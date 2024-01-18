@@ -310,7 +310,7 @@
 
                 <div class="row gutters decoration">
                   <h2 style="width:50%;text-align:center;margin-top:20px;">
-                    <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
+                    <u><b>FAKTURs</b></u> <br />{{ $penjualan->kode_inv }}
                   </h2>
                   <table style="width:50%">
                     <tr>
