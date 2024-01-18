@@ -305,12 +305,12 @@
                   </div>
                 </div>
               </div>
-
+              {{-- Jika tidak ada ppn --}}
               @if($penjualan->pajak == 0)
 
                 <div class="row gutters decoration">
                   <h2 style="width:50%;text-align:center;margin-top:20px;">
-                    <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
+                    <u><b>FAKTURss</b></u> <br />{{ $penjualan->kode_inv }}
                   </h2>
                   <table style="width:50%">
                     <tr>
@@ -371,6 +371,13 @@
                         <th style="text-align:center;font-weight:bold;">BANYAKNYA</th>
                         <th style="text-align:center;font-weight:bold;">JENIS BARANG</th>
                         <th style="text-align:center;font-weight:bold;">HARGA <br /> SATUAN (Rp)</th>
+                        <th style="text-align:center;font-weight:bold;">DISKON (Rp)</th>
+                        <th style="text-align:center;font-weight:bold;">DISKON
+                          <br/>PAKET (Rp)</th>
+                        <th style="text-align:center;font-weight:bold;">DISKON
+                          <br/>EXTRA (Rp)</th>
+                        <th style="text-align:center;font-weight:bold;">TOTAL
+                          <br/>DISKON (Rp)</th>
                         <th style="text-align:center;width:170px;font-weight:bold;">KETERANGAN</th>
                         <th style="text-align:center;width:145px;font-weight:bold;">JUMLAH (Rp)</th>
                       </tr>
@@ -380,7 +387,12 @@
                         <tr>
                           <td style="text-align:center;">{{ number_format($penjualandetail->total_jual,2,',','.') }} {{ strtoupper($penjualandetail->satuanbarang) }}</td>
                           <td style="text-align:left;">{{$penjualandetail->namabarang}}</td>
-                          <td style="text-align:right;">{{ number_format($penjualandetail->harga - $penjualandetail->diskon - $penjualandetail->diskon_paket - $penjualandetail->diskon_extra,0,',','.') }}</td>
+                          <td style="text-align:right;">{{ number_format($penjualandetail->harga ,0,',','.') }}</td>
+                          {{-- <td style="text-align:right;">{{ number_format($penjualandetail->harga - $penjualandetail->diskon - $penjualandetail->diskon_paket - $penjualandetail->diskon_extra,0,',','.') }}</td> --}}
+                          <td style="text-align:right;">{{ number_format($penjualandetail->diskon,0,',','.') }}</td>
+                          <td style="text-align:right;">{{ number_format($penjualandetail->diskon_paket,0,',','.') }}</td>
+                          <td style="text-align:right;">{{ number_format($penjualandetail->diskon_extra,0,',','.') }}</td>
+                          <td style="text-align:right;">{{ number_format($penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra,0,',','.') }}</td>
                           <td style="text-align:left;">{{$penjualandetail->catatan}}</td>
                           <td style="text-align:right;">{{ number_format($penjualandetail->subtotal,0,',','.') }}</td>
                         </tr>
@@ -389,7 +401,7 @@
                       <tfoot>
                       @if($penjualan->dp > 0)
                         <tr>
-                          <td colspan="3" rowspan="2">KETERANGAN :  {!! nl2br($penjualan->keterangan) !!}</td>
+                          <td colspan="7" rowspan="2">KETERANGAN :  {!! nl2br($penjualan->keterangan) !!}</td>
                           <td style="text-align:right;font-weight: bold;">DOWN PAYMENT : </td>
                           <td style="text-align:right;font-weight: bold;">{{ number_format($penjualan->dp,0,',','.') }}</td>
                         </tr>
@@ -399,7 +411,7 @@
                         </tr>
                       @else
                         <tr>
-                          <td colspan="3">KETERANGAN :  {!! nl2br($penjualan->keterangan) !!}</td>
+                          <td colspan="7">KETERANGAN :  {!! nl2br($penjualan->keterangan) !!}</td>
                           <td style="text-align:right;font-weight: bold;">TOTAL AKHIR : </td>
                           <td style="text-align:right;font-weight: bold;">{{ number_format($penjualan->grandtotal,0,',','.') }}</td>
                         </tr>
