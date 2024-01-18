@@ -1,0 +1,217 @@
+{
+  "menu": [
+
+
+    {
+      "url": "/home",
+      "name": "Beranda",
+      "slug": "Beranda",
+      "icon": "feather icon-home"
+    },
+
+    {
+      "url": "/",
+      "navheader": "Transaksi Penjualan",
+      "icon": ""
+    },
+      {
+        "url": "/penjualan/penjualan-manual",
+        "name": "Sales Order",
+        "icon": "feather icon-credit-card"
+      },
+      {
+        "url": "/report/so-stock-kurang",
+        "name": "SO Stock Kurang",
+        "icon": "feather icon-list"
+      },
+      {
+        "url": "/penjualan/surat-jalan",
+        "name": "Surat Jalan",
+        "icon": "feather icon-truck"
+      },
+      {
+        "url": "/penjualan/invoice",
+        "name": "Invoice",
+        "icon": "feather icon-folder-plus"
+      },
+      {
+        "url": "/penjualan/penjualan-manual/generate-password",
+        "name": "Generate Password",
+        "icon": "feather icon-lock"
+      },
+
+    {
+      "url": "/",
+      "navheader": "Pelunasan Piutang",
+      "icon": ""
+    },
+      {
+        "url": "/penjualan/piutang-customer",
+        "name": "Pel. Piutang per Konsumen",
+        "icon": "feather icon-user"
+      },
+      {
+        "url": "/penjualan/cancel-pelunasan",
+        "name": "List Pelunasan Piutang",
+        "icon": "feather icon-list"
+      },
+
+    {
+      "url": "/",
+      "navheader": "Manajemen Giro / Cek",
+      "icon": ""
+    },
+      {
+        "url": "/kas/giro-cek",
+        "name": "Manajemen Giro / Cek",
+        "icon": "feather icon-credit-card"
+      },
+
+    {
+      "url": "/",
+      "navheader": "Mutasi Stok Gudang Pabrik",
+      "icon": ""
+    },
+      {
+        "url": "/mutasi/masuk",
+        "name": "Tambah Stok Barang",
+        "icon": "feather icon-plus"
+      },
+      {
+        "url": "/mutasi/keluar",
+        "name": "Kurangi Stok Barang",
+        "icon": "feather icon-minus"
+      },
+
+    {
+      "url": "/",
+      "navheader": "Mutasi Stok Barang",
+      "icon": ""
+    },
+      {
+        "url": "/mutasi/gudang-toko",
+        "name": "Mutasi ke Toko",
+        "icon": "feather icon-download-cloud"
+      },
+      {
+        "url": "/mutasi/toko-gudang",
+        "name": "Mutasi ke Pabrik",
+        "icon": "feather icon-upload-cloud"
+      },
+
+    {
+      "url": "/",
+      "navheader": "Data Master",
+      "icon": ""
+    },
+      {
+        "url": "/",
+        "name": "Data Master",
+        "icon": "feather icon-book",
+        "submenu": [
+          {
+            "url": "/master/user",
+            "name": "User",
+            "icon": "feather icon-circle"
+          },
+          {
+            "url": "/master/kategori-barang",
+            "name": "Kategori Barang",
+            "icon": "feather icon-circle"
+          },
+          {
+            "url": "/master/barang-beli",
+            "name": "Barang",
+            "icon": "feather icon-circle"
+          },
+          {
+            "url": "/master/konsumen",
+            "name": "Konsumen",
+            "icon": "feather icon-circle"
+          }
+        ]
+      },
+    {
+      "url": "/",
+      "navheader": "Laporan",
+      "icon": ""
+    },
+    {
+      "url": "/report/penjualan",
+      "name": "Penjualan",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/rekap-penjualan",
+      "name": "Rekap Penjualan",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/total-penjualan",
+      "name": "Total Penjualan",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/stok-barang-beli",
+      "name": "Stok Barang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/mutasi-masuk",
+      "name": "Penambahan Stok Barang Pabrik",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/mutasi-keluar",
+      "name": "Pengurangan Stok Barang Pabrik",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/gudang-toko",
+      "name": "Mutasi ke Toko",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/toko-gudang",
+      "name": "Mutasi ke Pabrik",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/mutasi-keluar",
+      "name": "Pengurangan Stok Barang Pabrik",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/mutasi-barang",
+      "name": "Lap. Mutasi Barang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/rekap-pinjaman-konsumen",
+      "name": "Limit Piu. Konsumen",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/pelunasan-piutang",
+      "name": "Pelunasan Piutang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/laporan-piutang",
+      "name": "Laporan Piutang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/cancel-pelunasan-piutang",
+      "name": "Cancel Pel. Piutang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/giro-cek",
+      "name": "Manajemen Giro / Cek",
+      "icon": "feather icon-list"
+    }
+
+  ]
+}
+

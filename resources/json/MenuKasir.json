@@ -1,0 +1,87 @@
+{
+  "menu": [
+
+
+    {
+      "url": "/home",
+      "name": "Beranda",
+      "slug": "Beranda",
+      "icon": "feather icon-home"
+    },
+
+    {
+      "url": "/",
+      "navheader": "Pelunasan Piutang",
+      "icon": ""
+    },
+    {
+      "url": "/penjualan/piutang-customer",
+      "name": "Pel. Piutang per Konsumen",
+      "icon": "feather icon-user"
+    },
+    {
+      "url": "/penjualan/cancel-pelunasan",
+      "name": "List Pelunasan Piutang",
+      "icon": "feather icon-list"
+    },
+
+    {
+      "url": "/",
+      "navheader": "Manajemen Giro / Cek",
+      "icon": ""
+    },
+    {
+      "url": "/kas/giro-cek",
+      "name": "Manajemen Giro / Cek",
+      "icon": "feather icon-credit-card"
+    },
+
+    {
+      "url": "/",
+      "navheader": "Laporan",
+      "icon": ""
+    },
+    {
+      "url": "/report/penjualan",
+      "name": "Penjualan",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/rekap-penjualan",
+      "name": "Rekap Penjualan",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/total-penjualan",
+      "name": "Total Penjualan",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/rekap-pinjaman-konsumen",
+      "name": "Limit Piu. Konsumen",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/pelunasan-piutang",
+      "name": "Pelunasan Piutang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/laporan-piutang",
+      "name": "Laporan Piutang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/cancel-pelunasan-piutang",
+      "name": "Cancel Pel. Piutang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/giro-cek",
+      "name": "Manajemen Giro / Cek",
+      "icon": "feather icon-list"
+    }
+
+  ]
+}
+

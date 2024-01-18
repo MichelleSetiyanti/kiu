@@ -1,0 +1,114 @@
+{
+  "menu": [
+
+
+    {
+      "url": "/home",
+      "name": "Beranda",
+      "slug": "Beranda",
+      "icon": "feather icon-home"
+    },
+
+    {
+      "url": "/",
+      "navheader": "Mutasi Stok Gudang Pabrik",
+      "icon": ""
+    },
+    {
+      "url": "/mutasi/masuk",
+      "name": "Tambah Stok Barang",
+      "icon": "feather icon-plus"
+    },
+    {
+      "url": "/mutasi/keluar",
+      "name": "Kurangi Stok Barang",
+      "icon": "feather icon-minus"
+    },
+
+    {
+      "url": "/",
+      "navheader": "Mutasi Stok Barang",
+      "icon": ""
+    },
+    {
+      "url": "/mutasi/gudang-toko",
+      "name": "Mutasi ke Toko",
+      "icon": "feather icon-download-cloud"
+    },
+    {
+      "url": "/mutasi/toko-gudang",
+      "name": "Mutasi ke Pabrik",
+      "icon": "feather icon-upload-cloud"
+    },
+
+    {
+      "url": "/",
+      "navheader": "Data Master",
+      "icon": ""
+    },
+    {
+      "url": "/",
+      "name": "Data Master",
+      "icon": "feather icon-book",
+      "submenu": [
+        {
+          "url": "/master/user",
+          "name": "User",
+          "icon": "feather icon-circle"
+        },
+        {
+          "url": "/master/kategori-barang",
+          "name": "Kategori Barang",
+          "icon": "feather icon-circle"
+        },
+        {
+          "url": "/master/barang-beli",
+          "name": "Barang",
+          "icon": "feather icon-circle"
+        },
+        {
+          "url": "/master/konsumen",
+          "name": "Konsumen",
+          "icon": "feather icon-circle"
+        }
+      ]
+    },
+    {
+      "url": "/",
+      "navheader": "Laporan",
+      "icon": ""
+    },
+    {
+      "url": "/report/stok-barang-beli",
+      "name": "Stok Barang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/mutasi-masuk",
+      "name": "Penambahan Stok Barang Pabrik",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/mutasi-keluar",
+      "name": "Pengurangan Stok Barang Pabrik",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/gudang-toko",
+      "name": "Mutasi ke Toko",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/toko-gudang",
+      "name": "Mutasi ke Pabrik",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/mutasi-barang",
+      "name": "Lap. Mutasi Barang",
+      "icon": "feather icon-list"
+    }
+
+  ]
+}
+
