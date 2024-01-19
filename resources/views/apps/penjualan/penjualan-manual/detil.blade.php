@@ -687,12 +687,18 @@ use Illuminate\Support\Facades\Crypt;
         if(action == "Simpan"){
             $.post('/penjualan/penjualan-manual/store-detil',{idpenjualan: idpenjualan, produk: produks, totaljual: totaljual, harga: harga, catatan: catatan, diskon: diskon, diskonpaket: diskonpaket, diskonextra: diskonextra, _token: '{{csrf_token()}}'})
                 .done(function(data){
-                    if(data != "gagal"){
+                    if(data != "gagal" && data != "stockhabis"){
                         f_clear();
                         toastr.success('Data ini berhasil disimpan.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
                         f_loadtable();
                         f_hitungtotal();
-                    }else{
+                    } else if (data == "stockhabis") {
+                        f_clear();
+                        toastr.error('Stock Habis.', 'Warning', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
+                        f_loadtable();
+                        f_hitungtotal();
+                    }
+                    else{
                         Swal.fire('Peringatan', 'Data gagal tersimpan!', 'error');
                     }
                 });
