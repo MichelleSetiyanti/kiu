@@ -18,28 +18,30 @@ class LaporanPiutangController extends Controller
     $this->middleware('auth');
   }
 
-  public function index(){
+  public function index()
+  {
     $clients = DB::table('konsumens')
       ->orderBy('nama', 'asc')
       ->get();
 
-    return view('apps.report.laporan-piutang',[ 'clients' => $clients ]);
+    return view('apps.report.laporan-piutang', ['clients' => $clients]);
   }
 
   public function list(Request $request)
   {
-      $table = DB::table('konsumens')
-        ->where(function($query) use ($request) {
+    // echo $request->status . "<br>" . $request->client . "<br>" . $request->pajak;
+    // die();
+    $table = DB::table('konsumens')
+      ->where(function ($query) use ($request) {
 
-            if ($request->client != "All") {
-                $query->where('id', '=', $request->client);
-            }
+        if ($request->client != "All") {
+          $query->where('id', '=', $request->client);
+        }
+      })
+      ->orderBy('nama', 'asc')
+      ->get();
 
-        })
-        ->orderBy('nama', 'asc')
-        ->get();
 
-      return view('apps.report.laporan-piutang-detil',[ 'konsumens' => $table, 'request' => $request ]);
+    return view('apps.report.laporan-piutang-detil', ['konsumens' => $table, 'request' => $request]);
   }
-
 }
