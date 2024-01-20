@@ -74,17 +74,17 @@
         </div>
 
         <div class="col-sm-12 col-md-6 mt-1">
-          <label for="client"> Jenis Pajak</label>
-          <select class="form-control select" name="client" id="client">
-              <option value="" data-foo="" selected> Dengan PPN </option>
+          <label for="pajak"> Jenis Pajak</label>
+          <select class="form-control select" name="pajak" id="pajak">
+              <option value="PPN" data-foo="" selected> Dengan PPN </option>
               <option value="" data-foo="" selected> NON PPN </option>
           </select>
         </div>
     
         <div class="col-sm-12 col-md-6 mt-1">
-          <label for="client"> Jenis Pelunasan</label>
-          <select class="form-control select" name="client" id="client">
-              <option value="" data-foo="" selected> Lunas </option>
+          <label for="pelunasan"> Jenis Pelunasan</label>
+          <select class="form-control select" name="pelunasan" id="pelunasan">
+              <option value="Lunas" data-foo="" selected> Lunas </option>
               <option value="" data-foo="" selected> Belum Lunas </option>
           </select>
         </div>
@@ -229,6 +229,8 @@
       let tanggalmulai = $("#tanggalmulai").val();
       let tanggalselesai = $("#tanggalselesai").val();
       let client = $("#client").val();
+      let pajak = $("#pajak").val();
+      let pelunasan = $("#pelunasan").val();
 
       if(tanggalmulai == "" || tanggalselesai == ""){
           alert('Pilih tanggal untuk melihat Laporan Rekap Penjualan');
@@ -238,7 +240,8 @@
       let link = "/report/laporan-piutang/list" +
           "?tanggalmulai=" + tanggalmulai +
           "&tanggalselesai=" + tanggalselesai +
-          "&client=" + client;
+          "&client=" + client +
+          "&pelunasan=" + pelunasan;
 
       window.open(link,'_blank');
 

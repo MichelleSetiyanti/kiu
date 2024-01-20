@@ -34,12 +34,26 @@ class LaporanPiutangController extends Controller
             if ($request->client != "All") {
                 $query->where('id', '=', $request->client);
             }
+            if ($request->pelunasan == "lunas") {
+                $query->where('piutang', '>=', 0);
+            }
 
         })
         ->orderBy('nama', 'asc')
         ->get();
 
-      return view('apps.report.laporan-piutang-detil',[ 'konsumens' => $table, 'request' => $request ]);
+        $lunas = DB::table('konsumens')
+        ->where(function($query) use ($request) {
+
+            if ($request->pelunasan == "lunas") {
+                $query->where('piutang', '>=', 0);
+            }
+
+        })
+        ->orderBy('nama', 'asc')
+        ->get();
+
+      return view('apps.report.laporan-piutang-detil',[ 'konsumens' => $table, 'request' => $request, 'lunas' => $lunas ]);
   }
 
 }

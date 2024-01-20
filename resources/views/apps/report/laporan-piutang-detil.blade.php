@@ -297,82 +297,66 @@ use Illuminate\Support\Facades\DB;
                       </tr>
                       </thead>
                       <tbody>
-                      @php
-                      $sumsgrandtotal = 0;
-                      @endphp
-
-                      @foreach($konsumens ?? '' as $konsumen)
-
-                        <tr id="konsumen{{ $konsumen->id }}">
-                          <td>{{$konsumen->nama}}</td>
-
                         @php
-                          $sumkonsumen = 0;
+                        $sumsgrandtotal = 0;
                         @endphp
 
-                        @for($x=0;$x<=$diff;$x++)
+                        @foreach(($request->pelunasan == "lunas" ? $lunas : $konsumens) ?? [] as $konsumen)
+                            <tr id="{{ $request->pelunasan == 'lunas' ? 'lunas' : 'konsumen' }}{{ $konsumen->id }}">
+                                <td>{{ $konsumen->nama }}</td>
 
-                          @php
+                                @php
+                                $sumkonsumen = 0;
+                                @endphp
 
-                            $tanggalmulai = Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai)->addMonths($x)->isoFormat('Y-MM').'-01 00:00:00';
-                            $tanggalselesai = Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai)->addMonths($x)->isoFormat('Y-MM').'-31 23:59:59';
+                                @for($x = 0; $x <= $diff; $x++)
+                                    @php
+                                    $tanggalmulai = Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai)->addMonths($x)->isoFormat('Y-MM') . '-01 00:00:00';
+                                    $tanggalselesai = Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai)->addMonths($x)->isoFormat('Y-MM') . '-31 23:59:59';
 
+                                    $sums = DB::table('bayar_piutangs')
+                                        ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
+                                        ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
+                                        ->where('penjualans.id_konsumens', $konsumen->id)
+                                        ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
+                                        ->get();
 
-                            $sums = DB::table('bayar_piutangs')
-                            ->join('penjualans','bayar_piutangs.id_penjualans','=','penjualans.id')
-                            ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
-                            ->where('penjualans.id_konsumens',$konsumen->id)
-                            ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
-                            ->get();
+                                    $sumsgrandtotal += $sums[0]->totaljual;
+                                    $sumkonsumen += $sums[0]->totaljual;
+                                    @endphp
 
-                            $sumsgrandtotal += $sums[0]->totaljual;
-                            $sumkonsumen += $sums[0]->totaljual;
+                                    <td style="text-align:right;">{{ number_format($sums[0]->totaljual, 0, ',', '.') }}</td>
+                                @endfor
 
-                            @endphp
-                              <td style="text-align:right;">{{ number_format($sums[0]->totaljual,0,',','.') }}</td>
-                            @php
-                          @endphp
+                                <td style="text-align:right;">{{ number_format($sumkonsumen, 0, ',', '.') }}</td>
+                            </tr>
 
-                        @endfor
+                            <script>
+                                var sumkonsumen = "{{ $sumkonsumen }}";
 
-                          <td style="text-align:right;">{{ number_format($sumkonsumen,0,',','.') }}</td>
+                                if (sumkonsumen == "0") {
+                                    document.getElementById('{{ $request->pelunasan == "lunas" ? "lunas" : "konsumen" }}{{ $konsumen->id }}').style.display = "none";
+                                }
+                            </script>
+                        @endforeach
+
+                        <tr @if($request->client != "All") style="display:none;" @endif>
+                            <td style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;"> GRAND TOTAL : </td>
+                            @for($x = 0; $x <= $diff; $x++)
+                                @php
+                                $tanggalmulai = Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai)->addMonths($x)->isoFormat('Y-MM') . '-01 00:00:00';
+                                $tanggalselesai = Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai)->addMonths($x)->isoFormat('Y-MM') . '-31 23:59:59';
+
+                                $sums = DB::table('bayar_piutangs')
+                                    ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
+                                    ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
+                                    ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
+                                    ->get();
+                                @endphp
+                                <td style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">{{ number_format($sums[0]->totaljual, 0, ',', '.') }}</td>
+                            @endfor
+                            <td style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">{{ number_format($sumsgrandtotal, 0, ',', '.') }}</td>
                         </tr>
-
-                        <script>
-                          sumkonsumen = "{{ $sumkonsumen }}";
-
-                          if(sumkonsumen == "0"){
-                              document.getElementById('konsumen{{ $konsumen->id }}').style.display = "none";
-                          }
-                        </script>
-
-                      @endforeach
-
-                      <tr @if($request->client != "All") style="display:none;" @endif >
-                        <td style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;"> GRAND TOTAL : </td>
-                        @for($x=0;$x<=$diff;$x++)
-
-                          @php
-
-                            $tanggalmulai = Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai)->addMonths($x)->isoFormat('Y-MM').'-01 00:00:00';
-                            $tanggalselesai = Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai)->addMonths($x)->isoFormat('Y-MM').'-31 23:59:59';
-
-
-                            $sums = DB::table('bayar_piutangs')
-                            ->join('penjualans','bayar_piutangs.id_penjualans','=','penjualans.id')
-                            ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
-                            ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
-                            ->get();
-
-                          @endphp
-                          <td style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">{{ number_format($sums[0]->totaljual,0,',','.') }}</td>
-                          @php
-
-                          @endphp
-
-                        @endfor
-                        <td style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">{{ number_format($sumsgrandtotal,0,',','.') }}</td>
-                      </tr>
                       </tbody>
                     </table>
                   </div>
