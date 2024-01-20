@@ -74,15 +74,31 @@
         </div>
 
         <div class="col-sm-12 col-md-6 mt-1">
-            <label for="client"> Pilih Konsumen</label>
-            <select class="form-control select" name="client" id="client">
-                <option value="All" data-foo="" selected> Semua Konsumen </option>
-                @foreach($clients as $konsumen)
-                  <option value="{{ $konsumen->id }}" data-foo="{{ $konsumen->kode }} - {{ $konsumen->keterangan }}">{{ $konsumen->nama }}</option>
-                @endforeach
-            </select>
+          <label for="client"> Jenis Pajak</label>
+          <select class="form-control select" name="client" id="client">
+              <option value="" data-foo="" selected> Dengan PPN </option>
+              <option value="" data-foo="" selected> NON PPN </option>
+          </select>
+        </div>
+    
+        <div class="col-sm-12 col-md-6 mt-1">
+          <label for="client"> Jenis Pelunasan</label>
+          <select class="form-control select" name="client" id="client">
+              <option value="" data-foo="" selected> Lunas </option>
+              <option value="" data-foo="" selected> Belum Lunas </option>
+          </select>
         </div>
 
+        <div class="col-sm-12 col-md-6 mt-1">
+          <label for="client"> Pilih Konsumen</label>
+          <select class="form-control select" name="client" id="client">
+              <option value="All" data-foo="" selected> Semua Konsumen </option>
+              @foreach($clients as $konsumen)
+                <option value="{{ $konsumen->id }}" data-foo="{{ $konsumen->kode }} - {{ $konsumen->keterangan }}">{{ $konsumen->nama }}</option>
+              @endforeach
+          </select>
+      </div>
+        
         <div class="col-sm-12 col-md-12 mt-2">
           <button type="button" id="btnsearch" name="btnsearch" onclick="f_loaddetil()" class="btn bg-gradient-success waves-effect waves-light"> <i class="feather icon-search" style="margin-right:8px;"></i> Filter Data </button>
         </div>
