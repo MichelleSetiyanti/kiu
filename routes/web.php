@@ -12,15 +12,15 @@
 */
 
 Auth::routes([
-    'register' => false,
-    'verify' => false
+  'register' => false,
+  'verify' => false
 ]);
 
-Route::get('/change-password', function(){
+Route::get('/change-password', function () {
   return view('auth.change-password');
 });
 
-Route::group(['prefix' => 'mutasi'], function() {
+Route::group(['prefix' => 'mutasi'], function () {
 
   Route::group(['prefix' => 'masuk'], function () {
     Route::get('/', 'Mutasi\MasukController@index');
@@ -63,96 +63,93 @@ Route::group(['prefix' => 'mutasi'], function() {
     Route::post('/request-data', 'Mutasi\TokoGudangController@requestdata');
     Route::post('/drop', 'Mutasi\TokoGudangController@drop');
 
-  Route::post('/getstok', 'Mutasi\TokoGudangController@getstok');
+    Route::post('/getstok', 'Mutasi\TokoGudangController@getstok');
+  });
+});
+
+Route::group(['prefix' => 'master'], function () {
+
+  Route::group(['prefix' => 'user'], function () {
+    Route::get('/', 'MasterData\UserController@index');
+    Route::get('/list', 'MasterData\UserController@list');
+
+    Route::post('/store', 'MasterData\UserController@store');
+    Route::post('/update', 'MasterData\UserController@update');
+    Route::post('/update-password', 'MasterData\UserController@updatepassword');
+    Route::post('/request-data', 'MasterData\UserController@requestdata');
+    Route::post('/drop', 'MasterData\UserController@drop');
   });
 
+  Route::group(['prefix' => 'konsumen'], function () {
+    Route::get('/', 'MasterData\KonsumenController@index');
+    Route::get('/list', 'MasterData\KonsumenController@list');
+
+    Route::post('/store', 'MasterData\KonsumenController@store');
+    Route::post('/update', 'MasterData\KonsumenController@update');
+    Route::post('/request-data', 'MasterData\KonsumenController@requestdata');
+    Route::post('/drop', 'MasterData\KonsumenController@drop');
+
+    Route::post('/get-kode', 'MasterData\KonsumenController@getkode');
+    Route::post('/get-group', 'MasterData\KonsumenController@getgroup');
+  });
+
+  Route::group(['prefix' => 'kategori-barang'], function () {
+    Route::get('/', 'MasterData\KategoriBarangController@index');
+    Route::get('/list', 'MasterData\KategoriBarangController@list');
+
+    Route::post('/store', 'MasterData\KategoriBarangController@store');
+    Route::post('/update', 'MasterData\KategoriBarangController@update');
+    Route::post('/request-data', 'MasterData\KategoriBarangController@requestdata');
+    Route::post('/drop', 'MasterData\KategoriBarangController@drop');
+  });
+
+  Route::group(['prefix' => 'barang-beli'], function () {
+    Route::get('/', 'MasterData\BarangBeliController@index');
+    Route::get('/list', 'MasterData\BarangBeliController@list');
+
+    Route::post('/store', 'MasterData\BarangBeliController@store');
+    Route::post('/update', 'MasterData\BarangBeliController@update');
+    Route::post('/request-data', 'MasterData\BarangBeliController@requestdata');
+    Route::post('/drop', 'MasterData\BarangBeliController@drop');
+
+    Route::post('/get-kode', 'MasterData\BarangBeliController@getkode');
+  });
 });
 
-Route::group(['prefix' => 'master'], function() {
+Route::group(['prefix' => 'accounting'], function () {
 
-    Route::group(['prefix' => 'user'], function () {
-        Route::get('/', 'MasterData\UserController@index');
-        Route::get('/list', 'MasterData\UserController@list');
+  Route::group(['prefix' => 'akun'], function () {
+    Route::get('/', 'Accounting\AkunController@index');
+    Route::get('/list', 'Accounting\AkunController@list');
 
-        Route::post('/store', 'MasterData\UserController@store');
-        Route::post('/update', 'MasterData\UserController@update');
-        Route::post('/update-password', 'MasterData\UserController@updatepassword');
-        Route::post('/request-data', 'MasterData\UserController@requestdata');
-        Route::post('/drop', 'MasterData\UserController@drop');
-    });
+    Route::post('/store', 'Accounting\AkunController@store');
+    Route::post('/update', 'Accounting\AkunController@update');
+    Route::post('/request-data', 'Accounting\AkunController@requestdata');
+    Route::post('/drop', 'Accounting\AkunController@drop');
+  });
 
-    Route::group(['prefix' => 'konsumen'], function () {
-        Route::get('/', 'MasterData\KonsumenController@index');
-        Route::get('/list', 'MasterData\KonsumenController@list');
+  Route::group(['prefix' => 'input-jurnal'], function () {
+    Route::get('/', 'Accounting\JournalController@index_input');
+    Route::get('/list', 'Accounting\JournalController@list_input');
 
-        Route::post('/store', 'MasterData\KonsumenController@store');
-        Route::post('/update', 'MasterData\KonsumenController@update');
-        Route::post('/request-data', 'MasterData\KonsumenController@requestdata');
-        Route::post('/drop', 'MasterData\KonsumenController@drop');
+    Route::post('/store', 'Accounting\JournalController@store_temp');
+    Route::post('/update', 'Accounting\JournalController@update_temp');
+    Route::post('/request-data', 'Accounting\JournalController@requestdata_temp');
+    Route::post('/drop', 'Accounting\JournalController@drop_temp');
 
-        Route::post('/get-kode', 'MasterData\KonsumenController@getkode');
-        Route::post('/get-group', 'MasterData\KonsumenController@getgroup');
-    });
+    Route::post('/proses', 'Accounting\JournalController@proses_input');
+  });
 
-    Route::group(['prefix' => 'kategori-barang'], function () {
-        Route::get('/', 'MasterData\KategoriBarangController@index');
-        Route::get('/list', 'MasterData\KategoriBarangController@list');
+  Route::group(['prefix' => 'daftar-jurnal'], function () {
+    Route::get('/', 'Accounting\JournalController@index_list');
+    Route::get('/list', 'Accounting\JournalController@list_jurnal');
+    Route::get('/list-detil', 'Accounting\JournalController@list_detil');
 
-        Route::post('/store', 'MasterData\KategoriBarangController@store');
-        Route::post('/update', 'MasterData\KategoriBarangController@update');
-        Route::post('/request-data', 'MasterData\KategoriBarangController@requestdata');
-        Route::post('/drop', 'MasterData\KategoriBarangController@drop');
-    });
-
-    Route::group(['prefix' => 'barang-beli'], function () {
-        Route::get('/', 'MasterData\BarangBeliController@index');
-        Route::get('/list', 'MasterData\BarangBeliController@list');
-
-        Route::post('/store', 'MasterData\BarangBeliController@store');
-        Route::post('/update', 'MasterData\BarangBeliController@update');
-        Route::post('/request-data', 'MasterData\BarangBeliController@requestdata');
-        Route::post('/drop', 'MasterData\BarangBeliController@drop');
-
-        Route::post('/get-kode', 'MasterData\BarangBeliController@getkode');
-    });
-
+    Route::post('/drop', 'Accounting\JournalController@drop_jurnal');
+  });
 });
 
-Route::group(['prefix' => 'accounting'], function() {
-
-    Route::group(['prefix' => 'akun'], function () {
-        Route::get('/', 'Accounting\AkunController@index');
-        Route::get('/list', 'Accounting\AkunController@list');
-
-        Route::post('/store', 'Accounting\AkunController@store');
-        Route::post('/update', 'Accounting\AkunController@update');
-        Route::post('/request-data', 'Accounting\AkunController@requestdata');
-        Route::post('/drop', 'Accounting\AkunController@drop');
-    });
-
-    Route::group(['prefix' => 'input-jurnal'], function () {
-        Route::get('/', 'Accounting\JournalController@index_input');
-        Route::get('/list', 'Accounting\JournalController@list_input');
-
-        Route::post('/store', 'Accounting\JournalController@store_temp');
-        Route::post('/update', 'Accounting\JournalController@update_temp');
-        Route::post('/request-data', 'Accounting\JournalController@requestdata_temp');
-        Route::post('/drop', 'Accounting\JournalController@drop_temp');
-
-        Route::post('/proses', 'Accounting\JournalController@proses_input');
-    });
-
-    Route::group(['prefix' => 'daftar-jurnal'], function () {
-        Route::get('/', 'Accounting\JournalController@index_list');
-        Route::get('/list', 'Accounting\JournalController@list_jurnal');
-        Route::get('/list-detil', 'Accounting\JournalController@list_detil');
-
-        Route::post('/drop', 'Accounting\JournalController@drop_jurnal');
-    });
-
-});
-
-Route::group(['prefix' => 'pembelian'], function() {
+Route::group(['prefix' => 'pembelian'], function () {
 
   Route::group(['prefix' => 'pembelian-umum'], function () {
 
@@ -195,7 +192,6 @@ Route::group(['prefix' => 'pembelian'], function() {
     Route::post('/ubah-jadi-kredit', 'Pembelian\PembelianUmumController@ubah_jadi_kredit');
 
     Route::get('/edit-kasir/{param}', 'Pembelian\PembelianUmumController@index_edit_kasir');
-
   });
 
   Route::group(['prefix' => 'pembelian-khusus'], function () {
@@ -231,7 +227,6 @@ Route::group(['prefix' => 'pembelian'], function() {
 
     Route::get('/edit-detil/{param}', 'Pembelian\PembelianKhususController@index_edit_detil');
     Route::post('/proses-edit-detil', 'Pembelian\PembelianKhususController@proses_edit_detil');
-
   });
 
   Route::group(['prefix' => 'pembelian-keliling'], function () {
@@ -270,7 +265,6 @@ Route::group(['prefix' => 'pembelian'], function() {
 
     // list uang pegangan
     Route::get('/uang-pegangan', 'Pembelian\PembelianKelilingController@index_uangpegangan');
-
   });
 
   Route::group(['prefix' => 'pembelian-manual'], function () {
@@ -318,7 +312,6 @@ Route::group(['prefix' => 'pembelian'], function() {
     Route::post('/cek-password', 'Pembelian\PembelianManualController@cek_password');
 
     Route::get('/edit-kasir/{param}', 'Pembelian\PembelianManualController@index_edit_kasir');
-
   });
 
   Route::group(['prefix' => 'hutang'], function () {
@@ -381,10 +374,9 @@ Route::group(['prefix' => 'pembelian'], function() {
     Route::post('/request-data', 'Pembelian\PengembalianPinjamanPenampungController@requestdata');
     Route::post('/drop', 'Pembelian\PengembalianPinjamanPenampungController@drop');
   });
-
 });
 
-Route::group(['prefix' => 'penjualan'], function() {
+Route::group(['prefix' => 'penjualan'], function () {
 
   Route::get('/print-invoice/{param}', 'Payment\PelunasanController@print_invoice');
 
@@ -451,7 +443,6 @@ Route::group(['prefix' => 'penjualan'], function() {
     Route::post('/ubah-metode-pembayaran', 'Penjualan\PenjualanUmumController@ubah_metode_pembayaran');
 
     Route::post('/akses-edit', 'Penjualan\PenjualanUmumController@akses_edit');
-
   });
 
 
@@ -549,7 +540,6 @@ Route::group(['prefix' => 'penjualan'], function() {
     Route::post('/akses-edit', 'Penjualan\JasaTimbangController@akses_edit');
 
     Route::get('/print-data/{param}', 'Penjualan\JasaTimbangController@print_data');
-
   });
 
 
@@ -595,7 +585,6 @@ Route::group(['prefix' => 'penjualan'], function() {
     Route::post('/get-data', 'Penjualan\JasaTimbangManualController@get_data');
 
     Route::post('/akses-edit', 'Penjualan\JasaTimbangManualController@akses_edit');
-
   });
 
   Route::group(['prefix' => 'penjualan-kontainer'], function () {
@@ -638,7 +627,6 @@ Route::group(['prefix' => 'penjualan'], function() {
 
       Route::post('/update', 'Penjualan\UpdateSuratJalanController@update');
     });
-
   });
 
   Route::group(['prefix' => 'penjualan-manual'], function () {
@@ -734,87 +722,84 @@ Route::group(['prefix' => 'penjualan'], function() {
   Route::get('/print-data/{param}', 'Penjualan\PenjualanUmumController@print_data');
 
   Route::get('/print-surat-jalan/{param}', 'Penjualan\PenjualanUmumController@print_surat_jalan');
-
 });
 
-Route::group(['prefix' => 'jasa'], function() {
+Route::group(['prefix' => 'jasa'], function () {
 
-    Route::group(['prefix' => 'dropshipper'], function () {
-        Route::get('/', 'Jasa\DropshipperController@index');
-        Route::get('/list', 'Jasa\DropshipperController@list');
+  Route::group(['prefix' => 'dropshipper'], function () {
+    Route::get('/', 'Jasa\DropshipperController@index');
+    Route::get('/list', 'Jasa\DropshipperController@list');
 
-        Route::post('/store', 'Jasa\DropshipperController@store');
-        Route::post('/update', 'Jasa\DropshipperController@update');
-        Route::post('/request-data', 'Jasa\DropshipperController@requestdata');
-        Route::post('/request-data-utangdp', 'Jasa\DropshipperController@requestdata_utangdp');
-        Route::post('/drop', 'Jasa\DropshipperController@drop');
+    Route::post('/store', 'Jasa\DropshipperController@store');
+    Route::post('/update', 'Jasa\DropshipperController@update');
+    Route::post('/request-data', 'Jasa\DropshipperController@requestdata');
+    Route::post('/request-data-utangdp', 'Jasa\DropshipperController@requestdata_utangdp');
+    Route::post('/drop', 'Jasa\DropshipperController@drop');
 
-        Route::post('/update-pembelian', 'Jasa\DropshipperController@update_pembelian');
-        Route::post('/update-penjualan', 'Jasa\DropshipperController@update_penjualan');
+    Route::post('/update-pembelian', 'Jasa\DropshipperController@update_pembelian');
+    Route::post('/update-penjualan', 'Jasa\DropshipperController@update_penjualan');
 
-        Route::post('/cancel-update-pembelian', 'Jasa\DropshipperController@cancel_update_pembelian');
-        Route::post('/cancel-update-penjualan', 'Jasa\DropshipperController@cancel_update_penjualan');
+    Route::post('/cancel-update-pembelian', 'Jasa\DropshipperController@cancel_update_pembelian');
+    Route::post('/cancel-update-penjualan', 'Jasa\DropshipperController@cancel_update_penjualan');
 
 
-        Route::group(['prefix' => 'detil-biaya'], function () {
-          // input data timbangan
+    Route::group(['prefix' => 'detil-biaya'], function () {
+      // input data timbangan
 
-          Route::get('/detil/{param}', 'Jasa\DetilBiayaController@index_detil');
-          Route::get('/list-detil', 'Jasa\DetilBiayaController@listdetil');
+      Route::get('/detil/{param}', 'Jasa\DetilBiayaController@index_detil');
+      Route::get('/list-detil', 'Jasa\DetilBiayaController@listdetil');
 
-          Route::post('/store-detil', 'Jasa\DetilBiayaController@store_detil');
-          Route::post('/update-detil', 'Jasa\DetilBiayaController@update_detil');
-          Route::post('/drop-detil', 'Jasa\DetilBiayaController@drop_detil');
-          Route::post('/bayar', 'Jasa\DetilBiayaController@bayar');
-          Route::post('/request-data-detil', 'Jasa\DetilBiayaController@requestdata_detil');
-          Route::post('/request-total-detil', 'Jasa\DetilBiayaController@requesttotal_detil');
-          Route::post('/batalkanpelunasan', 'Jasa\DetilBiayaController@batalkanpelunasan');
-
-        });
+      Route::post('/store-detil', 'Jasa\DetilBiayaController@store_detil');
+      Route::post('/update-detil', 'Jasa\DetilBiayaController@update_detil');
+      Route::post('/drop-detil', 'Jasa\DetilBiayaController@drop_detil');
+      Route::post('/bayar', 'Jasa\DetilBiayaController@bayar');
+      Route::post('/request-data-detil', 'Jasa\DetilBiayaController@requestdata_detil');
+      Route::post('/request-total-detil', 'Jasa\DetilBiayaController@requesttotal_detil');
+      Route::post('/batalkanpelunasan', 'Jasa\DetilBiayaController@batalkanpelunasan');
     });
+  });
 
-    Route::group(['prefix' => 'dp-penampung'], function () {
-        Route::get('/', 'Jasa\DPPenampungController@index');
-        Route::get('/list', 'Jasa\DPPenampungController@list');
+  Route::group(['prefix' => 'dp-penampung'], function () {
+    Route::get('/', 'Jasa\DPPenampungController@index');
+    Route::get('/list', 'Jasa\DPPenampungController@list');
 
-        Route::post('/store', 'Jasa\DPPenampungController@store');
-        Route::post('/update', 'Jasa\DPPenampungController@update');
-        Route::post('/request-data', 'Jasa\DPPenampungController@requestdata');
-        Route::post('/drop', 'Jasa\DPPenampungController@drop');
-    });
+    Route::post('/store', 'Jasa\DPPenampungController@store');
+    Route::post('/update', 'Jasa\DPPenampungController@update');
+    Route::post('/request-data', 'Jasa\DPPenampungController@requestdata');
+    Route::post('/drop', 'Jasa\DPPenampungController@drop');
+  });
 
-    Route::group(['prefix' => 'komisi'], function () {
-        Route::get('/', 'Jasa\KomisiController@index');
-        Route::get('/list', 'Jasa\KomisiController@list');
+  Route::group(['prefix' => 'komisi'], function () {
+    Route::get('/', 'Jasa\KomisiController@index');
+    Route::get('/list', 'Jasa\KomisiController@list');
 
-        Route::post('/store', 'Jasa\KomisiController@store');
-        Route::post('/update', 'Jasa\KomisiController@update');
-        Route::post('/request-data', 'Jasa\KomisiController@requestdata');
-        Route::post('/drop', 'Jasa\KomisiController@drop');
-    });
+    Route::post('/store', 'Jasa\KomisiController@store');
+    Route::post('/update', 'Jasa\KomisiController@update');
+    Route::post('/request-data', 'Jasa\KomisiController@requestdata');
+    Route::post('/drop', 'Jasa\KomisiController@drop');
+  });
 
-    Route::group(['prefix' => 'surat-jalan'], function () {
-        Route::get('/', 'Jasa\SuratJalanController@index');
-        Route::get('/list', 'Jasa\SuratJalanController@list');
+  Route::group(['prefix' => 'surat-jalan'], function () {
+    Route::get('/', 'Jasa\SuratJalanController@index');
+    Route::get('/list', 'Jasa\SuratJalanController@list');
 
-        Route::post('/store', 'Jasa\SuratJalanController@store');
-        Route::post('/update', 'Jasa\SuratJalanController@update');
-        Route::post('/request-data', 'Jasa\SuratJalanController@requestdata');
-        Route::post('/drop', 'Jasa\SuratJalanController@drop');
+    Route::post('/store', 'Jasa\SuratJalanController@store');
+    Route::post('/update', 'Jasa\SuratJalanController@update');
+    Route::post('/request-data', 'Jasa\SuratJalanController@requestdata');
+    Route::post('/drop', 'Jasa\SuratJalanController@drop');
 
-        Route::get('/print/{param}', 'Jasa\SuratJalanController@print');
-    });
+    Route::get('/print/{param}', 'Jasa\SuratJalanController@print');
+  });
 
-    Route::group(['prefix' => 'update-surat-jalan'], function () {
-        Route::get('/', 'Jasa\UpdateSuratJalanController@index');
-        Route::get('/list', 'Jasa\UpdateSuratJalanController@list');
+  Route::group(['prefix' => 'update-surat-jalan'], function () {
+    Route::get('/', 'Jasa\UpdateSuratJalanController@index');
+    Route::get('/list', 'Jasa\UpdateSuratJalanController@list');
 
-        Route::post('/update', 'Jasa\UpdateSuratJalanController@update');
-    });
-
+    Route::post('/update', 'Jasa\UpdateSuratJalanController@update');
+  });
 });
 
-Route::group(['prefix' => 'pinjaman-karyawan'], function() {
+Route::group(['prefix' => 'pinjaman-karyawan'], function () {
 
   Route::group(['prefix' => 'pengajuan'], function () {
     Route::get('/', 'PinjamanKaryawan\PengajuanController@index');
@@ -849,10 +834,9 @@ Route::group(['prefix' => 'pinjaman-karyawan'], function() {
 
     Route::post('/getpinjamankaryawan', 'PinjamanKaryawan\PengembalianPinjamanController@getpinjamankaryawan');
   });
-
 });
 
-Route::group(['prefix' => 'ijin-cuti-karyawan'], function() {
+Route::group(['prefix' => 'ijin-cuti-karyawan'], function () {
 
   Route::group(['prefix' => 'pengajuan'], function () {
     Route::get('/', 'IjinCutiKaryawan\PengajuanController@index');
@@ -871,10 +855,9 @@ Route::group(['prefix' => 'ijin-cuti-karyawan'], function() {
     Route::post('/approve', 'IjinCutiKaryawan\ApprovePengajuanController@approve');
     Route::post('/tolak', 'IjinCutiKaryawan\ApprovePengajuanController@tolak');
   });
-
 });
 
-Route::group(['prefix' => 'asset'], function() {
+Route::group(['prefix' => 'asset'], function () {
 
   Route::group(['prefix' => 'post-jurnal'], function () {
     Route::get('/', 'Asset\PostJurnalController@index');
@@ -909,10 +892,9 @@ Route::group(['prefix' => 'asset'], function() {
 
     Route::post('/store', 'Asset\ProsesPenyusutanController@store');
   });
-
 });
 
-Route::group(['prefix' => 'config-absensi'], function() {
+Route::group(['prefix' => 'config-absensi'], function () {
 
   Route::group(['prefix' => 'global'], function () {
     Route::get('/', 'ConfigAbsensi\GlobalController@index');
@@ -975,10 +957,9 @@ Route::group(['prefix' => 'config-absensi'], function() {
 
     Route::post('/store', 'ConfigAbsensi\TarikAbsensiController@store');
   });
-
 });
 
-Route::group(['prefix' => 'laporan-absensi'], function() {
+Route::group(['prefix' => 'laporan-absensi'], function () {
 
   Route::group(['prefix' => 'data-presensi'], function () {
     Route::get('/list-detail', 'LaporanAbsensi\LaporanController@list_presensi');
@@ -993,11 +974,10 @@ Route::group(['prefix' => 'laporan-absensi'], function() {
     Route::get('/', 'LaporanAbsensi\LaporanController@index_rekap');
     Route::get('/list-detail', 'LaporanAbsensi\LaporanController@list_detail_rekap');
   });
-
 });
 
 
-Route::group(['prefix' => 'payroll'], function() {
+Route::group(['prefix' => 'payroll'], function () {
 
   Route::group(['prefix' => 'bulk-payroll'], function () {
 
@@ -1045,12 +1025,10 @@ Route::group(['prefix' => 'payroll'], function() {
     Route::get('/list-detil-print', 'Payroll\BulkPayrollController@listdetilprint');
 
     Route::get('/print-data/{param}', 'Payroll\BulkPayrollController@print_data');
-
   });
-
 });
 
-Route::group(['prefix' => 'kas'], function() {
+Route::group(['prefix' => 'kas'], function () {
 
   Route::group(['prefix' => 'giro-cek'], function () {
     Route::get('/', 'Kas\GiroCekController@index');
@@ -1061,15 +1039,14 @@ Route::group(['prefix' => 'kas'], function() {
     Route::post('/request-data', 'Kas\GiroCekController@requestdata');
     Route::post('/drop', 'Kas\GiroCekController@drop');
   });
-
 });
 
-Route::group(['prefix' => 'report'], function() {
+Route::group(['prefix' => 'report'], function () {
 
-    Route::group(['prefix' => 'total-penjualan'], function () {
-        Route::get('/', 'Report\TotalPenjualanController@index');
-        Route::get('/list-detil', 'Report\TotalPenjualanController@list_detil');
-    });
+  Route::group(['prefix' => 'total-penjualan'], function () {
+    Route::get('/', 'Report\TotalPenjualanController@index');
+    Route::get('/list-detil', 'Report\TotalPenjualanController@list_detil');
+  });
 
   Route::group(['prefix' => 'so-stock-kurang'], function () {
     Route::get('/', 'Report\SoStockKurangController@index');
@@ -1270,30 +1247,29 @@ Route::group(['prefix' => 'report'], function() {
   // accouting
 
   Route::group(['prefix' => 'laba-rugi-dropshipper'], function () {
-      Route::get('/', 'Report\LabaRugiDropshipperController@index');
-      Route::post('/get-data', 'Report\LabaRugiDropshipperController@get_data');
+    Route::get('/', 'Report\LabaRugiDropshipperController@index');
+    Route::post('/get-data', 'Report\LabaRugiDropshipperController@get_data');
   });
 
   Route::group(['prefix' => 'laba-rugi'], function () {
-      Route::get('/', 'Report\LabaRugiController@index');
-      Route::post('/get-data', 'Report\LabaRugiController@get_data');
+    Route::get('/', 'Report\LabaRugiController@index');
+    Route::post('/get-data', 'Report\LabaRugiController@get_data');
   });
 
   Route::group(['prefix' => 'neraca'], function () {
-      Route::get('/', 'Report\NeracaController@index');
-      Route::post('/get-data', 'Report\NeracaController@get_data');
+    Route::get('/', 'Report\NeracaController@index');
+    Route::post('/get-data', 'Report\NeracaController@get_data');
   });
 
   Route::group(['prefix' => 'keseluruhan-jurnal'], function () {
-      Route::get('/', 'Report\KeseluruhanJurnalController@index');
-      Route::get('/list-detil', 'Report\KeseluruhanJurnalController@list_detil');
+    Route::get('/', 'Report\KeseluruhanJurnalController@index');
+    Route::get('/list-detil', 'Report\KeseluruhanJurnalController@list_detil');
   });
 
   Route::group(['prefix' => 'bukubesar-rinci'], function () {
-      Route::get('/', 'Report\BukuBesarRinciController@index');
-      Route::get('/list-detil', 'Report\BukuBesarRinciController@list_detil');
+    Route::get('/', 'Report\BukuBesarRinciController@index');
+    Route::get('/list-detil', 'Report\BukuBesarRinciController@list_detil');
   });
-
 });
 
 Route::post('/setting', 'PengaturanController@insertOrUpdate');
@@ -1303,8 +1279,8 @@ Route::get('/light-mode', 'PengaturanController@lightmode');
 Route::get('/dark-mode', 'PengaturanController@darkmode');
 
 // Route url
-Route::get('/', function(){
-    return redirect('home');
+Route::get('/', function () {
+  return redirect('home');
 });
 
 Route::get('/home', 'DashboardController@home');
