@@ -182,7 +182,7 @@ use Illuminate\Support\Facades\Crypt;
                 </div>
 
                 <div class="col-sm-12 col-md-1 pl-0">
-                    <label for="totaljual">Qtys</label>
+                    <label for="totaljual">Qty</label>
                     <input type="text" class="form-control" name="totaljual" id="totaljual" value="0"
                         onfocus="f_tonumber(this.id)" onblur="f_tocurrency(this.id);">
                 </div>
