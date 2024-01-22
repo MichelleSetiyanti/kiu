@@ -319,7 +319,14 @@ use Illuminate\Support\Facades\DB;
                                         ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
                                         ->where('penjualans.id_konsumens', $konsumen->id)
                                         ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
+                                        ->when($request->pajak == "PPN", function ($query) {
+                                            return $query->where('penjualans.pajak', '==', 0);
+                                        })
+                                        ->when($request->pajak == "PPN", function ($query) {
+                                            return $query->where('penjualans.pajak', '==', 0);
+                                        })
                                         ->get();
+                                        
 
                                     $sumsgrandtotal += $sums[0]->totaljual;
                                     $sumkonsumen += $sums[0]->totaljual;
@@ -350,6 +357,9 @@ use Illuminate\Support\Facades\DB;
                                 $sums = DB::table('bayar_piutangs')
                                     ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
                                     ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
+                                    ->when($request->pajak == "PPN", function ($query) {
+                                            return $query->where('penjualans.pajak', '==', 0);
+                                        })
                                     ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
                                     ->get();
                                 @endphp

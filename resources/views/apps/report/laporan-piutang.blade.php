@@ -241,7 +241,8 @@
           "?tanggalmulai=" + tanggalmulai +
           "&tanggalselesai=" + tanggalselesai +
           "&client=" + client +
-          "&pelunasan=" + pelunasan;
+          "&pelunasan=" + pelunasan +
+          "&pajak=" + pajak;
 
       window.open(link,'_blank');
 
