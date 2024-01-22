@@ -383,7 +383,7 @@
 
               ],
               aLengthMenu: [[10, 20, 50, -1], [10, 20, 50, 'All']],
-              order: [[0, "desc"]],
+              order: [[8, "desc"]],
               bInfo: false,
               pageLength: 50,
           });
