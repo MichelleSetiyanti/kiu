@@ -355,12 +355,17 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td style="font-size:20px;"> Kepada Yth: </td>
+                                                <td style="font-size:20px;"> Kepada Yth: <label
+                                                        style="text-transform: uppercase;font-size:24px;font-weight: bold;">
+                                                        {{ $penjualan->namakonsumen }}</label>
+                                                </td>
+                                                <td style="text-transform: uppercase;font-size:24px;font-weight: bold;">
+                                                </td>
                                             </tr>
-                                            <tr>
+                                            {{-- <tr>
                                                 <td style="text-transform: uppercase;font-size:24px;font-weight: bold;">
                                                     {{ $penjualan->namakonsumen }} </td>
-                                            </tr>
+                                            </tr> --}}
                                             <tr>
                                                 <td style="font-size:20px;"> {!! nl2br($penjualan->alamat_sj) !!} </td>
                                             </tr>
@@ -484,10 +489,10 @@
                                     <div class="row gutters decoration" style="font-size:15px;font-weight:bold;">
                                         <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
                                             style="text-align:center;">
-                                            <div style="width:100%;text-align:left;font-weight:normal;">
+                                            {{-- <div style="width:100%;text-align:left;font-weight:normal;">
                                                 Tanggal Cetak {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }} -
                                                 {{ Auth::User()->name }}
-                                            </div>
+                                            </div> --}}
                                             <br />
                                             <span style="font-size:17px;">PENERIMA, </span>
                                             <br /> <br /> <br /> <br /> <br /> <br />
@@ -495,7 +500,8 @@
                                         </div>
                                         <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
                                             style="text-align:center;">
-                                            <br /> <br />
+                                            {{-- <br /> --}}
+                                            <br />
                                             <span style="font-size:17px;">NAMA, CAP, & TANDA TANGAN <br /> YANG
                                                 MENYERAHKAN, </span>
                                             <br /> <br /> <br /> <br /> <br />
@@ -504,7 +510,8 @@
                                         </div>
                                         <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
                                             style="text-align:center;">
-                                            <br /> <br />
+                                            {{-- <br /> --}}
+                                            <br />
                                             <span style="font-size:17px;">HORMAT KAMI, </span>
                                             <br /> <br /> <br /> <br /> <br /> <br />
                                             <span style="font-size:17px;"> PT. KAPUAS INTAN UTAMA </span>
