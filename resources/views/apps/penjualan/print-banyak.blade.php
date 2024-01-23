@@ -274,6 +274,8 @@
         .tabel tfoot td {
             padding-top: 5px !important;
             padding-left: 10px !important;
+            font-size: 22px !important;
+            vertical-align: top;
             padding-bottom: 5px !important;
         }
 
@@ -531,7 +533,9 @@
                                                 <tfoot>
                                                     <tr>
                                                         <td @if ($penjualan->sumdp > 0) rowspan="4" @else rowspan="3" @endif
-                                                            colspan="3">KETERANGAN : {!! nl2br($penjualan->keterangan) !!} </td>
+                                                            colspan="3"
+                                                            style="vertical-align: top;text-align: left;">KETERANGAN :
+                                                            {!! nl2br($penjualan->keterangan) !!} </td>
                                                         <td style="text-align:right;font-weight: bold;">Sub Total (Rp)
                                                         </td>
                                                         <td style="text-align:right;font-weight: bold;">

@@ -282,6 +282,8 @@
 
         .tabel tfoot td {
             font-size: 22px !important;
+            vertical-align: top;
+            text-align: left;
         }
 
         .tabel thead th {
