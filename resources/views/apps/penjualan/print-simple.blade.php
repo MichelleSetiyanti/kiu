@@ -337,7 +337,8 @@
                                                 <div class="row">
                                                     <div class="col-7"> {{ $penjualandetail->namabarang }} </div>
                                                     <div class="col-5 text-right">
-                                                        {{ number_format($penjualandetail->subtotal, 0, ',', '.') }}
+                                                        {{-- {{ number_format($penjualandetail->subtotal, 0, ',', '.') }} --}}
+                                                        {{ number_format($penjualandetail->total_jual * $penjualandetail->harga, 0, ',', '.') }}
                                                     </div>
                                                 </div>
                                             </div>
@@ -346,17 +347,35 @@
                                                     <div class="col-md-12">
                                                         {{ number_format($penjualandetail->total_jual, 2, ',', '.') }}
                                                         {{ strtoupper($penjualandetail->satuanbarang) }} x
-                                                        {{ number_format($penjualandetail->harga - $penjualandetail->diskon - $penjualandetail->diskon_paket - $penjualandetail->diskon_extra, 0, ',', '.') }}
+                                                        {{ number_format($penjualandetail->harga) }}
+                                                        {{-- {{ number_format($penjualandetail->harga - $penjualandetail->diskon - $penjualandetail->diskon_paket - $penjualandetail->diskon_extra, 0, ',', '.') }} --}}
                                                     </div>
                                                 </div>
                                             </div>
                                         @endforeach
+                                        {{-- <div class="col-md-10 offset-md-1">
+                                            <div class="row">
+                                                <div class="col-7"> DISKON </div>
+                                                <div class="col-5 text-right">
 
+                                                    {{ number_format($penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra, 0, ',', '.') }}
+                                                </div>
+                                            </div>
+                                        </div> --}}
                                         <div class="col-md-10 offset-md-1">
                                             <div class="row">
-                                                <div class="col-md-8 text-right" style="font-weight:bold;"> Grand Total
+                                                <div class="col-8 text-right" style="font-weight:bold;"> DISKON
                                                 </div>
-                                                <div class="col-md-4 text-right" style="font-weight:bold;">
+                                                <div class="col-4 text-right" style="font-weight:bold;">
+                                                    {{ number_format(($penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra) * $penjualandetail->total_jual, 0, ',', '.') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-10 offset-md-1">
+                                            <div class="row">
+                                                <div class="col-8 text-right" style="font-weight:bold;"> Grand Total
+                                                </div>
+                                                <div class="col-4 text-right" style="font-weight:bold;">
                                                     {{ number_format($penjualan->grandtotal, 0, ',', '.') }} </div>
                                             </div>
                                         </div>
