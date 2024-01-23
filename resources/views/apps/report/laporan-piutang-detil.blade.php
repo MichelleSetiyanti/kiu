@@ -316,14 +316,15 @@ use Illuminate\Support\Facades\DB;
 
                                     $sums = DB::table('bayar_piutangs')
                                         ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
+                                        ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
                                         ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
                                         ->where('penjualans.id_konsumens', $konsumen->id)
                                         ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
                                         ->when($request->pajak == "PPN", function ($query) {
                                             return $query->where('penjualans.pajak', '==', 0);
                                         })
-                                        ->when($request->pajak == "PPN", function ($query) {
-                                            return $query->where('penjualans.pajak', '==', 0);
+                                        ->when($request->pelunasan == "Lunas", function ($query) {
+                                            return $query->where('konsumens.termin', '==', 0);
                                         })
                                         ->get();
                                         
