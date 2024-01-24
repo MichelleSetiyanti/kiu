@@ -34,11 +34,9 @@ class LaporanPiutangController extends Controller
             if ($request->client != "All") {
                 $query->where('id', '=', $request->client);
             }
-            if ($request->pelunasan == "lunas") {
-                $query->where('piutang', '==', 0);
-            }
 
         })
+        ->where('piutang', '>', 0)
         ->orderBy('nama', 'asc')
         ->get();
 
@@ -50,7 +48,7 @@ class LaporanPiutangController extends Controller
             }
 
         })
-        // ->orderBy('id', 'asc')
+        ->orderBy('nama', 'asc')
         ->get();
 
         $pajak = DB::table('penjualans')

@@ -357,16 +357,20 @@ use Illuminate\Support\Facades\DB;
 
                                 $sums = DB::table('bayar_piutangs')
                                     ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
+                                    ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
                                     ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
                                     ->when($request->pajak == "PPN", function ($query) {
                                             return $query->where('penjualans.pajak', '==', 0);
                                         })
+                                    ->when($request->pelunasan == "Lunas", function ($query) {
+                                        return $query->where('konsumens.termin', '==', 0);
+                                    })
                                     ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
                                     ->get();
                                 @endphp
                                 <td style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">{{ number_format($sums[0]->totaljual, 0, ',', '.') }}</td>
                             @endfor
-                            <td style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">{{ number_format($sumsgrandtotal, 0, ',', '.') }}</td>
+                                <td style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">{{ number_format($sumsgrandtotal, 0, ',', '.') }}</td>
                         </tr>
                       </tbody>
                     </table>
