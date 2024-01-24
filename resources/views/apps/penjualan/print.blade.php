@@ -149,6 +149,7 @@
 
         .invoice-container .invoice-body {
             padding: 1rem 0 0 0;
+
         }
 
         .invoice-container .invoice-footer {
@@ -277,11 +278,11 @@
         }
 
         .tabel tbody td {
-            font-size: 22px !important;
+            font-size: 20px !important;
         }
 
         .tabel tfoot td {
-            font-size: 22px !important;
+            font-size: 20px !important;
             vertical-align: top;
             text-align: left;
         }
@@ -304,6 +305,10 @@
 
         .invoice-footer {
             font-size: 20px !important;
+        }
+
+        .space-line {
+            margin-bottom: -20px;
         }
     </style>
 </head>
@@ -334,7 +339,7 @@
                                 </div>
                                 {{-- Jika tidak ada ppn --}}
                                 @if ($penjualan->pajak == 0)
-                                    <div class="row gutters decoration">
+                                    <div class="row gutters decoration space-line">
                                         <h2 style="width:50%;text-align:center;margin-top:20px;">
                                             <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
                                         </h2>
@@ -358,7 +363,7 @@
                                         </table>
                                     </div>
                                 @else
-                                    <div class="row gutters decoration">
+                                    <div class="row gutters decoration space-line">
                                         {{--                  <img style="width:30%" src="{{ asset('/images/logo/kop_kiu.png') }}" /> --}}
                                         <div style="width:30%;height:1px;"></div>
                                         <h2 style="width:30%;text-align:center;margin-top:20px;">
@@ -380,7 +385,8 @@
                                                     {{ $penjualan->namakonsumen }} </td>
                                             </tr> --}}
                                             <tr>
-                                                <td style="font-size:20px;"> {!! nl2br($penjualan->alamat_inv) !!} </td>
+                                                <td style="font-size:20px; margin-bottom:0px;"> {!! nl2br($penjualan->alamat_inv) !!}
+                                                </td>
                                             </tr>
                                             {{--                    <tr> --}}
                                             {{--                      <td style="text-transform: uppercase;font-size:20px;"> HP : {{ $penjualan->nohpkonsumen }} ({{ $penjualan->cpkonsumen }}) </td> --}}
@@ -403,14 +409,16 @@
                                                         <th style="text-align:center;font-weight:bold;">BANYAKNYA</th>
                                                         <th style="text-align:center;font-weight:bold;">JENIS BARANG
                                                         </th>
-                                                        <th style="text-align:center;font-weight:bold;">HARGA SATUAN
+                                                        <th style="text-align:center;font-weight:bold; width: 150px;">
+                                                            HARGA SATUAN
                                                         </th>
                                                         {{-- <th style="text-align:center;font-weight:bold;">DISKON (Rp)</th>
                         <th style="text-align:center;font-weight:bold;">DISKON
                           <br/>PAKET (Rp)</th>
                         <th style="text-align:center;font-weight:bold;">DISKON
                           <br/>EXTRA (Rp)</th> --}}
-                                                        <th style="text-align:center;font-weight:bold;">TOTAL DISKON
+                                                        <th style="text-align:center;font-weight:bold;width: 150px;">
+                                                            TOTAL DISKON
                                                         </th>
                                                         <th style="text-align:center;width:170px;font-weight:bold;">
                                                             KETERANGAN</th>
@@ -449,7 +457,7 @@
                                                         <tr>
                                                             <td colspan="4" rowspan="3">KETERANGAN :
                                                                 {!! nl2br($penjualan->keterangan) !!}</td>
-                                                            <td style="text-align:right;font-weight: bold;">DOWN PAYMENT
+                                                            <td style="text-align:right;font-weight: bold;">DP
                                                                 : </td>
                                                             <td style="text-align:right;font-weight: bold;">
                                                                 {{ number_format($penjualan->dp, 0, ',', '.') }}</td>
@@ -489,7 +497,7 @@
                                 </div>
                                 <div class="invoice-footer">
                                     <!-- Row start -->
-                                    <div class="row gutters decoration" style="font-size:15px;">
+                                    <div class="row gutters decoration" style="font-size:15px; margin-top:-30px;">
                                         <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
                                             style="text-align:center;">
                                             {{-- <div style="width:100%;text-align:left;">
@@ -498,14 +506,14 @@
                                             </div> --}}
                                             <br />
                                             <span style="font-size:17px;">Tanda Terima, </span>
-                                            <br /> <br /> <br /> <br /> <br />
+                                            <br /> <br /> <br /> <br />
                                             (..............................................)
                                         </div>
                                         <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
                                             style="text-align:center;">
-                                            <br /> <br />
+                                            <br />
                                             <span style="font-size:17px;">Hormat Kami, </span>
-                                            <br /> <br /> <br /> <br /> <br />
+                                            <br /> <br /> <br /> <br />
                                             (..............................................)
                                         </div>
                                     </div>
@@ -565,8 +573,7 @@
                                                     </tr>
                                                     @if ($penjualan->dp > 0)
                                                         <tr>
-                                                            <td style="text-align:right;font-weight: bold;"> Down
-                                                                Payment </td>
+                                                            <td style="text-align:right;font-weight: bold;"> DP </td>
                                                             <td style="text-align:right;font-weight: bold;">
                                                                 {{ number_format($penjualan->dp, 0, ',', '.') }}</td>
                                                         </tr>

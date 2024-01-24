@@ -294,11 +294,11 @@
         }
 
         .pajak tbody td {
-            font-size: 19px !important;
+            font-size: 18px !important;
         }
 
         .pajak tfoot td {
-            font-size: 20px !important;
+            font-size: 17px !important;
         }
 
         .pajak thead th {
@@ -307,6 +307,10 @@
 
         .invoice-footer {
             font-size: 20px !important;
+        }
+
+        .space-line {
+            margin-bottom: -20px;
         }
     </style>
 </head>
@@ -337,7 +341,7 @@
                                 </div>
 
                                 @if ($penjualan->sumpajak == 0)
-                                    <div class="row gutters decoration">
+                                    <div class="row gutters decoration space-line">
                                         <h2 style="width:50%;text-align:center;margin-top:20px;">
                                             <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
                                         </h2>
@@ -362,12 +366,15 @@
                                         </table>
                                     </div>
                                 @else
-                                    <div class="row gutters decoration">
+                                    <div class="row gutters decoration space-line">
                                         {{--                  <img style="width:30%" src="{{ asset('/images/logo/kop_kiu.png') }}" /> --}}
                                         <div style="width:30%;height:1px;"></div>
-                                        <h2 style="width:30%;text-align:center;margin-top:20px;">
+                                        <!--<h2 style="width:30%;text-align:center;margin-top:20px;">-->
+                                        <!--    <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}-->
+                                        <!--</h2>-->
+                                        <p style="font-size:26px;width:30%;text-align:center;margin-top:20px;">
                                             <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
-                                        </h2>
+                                        </p>
                                         <table style="width:40%;">
                                             <tr>
                                                 <td style="text-transform: uppercase;font-size:20px;"> PONTIANAK,
@@ -543,7 +550,8 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td style="text-align:right;font-weight: bold;"> Pajak 11% </td>
+                                                        <td style="text-align:right;font-weight: bold;"> Pajak 11%
+                                                        </td>
                                                         <td style="text-align:right;font-weight: bold;">
                                                             {{ number_format($penjualan->sumpajak, 0, ',', '.') }}</td>
                                                     </tr>
@@ -588,13 +596,13 @@
                                                 <tbody>
                                                     <tr>
                                                         <td
-                                                            style="width:33.33%;text-align:center;padding-bottom:140px;">
+                                                            style="width:33.33%;text-align:center;padding-bottom:110px;">
                                                             Nama dan Tanda Tangan Penerima</td>
                                                         <td
-                                                            style="width:33.33%;text-align:center;padding-bottom:140px;">
+                                                            style="width:33.33%;text-align:center;padding-bottom:110px;">
                                                             Tanda Tangan Yang Menyerahkan</td>
                                                         <td
-                                                            style="width:33.33%;text-align:center;padding-bottom:140px;">
+                                                            style="width:33.33%;text-align:center;padding-bottom:110px;">
                                                             Hormat Kami</td>
                                                     </tr>
                                                 </tbody>

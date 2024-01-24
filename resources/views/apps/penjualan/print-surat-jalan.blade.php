@@ -49,7 +49,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Surat Jalan - {{ $penjualan->kode_sj . ' - ' . $penjualan->namakonsumen }} </title>
+    <title>Invoice - {{ $penjualan->kode_inv . ' - ' . $penjualan->namakonsumen }} </title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
         integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
@@ -149,6 +149,7 @@
 
         .invoice-container .invoice-body {
             padding: 1rem 0 0 0;
+
         }
 
         .invoice-container .invoice-footer {
@@ -277,15 +278,37 @@
         }
 
         .tabel tbody td {
-            font-size: 22px !important;
+            font-size: 20px !important;
+        }
+
+        .tabel tfoot td {
+            font-size: 20px !important;
+            vertical-align: top;
+            text-align: left;
         }
 
         .tabel thead th {
-            font-size: 19px !important;
+            font-size: 18px !important;
+        }
+
+        .pajak tbody td {
+            font-size: 18px !important;
+        }
+
+        .pajak tfoot td {
+            font-size: 17px !important;
+        }
+
+        .pajak thead th {
+            font-size: 17px !important;
         }
 
         .invoice-footer {
             font-size: 20px !important;
+        }
+
+        .space-line {
+            margin-bottom: -20px;
         }
     </style>
 </head>
@@ -314,61 +337,60 @@
                                         </div>
                                     </div>
                                 </div>
-
+                                {{-- Jika tidak ada ppn --}}
                                 @if ($penjualan->pajak == 0)
-                                    <div class="row gutters decoration">
+                                    <div class="row gutters decoration space-line">
                                         <h2 style="width:50%;text-align:center;margin-top:20px;">
-                                            <u>SURAT PENGANTAR</u> <br />{{ $penjualan->kode_sj }}
+                                            <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
                                         </h2>
-                                        <table style="width:50%;">
+                                        <table style="width:50%">
                                             <tr>
                                                 <td style="text-transform: uppercase;font-size:20px;"> PONTIANAK,
-                                                    {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_sj)->isoFormat('D MMMM Y') }}
+                                                    {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_inv)->isoFormat('D MMMM Y') }}
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td style="font-size:20px;"> Kepada Yth: <label
                                                         style="text-transform: uppercase;font-size:24px;font-weight: bold;">
-                                                        {{ $penjualan->namakonsumen }}</label>
-                                                </td>
-                                                <td style="text-transform: uppercase;font-size:24px;font-weight: bold;">
-                                                </td>
+                                                        {{ $penjualan->namakonsumen }} </label> </td>
                                             </tr>
-                                            </tr>
+                                            {{-- <tr>
+                      <td style="text-transform: uppercase;font-size:24px;font-weight: bold;"> {{ $penjualan->namakonsumen }} </td>
+                    </tr> --}}
                                             <tr>
-                                            <tr>
-                                                <td style="font-size:20px;"> {!! nl2br($penjualan->alamat_sj) !!} </td>
+                                                <td style="font-size:20px;"> {!! nl2br($penjualan->alamat_inv) !!} </td>
                                             </tr>
                                         </table>
                                     </div>
                                 @else
-                                    <div class="row gutters decoration">
+                                    <div class="row gutters decoration space-line">
                                         {{--                  <img style="width:30%" src="{{ asset('/images/logo/kop_kiu.png') }}" /> --}}
-                                        {{--                  <div style="width:40%;height:1px;"></div> --}}
-                                        <h2 style="width:35%;text-align:center;margin-top:20px;margin-left:25%;">
-                                            <u>SURAT PENGANTAR</u> <br />{{ $penjualan->kode_sj }}
-                                        </h2>
-                                        <table style="width:40%;">
+                                        <div style="width:30%;height:1px;"></div>
+                                        <p style="font-size:26px;width:30%;text-align:center;margin-top:20px;">
+                                            <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
+                                        </p>
+                                        <table style="width:40%">
                                             <tr>
                                                 <td style="text-transform: uppercase;font-size:20px;"> PONTIANAK,
-                                                    {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_sj)->isoFormat('D MMMM Y') }}
+                                                    {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_inv)->isoFormat('D MMMM Y') }}
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td style="font-size:20px;"> Kepada Yth: <label
                                                         style="text-transform: uppercase;font-size:24px;font-weight: bold;">
-                                                        {{ $penjualan->namakonsumen }}</label>
-                                                </td>
-                                                <td style="text-transform: uppercase;font-size:24px;font-weight: bold;">
-                                                </td>
+                                                        {{ $penjualan->namakonsumen }} </label> </td>
                                             </tr>
                                             {{-- <tr>
                                                 <td style="text-transform: uppercase;font-size:24px;font-weight: bold;">
                                                     {{ $penjualan->namakonsumen }} </td>
                                             </tr> --}}
                                             <tr>
-                                                <td style="font-size:20px;"> {!! nl2br($penjualan->alamat_sj) !!} </td>
+                                                <td style="font-size:20px; margin-bottom:0px;"> {!! nl2br($penjualan->alamat_inv) !!}
+                                                </td>
                                             </tr>
+                                            {{--                    <tr> --}}
+                                            {{--                      <td style="text-transform: uppercase;font-size:20px;"> HP : {{ $penjualan->nohpkonsumen }} ({{ $penjualan->cpkonsumen }}) </td> --}}
+                                            {{--                    </tr> --}}
                                         </table>
                                     </div>
                                 @endif
@@ -377,107 +399,96 @@
 
                             @if ($penjualan->pajak == 0)
 
-                                <div class="invoice-body" style="padding: 30px 20px 10px 40px;">
+                                <div class="invoice-body" style="padding: 30px 40px 10px 40px;">
                                     <!-- Row start -->
                                     <div class="row gutters">
                                         <div class="col-lg-12 col-md-12 col-sm-12">
                                             <table class="tabel m-0" style="border:1px solid black !important;">
                                                 <thead>
                                                     <tr>
-                                                        <th style="text-align:center;width:200px;font-weight:bold;">
-                                                            BANYAKNYA</th>
-                                                        <th style="text-align:center;font-weight:bold;">NAMA BARANG</th>
-                                                        <th style="text-align:center;font-weight:bold;">KETERANGAN</th>
+                                                        <th style="text-align:center;font-weight:bold;">BANYAKNYA</th>
+                                                        <th style="text-align:center;font-weight:bold;">JENIS BARANG
+                                                        </th>
+                                                        <th style="text-align:center;font-weight:bold; width: 150px;">
+                                                            HARGA SATUAN
+                                                        </th>
+                                                        {{-- <th style="text-align:center;font-weight:bold;">DISKON (Rp)</th>
+                        <th style="text-align:center;font-weight:bold;">DISKON
+                          <br/>PAKET (Rp)</th>
+                        <th style="text-align:center;font-weight:bold;">DISKON
+                          <br/>EXTRA (Rp)</th> --}}
+                                                        <th style="text-align:center;font-weight:bold;width: 150px;">
+                                                            TOTAL DISKON
+                                                        </th>
+                                                        <th style="text-align:center;width:170px;font-weight:bold;">
+                                                            KETERANGAN</th>
+                                                        <th style="text-align:center;width:145px;font-weight:bold;">
+                                                            JUMLAH (Rp)</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($penjualandetails ?? '' as $penjualandetail)
                                                         <tr>
-                                                            <td style="text-align:right;">
+                                                            <td style="text-align:center;">
                                                                 {{ number_format($penjualandetail->total_jual, 2, ',', '.') }}
                                                                 {{ strtoupper($penjualandetail->satuanbarang) }}</td>
                                                             <td style="text-align:left;">
                                                                 {{ $penjualandetail->namabarang }}</td>
-                                                            <td style="text-align:left;">
-                                                                {{ $penjualandetail->catatan }}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                                @if ($penjualan->keterangan != '')
-                                                    <tfoot>
-                                                        <tr>
-                                                            <td colspan="3"> KETERANGAN : {!! nl2br($penjualan->keterangan) !!}
+                                                            <td style="text-align:right;">
+                                                                {{ number_format($penjualandetail->harga, 0, ',', '.') }}
                                                             </td>
-                                                        </tr>
-                                                    </tfoot>
-                                                @endif
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <!-- Row end -->
-                                </div>
-                                <div class="invoice-footer">
-                                    <!-- Row start -->
-                                    <div class="row gutters decoration" style="font-size:15px;">
-                                        {{-- <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
-                                            style="text-align:center;">
-                                            <div style="width:100%;text-align:left;">
-                                                Tanggal Cetak {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }} -
-                                                {{ Auth::User()->name }}
-                                            </div>
-                                            <br />
-                                            <span style="font-size:17px;">Nama & Tanda Tangan Penerima, </span>
-                                        </div> --}}
-                                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
-                                            style="text-align:center;">
-                                            <br /> <br />
-                                            <span style="font-size:17px;">Tanda Tangan Yang Menyerahkan, </span>
-                                            <br /> <br /> <br /> <br /> <br />
-                                            <span style="font-size:17px;text-transform: uppercase">
-                                                {{ $penjualan->ekspedisi }} </span>
-                                        </div>
-                                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
-                                            style="text-align:center;">
-                                            <br /> <br />
-                                            <span style="font-size:17px;">Hormat Kami, </span>
-                                            <br /> <br /> <br /> <br /> <br /> <br />
-                                        </div>
-                                    </div>
-                                    <!-- Row end -->
-                                </div>
-                            @else
-                                <div class="invoice-body" style="padding: 30px 20px 10px 40px;">
-                                    <!-- Row start -->
-                                    <div class="row gutters">
-                                        <div class="col-lg-12 col-md-12 col-sm-12">
-                                            Dengan ini kami kirimkan barang-barang yang tersebut dibawah ini sebagai
-                                            berikut:
-                                            <table class="tabel m-0" style="border:1px solid black !important;">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="text-align:center;width:200px;font-weight:bold; ">
-                                                            BANYAKNYA</th>
-                                                        <th style="text-align:center;font-weight:bold;">NAMA BARANG</th>
-                                                        <th style="text-align:center;font-weight:bold;">KETERANGAN</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($penjualandetails ?? '' as $penjualandetail)
-                                                        <tr>
+                                                            {{-- <td style="text-align:right;">{{ number_format($penjualandetail->harga - $penjualandetail->diskon - $penjualandetail->diskon_paket - $penjualandetail->diskon_extra,0,',','.') }}</td> --}}
+                                                            {{-- <td style="text-align:right;">{{ number_format($penjualandetail->diskon,0,',','.') }}</td>
+                          <td style="text-align:right;">{{ number_format($penjualandetail->diskon_paket,0,',','.') }}</td>
+                          <td style="text-align:right;">{{ number_format($penjualandetail->diskon_extra,0,',','.') }}</td> --}}
                                                             <td style="text-align:right;">
-                                                                {{ number_format($penjualandetail->total_jual, 2, ',', '.') }}
-                                                                {{ strtoupper($penjualandetail->satuanbarang) }}</td>
-                                                            <td style="text-align:left;">
-                                                                {{ $penjualandetail->namabarang }}</td>
+                                                                {{ number_format($penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra, 0, ',', '.') }}
+                                                            </td>
                                                             <td style="text-align:left;">
                                                                 {{ $penjualandetail->catatan }}</td>
+                                                            <td style="text-align:right;">
+                                                                {{ number_format($penjualandetail->subtotal, 0, ',', '.') }}
+                                                            </td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
                                                 <tfoot>
-                                                    <tr>
-                                                        <td colspan="3"> KETERANGAN : {!! nl2br($penjualan->keterangan) !!} </td>
-                                                    </tr>
+                                                    @if ($penjualan->dp > 0)
+                                                        <tr>
+                                                            <td colspan="4" rowspan="3">KETERANGAN :
+                                                                {!! nl2br($penjualan->keterangan) !!}</td>
+                                                            <td style="text-align:right;font-weight: bold;">DP
+                                                                : </td>
+                                                            <td style="text-align:right;font-weight: bold;">
+                                                                {{ number_format($penjualan->dp, 0, ',', '.') }}</td>
+                                                        </tr>
+                                                        {{-- @if ($penjualan->diskon > 0) --}}
+                                                        <tr>
+                                                            <td style="text-align:right;font-weight: bold;">DISKON :
+                                                            </td>
+                                                            <td style="text-align:right;font-weight: bold;">
+                                                                {{ number_format($penjualan->diskon, 0, ',', '.') }}
+                                                            </td>
+                                                        </tr>
+                                                        {{-- @endif --}}
+                                                        <tr>
+                                                            <td style="text-align:right;font-weight: bold;">TOTAL AKHIR
+                                                                : </td>
+                                                            <td style="text-align:right;font-weight: bold;">
+                                                                {{ number_format($penjualan->grandtotal - $penjualan->dp, 0, ',', '.') }}
+                                                            </td>
+                                                        </tr>
+                                                    @else
+                                                        <tr>
+                                                            <td colspan="4">KETERANGAN : {!! nl2br($penjualan->keterangan) !!}</td>
+                                                            <td style="text-align:right;font-weight: bold;">TOTAL AKHIR
+                                                                : </td>
+                                                            <td style="text-align:right;font-weight: bold;">
+                                                                {{ number_format($penjualan->grandtotal, 0, ',', '.') }}
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+
                                                 </tfoot>
                                             </table>
                                         </div>
@@ -486,35 +497,130 @@
                                 </div>
                                 <div class="invoice-footer">
                                     <!-- Row start -->
-                                    <div class="row gutters decoration" style="font-size:15px;font-weight:bold;">
+                                    <div class="row gutters decoration" style="font-size:15px; margin-top:-30px;">
                                         <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
                                             style="text-align:center;">
-                                            {{-- <div style="width:100%;text-align:left;font-weight:normal;">
+                                            {{-- <div style="width:100%;text-align:left;">
                                                 Tanggal Cetak {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }} -
                                                 {{ Auth::User()->name }}
                                             </div> --}}
                                             <br />
-                                            <span style="font-size:17px;">PENERIMA, </span>
-                                            <br /> <br /> <br /> <br /> <br /> <br />
-                                            <span style="font-size:17px;"> {{ $penjualan->namakonsumen }} </span>
+                                            <span style="font-size:17px;">Tanda Terima, </span>
+                                            <br /> <br /> <br /> <br />
+                                            (..............................................)
                                         </div>
                                         <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
                                             style="text-align:center;">
-                                            {{-- <br /> --}}
                                             <br />
-                                            <span style="font-size:17px;">NAMA, CAP, & TANDA TANGAN <br /> YANG
-                                                MENYERAHKAN, </span>
-                                            <br /> <br /> <br /> <br /> <br />
-                                            <span style="font-size:17px;text-transform: uppercase">
-                                                {{ $penjualan->ekspedisi }} </span>
+                                            <span style="font-size:17px;">Hormat Kami, </span>
+                                            <br /> <br /> <br /> <br />
+                                            (..............................................)
                                         </div>
-                                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
-                                            style="text-align:center;">
-                                            {{-- <br /> --}}
-                                            <br />
-                                            <span style="font-size:17px;">HORMAT KAMI, </span>
-                                            <br /> <br /> <br /> <br /> <br /> <br />
-                                            <span style="font-size:17px;"> PT. KAPUAS INTAN UTAMA </span>
+                                    </div>
+                                    <!-- Row end -->
+                                </div>
+                            @else
+                                <div class="invoice-body" style="padding: 30px 40px 10px 40px;">
+                                    <!-- Row start -->
+                                    <div class="row gutters">
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <table class="tabel m-0 pajak" style="border:1px solid black !important;">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="text-align:center;font-weight:bold;">JENIS BARANG
+                                                        </th>
+                                                        <th style="text-align:center;font-weight:bold;">BANYAKNYA</th>
+                                                        <th style="text-align:center;font-weight:bold;">HARGA SATUAN
+                                                            (Rp)</th>
+                                                        <th style="text-align:center;width:170px;font-weight:bold;">
+                                                            KETERANGAN</th>
+                                                        <th style="text-align:center;width:145px;font-weight:bold;">
+                                                            JUMLAH (Rp)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($penjualandetails ?? '' as $penjualandetail)
+                                                        <tr>
+                                                            <td style="text-align:left;">
+                                                                {{ $penjualandetail->namabarang }}</td>
+                                                            <td style="text-align:center;">
+                                                                {{ number_format($penjualandetail->total_jual, 2, ',', '.') }}
+                                                                {{ strtoupper($penjualandetail->satuanbarang) }}</td>
+                                                            <td style="text-align:right;">
+                                                                {{ number_format($penjualandetail->harga - $penjualandetail->diskon - $penjualandetail->diskon_paket - $penjualandetail->diskon_extra, 0, ',', '.') }}
+                                                            </td>
+                                                            <td style="text-align:left;">
+                                                                {{ $penjualandetail->catatan }}</td>
+                                                            <td style="text-align:right;">
+                                                                {{ number_format($penjualandetail->subtotal, 0, ',', '.') }}
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td @if ($penjualan->dp > 0) rowspan="4" @else rowspan="3" @endif
+                                                            colspan="3">KETERANGAN : {!! nl2br($penjualan->keterangan) !!} </td>
+                                                        <td style="text-align:right;font-weight: bold;">Sub Total (Rp)
+                                                        </td>
+                                                        <td style="text-align:right;font-weight: bold;">
+                                                            {{ number_format($penjualan->subtotal, 0, ',', '.') }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="text-align:right;font-weight: bold;"> Pajak 11% </td>
+                                                        <td style="text-align:right;font-weight: bold;">
+                                                            {{ number_format($penjualan->pajak, 0, ',', '.') }}</td>
+                                                    </tr>
+                                                    @if ($penjualan->dp > 0)
+                                                        <tr>
+                                                            <td style="text-align:right;font-weight: bold;"> DP </td>
+                                                            <td style="text-align:right;font-weight: bold;">
+                                                                {{ number_format($penjualan->dp, 0, ',', '.') }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="text-align:right;font-weight: bold;"> Total (Rp)
+                                                            </td>
+                                                            <td style="text-align:right;font-weight: bold;">
+                                                                {{ number_format($penjualan->grandtotal - $penjualan->dp, 0, ',', '.') }}
+                                                            </td>
+                                                        </tr>
+                                                    @else
+                                                        <tr>
+                                                            <td style="text-align:right;font-weight: bold;"> Total (Rp)
+                                                            </td>
+                                                            <td style="text-align:right;font-weight: bold;">
+                                                                {{ number_format($penjualan->grandtotal, 0, ',', '.') }}
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    <tr>
+                                                        <td colspan="5">Syarat Pembayaran : @if ($penjualan->pembayaran == 'Credit')
+                                                                <b> KREDIT {{ $penjualan->termin }} HARI </b>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="5" style="text-transform: capitalize">
+                                                            Terbilang (Rp) : {{ terbilang($penjualan->grandtotal) }}
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                            <table class="table m-0" style="border:1px solid black !important;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td
+                                                            style="width:33.33%;text-align:center;padding-bottom:110px;">
+                                                            Nama dan Tanda Tangan Penerima</td>
+                                                        <td
+                                                            style="width:33.33%;text-align:center;padding-bottom:110px;">
+                                                            Tanda Tangan Yang Menyerahkan</td>
+                                                        <td
+                                                            style="width:33.33%;text-align:center;padding-bottom:110px;">
+                                                            Hormat Kami</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                     <!-- Row end -->
@@ -560,7 +666,7 @@
                 pdf.addImage(imgData, 'JPG', top_left_margin, -(PDF_Height * i) + (top_left_margin * 4),
                     canvas_image_width, canvas_image_height);
             }
-            pdf.save("Surat Jalan - {{ $penjualan->kode_sj . ' - ' . $penjualan->namakonsumen }} .pdf");
+            pdf.save("Invoice - {{ $penjualan->kode_inv . ' - ' . $penjualan->namakonsumen }} .pdf");
             $(".no-print").show();
         });
     }

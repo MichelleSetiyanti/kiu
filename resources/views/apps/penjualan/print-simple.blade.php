@@ -367,7 +367,7 @@
                                                 <div class="col-8 text-right" style="font-weight:bold;"> Diskon
                                                 </div>
                                                 <div class="col-4 text-right" style="font-weight:bold;">
-                                                    {{ number_format(($penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra) * $penjualandetail->total_jual, 0, ',', '.') }}
+                                                    {{ number_format(($penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra) * $penjualandetail->total_jual + $penjualan->diskon, 0, ',', '.') }}
                                                 </div>
                                             </div>
                                         </div>

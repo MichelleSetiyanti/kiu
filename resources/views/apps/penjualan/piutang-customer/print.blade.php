@@ -367,9 +367,7 @@
                                                 </div>
 
                                                 <div
-                                                    style="width:50%;text-align:center;margin-bottom:30px;
-                                                    margin-top:-20px;
-                                                    font-size:20px;margin-left:50%;">
+                                                    style="width:50%;text-align:center;margin-bottom:30px;font-size:20px;margin-left:50%;margin-top:-50px">
                                                     Pontianak, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}
                                                 </div>
 
@@ -435,7 +433,7 @@
             }
             pdf.save(
                 "Nota Pelunasan Penjualan - {{ $bayarpiutang->kode . ' - ' . $bayarpiutang->namakonsumen }}.pdf"
-            );
+                );
             $(".no-print").show();
         });
     }
