@@ -18,51 +18,49 @@ class LaporanPiutangController extends Controller
     $this->middleware('auth');
   }
 
-  public function index(){
+  public function index()
+  {
     $clients = DB::table('konsumens')
       ->orderBy('nama', 'asc')
       ->get();
 
-    return view('apps.report.laporan-piutang',[ 'clients' => $clients ]);
+    return view('apps.report.laporan-piutang', ['clients' => $clients]);
   }
 
   public function list(Request $request)
   {
-      $table = DB::table('konsumens')
-        ->where(function($query) use ($request) {
+    $table = DB::table('konsumens')
+      ->where(function ($query) use ($request) {
 
-            if ($request->client != "All") {
-                $query->where('id', '=', $request->client);
-            }
+        if ($request->client != "All") {
+          $query->where('id', '=', $request->client);
+        }
+      })
+      ->where('piutang', '>', 0)
+      ->orderBy('nama', 'asc')
+      ->get();
 
-        })
-        ->where('piutang', '>', 0)
-        ->orderBy('nama', 'asc')
-        ->get();
+    $lunas = DB::table('konsumens')
+      ->where(function ($query) use ($request) {
 
-        $lunas = DB::table('konsumens')
-        ->where(function($query) use ($request) {
+        if ($request->pelunasan == "lunas") {
+          $query->where('piutang', '==', 0);
+        }
+      })
+      ->orderBy('nama', 'asc')
+      ->get();
 
-            if ($request->pelunasan == "lunas") {
-                $query->where('piutang', '==', 0);
-            }
+    $pajak = DB::table('penjualans')
+      ->where(function ($query) use ($request) {
 
-        })
-        ->orderBy('nama', 'asc')
-        ->get();
-
-        $pajak = DB::table('penjualans')
-        ->where(function($query) use ($request) {
-
-            if ($request->pajak == "ppn") {
-                $query->where('pajak', '<=', 0);
-            }
-
-        })
-        // ->orderBy('id_konsumens', 'asc')
-        ->get();
-
-      return view('apps.report.laporan-piutang-detil',[ 'konsumens' => $table, 'request' => $request, 'lunas' => $lunas, 'pajaks' => $pajak ]);
+        if ($request->pajak == "ppn") {
+          $query->where('pajak', '<=', 0);
+        }
+      })
+      // ->orderBy('id_konsumens', 'asc')
+      ->get();
+    // dd($table);
+    // die();
+    return view('apps.report.laporan-piutang-detil', ['konsumens' => $table, 'request' => $request, 'lunas' => $lunas, 'pajaks' => $pajak]);
   }
-
 }
