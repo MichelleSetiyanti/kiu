@@ -288,16 +288,18 @@
         }
 
         .tabel thead th {
-            font-size: 19px !important;
+            font-size: 18px !important;
         }
 
         .pajak tbody td {
-            font-size: 17px !important;
+            font-size: 18px !important;
         }
 
         .pajak tfoot td {
-            font-size: 20px !important;
+            font-size: 18px !important;
         }
+
+
 
         .pajak thead th {
             font-size: 17px !important;
@@ -366,9 +368,9 @@
                                     <div class="row gutters decoration space-line">
                                         {{--                  <img style="width:30%" src="{{ asset('/images/logo/kop_kiu.png') }}" /> --}}
                                         <div style="width:30%;height:1px;"></div>
-                                        <h2 style="width:30%;text-align:center;margin-top:20px;">
+                                        <p style="font-size:26px;width:30%;text-align:center;margin-top:20px;">
                                             <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
-                                        </h2>
+                                        </p>
                                         <table style="width:40%">
                                             <tr>
                                                 <td style="text-transform: uppercase;font-size:20px;"> PONTIANAK,
@@ -417,10 +419,10 @@
                           <br/>PAKET (Rp)</th>
                         <th style="text-align:center;font-weight:bold;">DISKON
                           <br/>EXTRA (Rp)</th> --}}
-                                                        <th style="text-align:center;font-weight:bold;width: 150px;">
-                                                            TOTAL DISKON
+                                                        <th style="text-align:center;font-weight:bold;width: 80px;">
+                                                            DISKON
                                                         </th>
-                                                        <th style="text-align:center;width:170px;font-weight:bold;">
+                                                        <th style="text-align:center;width:280px;font-weight:bold;">
                                                             KETERANGAN</th>
                                                         <th style="text-align:center;width:145px;font-weight:bold;">
                                                             JUMLAH (Rp)</th>
@@ -462,15 +464,15 @@
                                                             <td style="text-align:right;font-weight: bold;">
                                                                 {{ number_format($penjualan->dp, 0, ',', '.') }}</td>
                                                         </tr>
-                                                        {{-- @if ($penjualan->diskon > 0) --}}
-                                                        <tr>
-                                                            <td style="text-align:right;font-weight: bold;">DISKON :
-                                                            </td>
-                                                            <td style="text-align:right;font-weight: bold;">
-                                                                {{ number_format($penjualan->diskon, 0, ',', '.') }}
-                                                            </td>
-                                                        </tr>
-                                                        {{-- @endif --}}
+                                                        @if ($penjualan->diskon > 0)
+                                                            <tr>
+                                                                <td style="text-align:right;font-weight: bold;">DISKON :
+                                                                </td>
+                                                                <td style="text-align:right;font-weight: bold;">
+                                                                    {{ number_format($penjualan->diskon, 0, ',', '.') }}
+                                                                </td>
+                                                            </tr>
+                                                        @endif
                                                         <tr>
                                                             <td style="text-align:right;font-weight: bold;">TOTAL AKHIR
                                                                 : </td>
@@ -578,15 +580,17 @@
                                                                 {{ number_format($penjualan->dp, 0, ',', '.') }}</td>
                                                         </tr>
                                                         <tr>
-                                                            <td style="text-align:right;font-weight: bold;"> Total (Rp)
+                                                            <td style="text-align:right;font-weight: bold;"
+                                                                class="besar"> TOTAL
                                                             </td>
-                                                            <td style="text-align:right;font-weight: bold;">
+                                                            <td style="text-align:right;font-weight: bold;"
+                                                                class="besar">
                                                                 {{ number_format($penjualan->grandtotal - $penjualan->dp, 0, ',', '.') }}
                                                             </td>
                                                         </tr>
                                                     @else
                                                         <tr>
-                                                            <td style="text-align:right;font-weight: bold;"> Total (Rp)
+                                                            <td style="text-align:right;font-weight: bold;"> TOTAL
                                                             </td>
                                                             <td style="text-align:right;font-weight: bold;">
                                                                 {{ number_format($penjualan->grandtotal, 0, ',', '.') }}
@@ -610,13 +614,13 @@
                                                 <tbody>
                                                     <tr>
                                                         <td
-                                                            style="width:33.33%;text-align:center;padding-bottom:140px;">
+                                                            style="width:33.33%;text-align:center;padding-bottom:110px;">
                                                             Nama dan Tanda Tangan Penerima</td>
                                                         <td
-                                                            style="width:33.33%;text-align:center;padding-bottom:140px;">
+                                                            style="width:33.33%;text-align:center;padding-bottom:110px;">
                                                             Tanda Tangan Yang Menyerahkan</td>
                                                         <td
-                                                            style="width:33.33%;text-align:center;padding-bottom:140px;">
+                                                            style="width:33.33%;text-align:center;padding-bottom:110px;">
                                                             Hormat Kami</td>
                                                     </tr>
                                                 </tbody>

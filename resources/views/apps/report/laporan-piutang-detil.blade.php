@@ -342,15 +342,33 @@
                                                 <tbody>
                                                     @php
                                                         $sumsgrandtotal = 0;
+                                                        $sumsblmgrandtotal = 0;
                                                     @endphp
 
-                                                    @foreach (($request->pelunasan == 'lunas' ? $lunas : $konsumens) ?? [] as $konsumen)
+                                                    {{-- @if ($request->pelunasan == 'Lunas')
+                                                        <tr>
+                                                            <td>
+                                                                lunas
+                                                            </td>
+                                                        </tr>
+                                                    @elseif($request->pelunasan == 'Belum Lunas')
+                                                        <tr>
+                                                            <td>
+                                                                belum
+                                                            </td>
+                                                        </tr>
+                                                    @endif --}}
+
+
+                                                    @foreach (($request->pelunasan == 'Lunas' ? $lunas : $konsumens) ?? [] as $konsumen)
                                                         <tr
-                                                            id="{{ $request->pelunasan == 'lunas' ? 'lunas' : 'konsumen' }}{{ $konsumen->id }}">
+                                                            id="{{ $request->pelunasan == 'Lunas' ? 'Lunas' : 'Konsumen' }}{{ $konsumen->id }}">
                                                             <td>{{ $konsumen->nama }}</td>
 
                                                             @php
                                                                 $sumkonsumen = 0;
+                                                                $sumblm = 0;
+                                                                $totalpiutang = 0;
                                                             @endphp
 
                                                             @for ($x = 0; $x <= $diff; $x++)
@@ -379,23 +397,47 @@
                                                                         ->get();
 
                                                                     $sumsgrandtotal += $sums[0]->totaljual;
+                                                                    $sumsblmgrandtotal += $konsumen->piutang;
                                                                     $sumkonsumen += $sums[0]->totaljual;
+                                                                    $sumblm += $konsumen->piutang;
+                                                                    $totalpiutang += $konsumen->piutang;
                                                                 @endphp
 
-                                                                <td style="text-align:right;">
-                                                                    {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
-                                                                </td>
-                                                            @endfor
+                                                                @if ($request->pelunasan == 'Lunas')
+                                                                    <td style="text-align:right;">
+                                                                        {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
+                                                                    </td>
+                                                                @else
+                                                                    <td style="text-align:right;">
+                                                                        {{ number_format($konsumen->piutang, 0, ',', '.') }}
 
-                                                            <td style="text-align:right;">
-                                                                {{ number_format($sumkonsumen, 0, ',', '.') }}</td>
+                                                                    </td>
+                                                                @endif
+                                                                {{-- <td style="text-align:right;">
+                                                                    {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
+                                                                </td> --}}
+                                                            @endfor
+                                                            @if ($request->pelunasan == 'Lunas')
+                                                                <td style="text-align:right;">
+                                                                    {{ number_format($sumkonsumen, 0, ',', '.') }}
+                                                                </td>
+                                                            @else
+                                                                <td style="text-align:right;">
+                                                                    {{ number_format($sumblm, 0, ',', '.') }}
+                                                                </td>
+                                                            @endif
+
                                                         </tr>
 
                                                         <script>
                                                             var sumkonsumen = "{{ $sumkonsumen }}";
-
+                                                            var sumblm = "{{ $sumblm }}";
+                                                            if (sumblm == "0") {
+                                                                document.getElementById('{{ $request->pelunasan == 'Lunas' ? 'Lunas' : 'konsumen' }}{{ $konsumen->id }}')
+                                                                    .style.display = "none";
+                                                            }
                                                             if (sumkonsumen == "0") {
-                                                                document.getElementById('{{ $request->pelunasan == 'lunas' ? 'lunas' : 'konsumen' }}{{ $konsumen->id }}')
+                                                                document.getElementById('{{ $request->pelunasan == 'Lunas' ? 'Lunas' : 'konsumen' }}{{ $konsumen->id }}')
                                                                     .style.display = "none";
                                                             }
                                                         </script>
@@ -428,15 +470,55 @@
                                                                     })
                                                                     ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
                                                                     ->get();
+                                                                // $totalblmlunas = 0;
+
+                                                                // $totalblmlunas = DB::table('bayar_piutangs')
+                                                                //     ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
+                                                                //     ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+                                                                //     ->select(DB::raw('sum(konsumens.piutang) as totaljual'))
+                                                                //     ->where('konsumens.piutang', '>', 0)
+                                                                //     ->when($request->pajak == 'PPN', function ($query) {
+                                                                //         return $query->where('penjualans.pajak', '==', 0);
+                                                                //     })
+                                                                //     ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
+                                                                //     ->get();
+                                                                // $totalblmlunas = DB::table('konsumens')
+                                                                //     ->select(DB::raw('SUM(piutang) as totalPiutang'))
+                                                                //     ->where('piutang', '>', 0)
+                                                                //     ->whereBetween('created_at', [$tanggalmulai, $tanggalselesai])
+                                                                //     ->get();
+
+                                                                // $totalPiutang = $totalblmlunas->first()->totalPiutang;
                                                             @endphp
-                                                            <td
+                                                            @if ($request->pelunasan == 'Lunas')
+                                                                <td
+                                                                    style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
+                                                                    {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
+                                                                </td>
+                                                            @else
+                                                                <td
+                                                                    style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
+                                                                    {{-- {{ number_format($sumsblmgrandtotal, 0, ',', '.') }} --}}
+                                                                </td>
+                                                            @endif
+                                                            {{-- <td
                                                                 style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
                                                                 {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
-                                                            </td>
+                                                            </td> --}}
                                                         @endfor
-                                                        <td
+                                                        @if ($request->pelunasan == 'Lunas')
+                                                            <td
+                                                                style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
+                                                                {{ number_format($sumsgrandtotal, 0, ',', '.') }}</td>
+                                                        @else
+                                                            <td
+                                                                style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
+                                                                {{ number_format($sumsblmgrandtotal, 0, ',', '.') }}
+                                                            </td>
+                                                        @endif
+                                                        {{-- <td
                                                             style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
-                                                            {{ number_format($sumsgrandtotal, 0, ',', '.') }}</td>
+                                                            {{ number_format($sumsgrandtotal, 0, ',', '.') }}</td> --}}
                                                     </tr>
                                                 </tbody>
                                             </table>

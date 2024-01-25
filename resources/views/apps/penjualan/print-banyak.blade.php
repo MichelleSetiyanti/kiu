@@ -298,7 +298,7 @@
         }
 
         .pajak tfoot td {
-            font-size: 17px !important;
+            font-size: 18px !important;
         }
 
         .pajak thead th {
@@ -343,7 +343,7 @@
                                 @if ($penjualan->sumpajak == 0)
                                     <div class="row gutters decoration space-line">
                                         <h2 style="width:50%;text-align:center;margin-top:20px;">
-                                            <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
+                                            <u><b>FAKTURs</b></u> <br />{{ $penjualan->kode_inv }}
                                         </h2>
                                         <table style="width:50%">
                                             <tr>
@@ -373,7 +373,7 @@
                                         <!--    <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}-->
                                         <!--</h2>-->
                                         <p style="font-size:26px;width:30%;text-align:center;margin-top:20px;">
-                                            <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
+                                            <u><b>FAKTURs</b></u> <br />{{ $penjualan->kode_inv }}
                                         </p>
                                         <table style="width:40%;">
                                             <tr>
@@ -564,7 +564,7 @@
                                                             </td>
                                                         </tr>
                                                         <tr>
-                                                            <td style="text-align:right;font-weight: bold;"> Total (Rp)
+                                                            <td style="text-align:right;font-weight: bold;"> TOTAL
                                                             </td>
                                                             <td style="text-align:right;font-weight: bold;">
                                                                 {{ number_format($penjualan->sumgrandtotal - $penjualan->sumdp, 0, ',', '.') }}
@@ -572,7 +572,7 @@
                                                         </tr>
                                                     @else
                                                         <tr>
-                                                            <td style="text-align:right;font-weight: bold;"> Total (Rp)
+                                                            <td style="text-align:right;font-weight: bold;"> TOTAL
                                                             </td>
                                                             <td style="text-align:right;font-weight: bold;">
                                                                 {{ number_format($penjualan->sumgrandtotal, 0, ',', '.') }}

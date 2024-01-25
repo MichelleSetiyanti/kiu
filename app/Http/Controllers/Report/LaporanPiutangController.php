@@ -57,10 +57,8 @@ class LaporanPiutangController extends Controller
           $query->where('pajak', '<=', 0);
         }
       })
-      // ->orderBy('id_konsumens', 'asc')
       ->get();
-    // dd($table);
-    // die();
+    // dd($table, $lunas);
     return view('apps.report.laporan-piutang-detil', ['konsumens' => $table, 'request' => $request, 'lunas' => $lunas, 'pajaks' => $pajak]);
   }
 }
