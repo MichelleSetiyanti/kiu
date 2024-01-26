@@ -469,6 +469,12 @@ Route::group(['prefix' => 'penjualan'], function () {
 
     Route::post('/pelunasan', 'Penjualan\PiutangCustomerController@pelunasan');
 
+    Route::get('/cetak-kwitansi', 'Penjualan\PiutangCustomerController@cetakKuitansi');
+
+
+    Route::get('/print-preview/{param}', 'Penjualan\PiutangCustomerController@print_data_preview')->name('print-preview');
+
+
     Route::post('/cancel-data', 'Penjualan\PiutangCustomerController@cancel_data');
 
     Route::get('/print-data/{param}', 'Penjualan\PiutangCustomerController@print_data');
