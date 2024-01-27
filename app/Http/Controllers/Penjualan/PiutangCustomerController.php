@@ -296,52 +296,12 @@ class PiutangCustomerController extends Controller
       $sumtotalpelunasan = $sumtotalpelunasan + $sisa;
     }
 
-    // dd($kode, $konsumen->nama, $sumtotalpelunasan);
-    $loadvalue = [
-      'kode' => $kode,
-      'id_users' => Auth::User()->id,
-      'nama' => $konsumen->nama,
-      'nominal' => $sumtotalpelunasan,
-    ];
-
-    // dd($loadvalue);
-    // die();
     return view('apps.penjualan.piutang-customer.print-kwitansi', [
       'kode' => $kode,
       'id_users' => Auth::User()->id,
       'nama' => $konsumen->nama,
+      'nofaktur' => $request->nofaktur,
       'nominal' => $sumtotalpelunasan,
     ]);
-  }
-
-  public function print_kwitansi($param)
-  {
-    // dd($param);
-    // $encrypt = Crypt::encrypt($penjualans->id);
-
-    $id = Crypt::decrypt($param);
-
-    $bayarpiutang = DB::table('bayar_piutang_konsumens')
-      ->join('konsumens', 'bayar_piutang_konsumens.id_konsumens', '=', 'konsumens.id')
-      ->select('bayar_piutang_konsumens.*', 'konsumens.nama as namakonsumen')
-      ->where('bayar_piutang_konsumens.id', $id)
-      ->orderBy('bayar_piutang_konsumens.created_at', 'desc')
-      ->first();
-
-    $stringid = $bayarpiutang->kodepelunasan;
-
-    if (substr($stringid, -1, 1) == ',') {
-      $stringid = substr($stringid, 0, -1);
-    }
-
-    $arrayid = explode(',', $stringid);
-
-    $penjualan_details = DB::table('bayar_piutangs')
-      ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
-      ->select('penjualans.*', 'bayar_piutangs.nominal as nominalpelunasan')
-      ->whereIn('bayar_piutangs.id', $arrayid)
-      ->orderBy('bayar_piutangs.created_at', 'asc')->get();
-
-    return view('apps.penjualan.piutang-customer.print', ['bayarpiutang' => $bayarpiutang, 'penjualandetails' => $penjualan_details]);
   }
 }

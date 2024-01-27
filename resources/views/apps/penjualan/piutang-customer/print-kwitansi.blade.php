@@ -326,27 +326,11 @@
                                                         <td style="vertical-align: top;"> Sesuai Dengan Faktur Terlampir
                                                         </td>
                                                     </tr>
-                                                    {{--
-                                                    @php
-                                                        $kode = [];
-                                                        $value = '';
-                                                    @endphp
-
-                                                    @foreach ($penjualandetails ?? '' as $penjualandetail)
-                                                        @php
-                                                            if (in_array($penjualandetail->kode_inv, $kode) == false) {
-                                                                $value = $value . $penjualandetail->kode_inv . ', ';
-                                                            }
-
-                                                            array_push($kode, $penjualandetail->kode_inv);
-                                                        @endphp
-                                                    @endforeach
-
                                                     <tr>
                                                         <td> </td>
                                                         <td> </td>
-                                                        <td> ( Faktur Penjualan {{ substr($value, 0, -2) }} )</td>
-                                                    </tr> --}}
+                                                        <td> ( Faktur Penjualan {{ implode(', ', $nofaktur) }} )</td>
+                                                    </tr>
                                                     <tr>
                                                         <td colspan="3">
                                                             <div

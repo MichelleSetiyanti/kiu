@@ -504,32 +504,35 @@
         }
 
         function f_printKwitansi() {
-
             var tblData = dataListView.rows('.selected').data();
             var Countrow = 0;
             var items = [];
+            var nofaktur = [];
             let konsumen = $("#konsumen").val();
 
             $.each(tblData, function(i, val) {
                 items[i] = tblData[i]['id'];
+                nofaktur[i] = tblData[i]['kode_inv'];
                 console.log(items[i]);
                 Countrow++;
 
-                // location.reload();
                 if (Countrow == tblData.length) {
                     let link = "/penjualan/piutang-customer/cetak-kwitansi";
-
 
                     $.ajax({
                         url: link,
                         method: 'GET',
                         data: {
                             datas: items,
+                            nofaktur: nofaktur,
                             konsumen: konsumen,
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(data) {
-                            console.log("tes");
+                            var newWindow = window.open();
+                            newWindow.document.write(data);
+                            newWindow.document.close();
+
                         },
                         error: function() {
                             console.log('error');
