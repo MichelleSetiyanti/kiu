@@ -162,6 +162,36 @@
 
     </section>
     {{-- Data list view end --}}
+
+    {{-- Modal --}}
+    <div class="modal fade text-left" id="modal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel3"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel3">Masukkan Keterangan</h4>
+                    <button type="button" class="close" data-dismiss="modal" id="btntutup3" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="height:160px;">
+                    <div class="row">
+                        <div class="col-sm-12 mb-1 data-field-col">
+                            <label for="keterangan">Keterangan</label>
+                            <textarea class="form-control" name="keterangan" id="keterangan" rows="3" placeholder="keterangan"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-sm-12 text-right mt-2 mb-1">
+                        <button type="button" class="btn btn-primary" value="Simpan" id="btnsubmit" name="btnsubmit"
+                            onclick="f_prosespelunasan()">Submit</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('vendor-script')
     {{-- vendor js files --}}
@@ -358,16 +388,16 @@
                 buttons: [{
                         text: "<i class='feather icon-send mr-1'></i> Proses Pelunasan",
                         action: function() {
-                            f_prosespelunasan()
+                            f_keterangan()
                         },
                         className: "btn bg-gradient-success waves-effect waves-light custom-btn rounded-btn mr-2",
                     },
                     {
-                        text: "<i class='feather icon-send mr-1'></i> Print Kwitansi",
+                        text: "<i class='feather icon-download mr-1'></i> Print Kwitansi",
                         action: function() {
                             f_printKwitansi()
                         },
-                        className: "btn bg-gradient-success waves-effect waves-light custom-btn rounded-btn mr-2",
+                        className: "btn bg-gradient-primary waves-effect waves-light custom-btn rounded-btn mr-2",
                     }
                 ],
                 scrollCollapse: true,
@@ -415,10 +445,17 @@
             $("#totalpelunasan").val(accounting.formatNumber(totalpelunasan, 0, ".", ","));
         }
 
+        function f_keterangan() {
+            $("#modal3").modal();
+
+        }
+
         function f_prosespelunasan() {
             var $body = $('body');
 
             let akuns = $("#akuns").val();
+            let keterangan = $("#keterangan").val();
+            console.log(keterangan);
 
             let tblData = dataListView.rows('.selected').data();
             let Countrow = 0;
@@ -472,6 +509,7 @@
                             akun: akuns,
                             utangdp: utangdp,
                             potongdp: potongdp,
+                            keterangan: keterangan,
                             konsumen: konsumen,
                             _token: '{{ csrf_token() }}'
                         })
@@ -480,12 +518,19 @@
                                 $body.removeClass('loading');
 
                                 $body.removeClass('loading');
+
                                 toastr.success('Proses pelunasan berhasil.', 'Berhasil', {
                                     positionClass: 'toast-top-right',
                                     containerId: 'toast-top-right',
                                     "closeButton": true
                                 });
-                                window.open('/penjualan/piutang-customer/print-data/' + data, '_blank');
+                                $("#modal3").modal('hide');
+                                toastr.success('Data berhasil terinput.', 'Berhasil', {
+                                    positionClass: 'toast-top-right',
+                                    containerId: 'toast-top-right',
+                                    "closeButton": true
+                                });
+                                // f_loadtable();
                                 location.reload();
                             } else {
                                 Swal.fire({
@@ -532,6 +577,7 @@
                             var newWindow = window.open();
                             newWindow.document.write(data);
                             newWindow.document.close();
+                            location.reload();
 
                         },
                         error: function() {

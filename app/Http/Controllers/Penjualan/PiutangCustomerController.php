@@ -85,6 +85,8 @@ class PiutangCustomerController extends Controller
   public function pelunasan(Request $request)
   {
 
+    // dd($request->keterangan);
+    // die();
     DB::beginTransaction();
 
     try {
@@ -108,6 +110,7 @@ class PiutangCustomerController extends Controller
 
       $sumtotalpelunasan = 0;
       $kodepelunasan = "";
+      $keterangan = $request->keterangan;
 
       for ($x = 0; $x < count($datas); $x++) {
         $penjualan = DB::table('penjualans')->where('id', $datas[$x])->first();
@@ -125,6 +128,7 @@ class PiutangCustomerController extends Controller
           'id_penjualans' => $datas[$x],
           'id_users' => Auth::user()->id,
           'nominal' => $sisa,
+          // 'keterangan' => $keterangan,
           'pelunasan_konsumen' => 'Y',
           "created_at" => \Carbon\Carbon::now(),
           "updated_at" => \Carbon\Carbon::now()
@@ -148,6 +152,7 @@ class PiutangCustomerController extends Controller
         'id_users' => Auth::User()->id,
         'id_konsumens' => $request->konsumen,
         'nominal' => $sumtotalpelunasan,
+        'keterangan' => $keterangan,
         'status' => 'Paid',
         "created_at" =>  \Carbon\Carbon::now(),
         "updated_at" => \Carbon\Carbon::now()
