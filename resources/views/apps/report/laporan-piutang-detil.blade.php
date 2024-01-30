@@ -369,6 +369,7 @@
                                                                 $sumkonsumen = 0;
                                                                 $sumblm = 0;
                                                                 $totalpiutang = 0;
+                                                                $sumsblmgrandtotal += $konsumen->piutang;
                                                             @endphp
 
                                                             @for ($x = 0; $x <= $diff; $x++)
@@ -397,9 +398,8 @@
                                                                         ->get();
 
                                                                     $sumsgrandtotal += $sums[0]->totaljual;
-                                                                    $sumsblmgrandtotal += $konsumen->piutang;
                                                                     $sumkonsumen += $sums[0]->totaljual;
-                                                                    $sumblm += $konsumen->piutang;
+                                                                    $sumblm = $konsumen->piutang;
                                                                     $totalpiutang += $konsumen->piutang;
                                                                 @endphp
 
