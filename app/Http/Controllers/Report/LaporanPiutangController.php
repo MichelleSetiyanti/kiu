@@ -29,6 +29,7 @@ class LaporanPiutangController extends Controller
 
   public function list(Request $request)
   {
+    // dd($request->pajak);
     $table = DB::table('konsumens')
       ->where(function ($query) use ($request) {
 
@@ -50,15 +51,15 @@ class LaporanPiutangController extends Controller
       ->orderBy('nama', 'asc')
       ->get();
 
-    $pajak = DB::table('penjualans')
-      ->where(function ($query) use ($request) {
-
-        if ($request->pajak == "ppn") {
-          $query->where('pajak', '<=', 0);
-        }
-      })
+    $nonpajak = DB::table('penjualans')
+      ->where('pajak', '<=', 0)
       ->get();
-    // dd($table, $lunas);
-    return view('apps.report.laporan-piutang-detil', ['konsumens' => $table, 'request' => $request, 'lunas' => $lunas, 'pajaks' => $pajak]);
+
+    $pajak = DB::table('penjualans')
+      ->where('pajak', '>', 0)
+      ->get();
+
+    // dd($table, $lunas, $pajak, $nonpajak);
+    return view('apps.report.laporan-piutang-detil', ['konsumens' => $table, 'request' => $request, 'lunas' => $lunas, 'pajaks' => $pajak, 'nonpajaks' => $nonpajak]);
   }
 }
