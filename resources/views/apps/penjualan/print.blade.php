@@ -408,11 +408,12 @@
                                             <table class="tabel m-0" style="border:1px solid black !important;">
                                                 <thead>
                                                     <tr>
-                                                        <th style="text-align:center;font-weight:bold;">BANYAKNYA</th>
+                                                        <th style="text-align:center;font-weight:bold;width: 120px;">
+                                                            BANYAKNYA</th>
                                                         <th style="text-align:center;font-weight:bold;">JENIS BARANG
                                                         </th>
-                                                        <th style="text-align:center;font-weight:bold; width: 150px;">
-                                                            HARGA SATUAN
+                                                        <th style="text-align:center;font-weight:bold; width: 100px;">
+                                                            HARGA
                                                         </th>
                                                         {{-- <th style="text-align:center;font-weight:bold;">DISKON (Rp)</th>
                         <th style="text-align:center;font-weight:bold;">DISKON
@@ -422,7 +423,7 @@
                                                         <th style="text-align:center;font-weight:bold;width: 80px;">
                                                             DISKON
                                                         </th>
-                                                        <th style="text-align:center;width:280px;font-weight:bold;">
+                                                        <th style="text-align:center;font-weight:bold;width:180;">
                                                             KETERANGAN</th>
                                                         <th style="text-align:center;width:145px;font-weight:bold;">
                                                             JUMLAH (Rp)</th>

@@ -51,6 +51,7 @@ class InvoiceController extends Controller
       })
       ->orderBy('updated_at', 'desc')
       ->get();
+
     return datatables()::of($penjualans)
       ->addColumn('action', function ($penjualans) {
         $encrypt = Crypt::encrypt($penjualans->id);
@@ -64,12 +65,17 @@ class InvoiceController extends Controller
 
         if ($penjualans->pembayaran == "Credit") {
           $class = "hidden";
+
+
+          if ($penjualans->sisa == "0") {
+            $classedit = "hidden";
+          }
         }
 
         return '
           <div class="fonticon-container">
             <span class="fonticon-wrap" onclick="f_datadetil(' . $penjualans->id . ')"><i class="feather icon-eye" data-toggle="tooltip" title="Lihat Detil Penjualan"></i></span>
-            <span class="fonticon-wrap" onclick="f_invoice(' . $penjualans->id . ', \'' . $encrypt . '\', \'' . $penjualans->kode_inv . '\', \'' . $penjualans->pembayaran . '\' )"><i class="feather icon-printer" data-toggle="tooltip" title="Cetak Invoice"></i></span>
+            <span class="fonticon-wrap" onclick="f_invoice(' . $penjualans->id . ', \'' . $encrypt . '\', \'' . $penjualans->keterangan . '\', \'' . $penjualans->kode_inv . '\', \'' . $penjualans->pembayaran . '\' )"><i class="feather icon-printer" data-toggle="tooltip" title="Cetak Invoice"></i></span>
             <span class="fonticon-wrap" onclick="f_invoicesimple(' . $penjualans->id . ', \'' . $encrypt . '\', \'' . $penjualans->kode_inv . '\', \'' . $penjualans->pembayaran . '\' )"><i class="feather icon-inbox" data-toggle="tooltip" title="Cetak Faktur Simple"></i></span>
             <span class="fonticon-wrap ' . $class . '" onclick="f_kwitansi(' . $penjualans->id . ', \'' . $encrypt . '\', \'' . $penjualans->kode_inv . '\', \'' . $penjualans->pembayaran . '\' )"><i class="feather icon-file-text" data-toggle="tooltip" title="Cetak Kwitansi Cash"></i></span>
             <span class="fonticon-wrap ' . $classedit . '" onclick="f_editinvoice(' . $penjualans->id . ', \'' . $encrypt . '\')"><i class="feather icon-edit" data-toggle="tooltip" title="Edit Data Invoice"></i></span>
@@ -82,8 +88,6 @@ class InvoiceController extends Controller
 
   public function store(Request $request)
   {
-
-
     DB::beginTransaction();
 
     try {
@@ -110,6 +114,7 @@ class InvoiceController extends Controller
         'kode_inv' => $kodetransaksi,
         'tanggal_inv' => $request->tanggal,
         'alamat_inv' => $request->alamat,
+        'keterangan' => $request->keterangan,
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
