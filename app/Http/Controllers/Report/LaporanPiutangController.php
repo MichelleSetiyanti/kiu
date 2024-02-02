@@ -29,23 +29,21 @@ class LaporanPiutangController extends Controller
 
   public function list(Request $request)
   {
-    // dd($request->pajak);
-    $table = DB::table('konsumens')
-      ->where(function ($query) use ($request) {
-
-        if ($request->client != "All") {
-          $query->where('id', '=', $request->client);
+    $tidaklunas = DB::table('konsumens')
+      ->where(
+        function ($query) use ($request) {
+          if ($request->client != "All") {
+            $query->where('id', '=', $request->client);
+          }
         }
-      })
-      ->where('piutang', '>', 0)
+      )
       ->orderBy('nama', 'asc')
       ->get();
 
     $lunas = DB::table('konsumens')
       ->where(function ($query) use ($request) {
-
         if ($request->pelunasan == "lunas") {
-          $query->where('piutang', '==', 0);
+          $query->where('piutang', '=', 0);
         }
       })
       ->orderBy('nama', 'asc')
@@ -59,7 +57,12 @@ class LaporanPiutangController extends Controller
       ->where('pajak', '>', 0)
       ->get();
 
-    // dd($table, $lunas, $pajak, $nonpajak);
-    return view('apps.report.laporan-piutang-detil', ['konsumens' => $table, 'request' => $request, 'lunas' => $lunas, 'pajaks' => $pajak, 'nonpajaks' => $nonpajak]);
+    return view('apps.report.laporan-piutang-detil', [
+      'konsumens' => $tidaklunas,
+      'request' => $request,
+      'lunas' => $lunas,
+      'pajaks' => $pajak,
+      'nonpajaks' => $nonpajak,
+    ]);
   }
 }

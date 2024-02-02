@@ -345,21 +345,6 @@
                                                         $sumsblmgrandtotal = 0;
                                                     @endphp
 
-                                                    {{-- @if ($request->pelunasan == 'Lunas')
-                                                        <tr>
-                                                            <td>
-                                                                lunas
-                                                            </td>
-                                                        </tr>
-                                                    @elseif($request->pelunasan == 'Belum Lunas')
-                                                        <tr>
-                                                            <td>
-                                                                belum
-                                                            </td>
-                                                        </tr>
-                                                    @endif --}}
-
-
                                                     @foreach (($request->pelunasan == 'Lunas' ? $lunas : $konsumens) ?? [] as $konsumen)
                                                         <tr
                                                             id="{{ $request->pelunasan == 'Lunas' ? 'Lunas' : 'Konsumen' }}{{ $konsumen->id }}">
@@ -382,50 +367,76 @@
                                                                         Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai)
                                                                             ->addMonths($x)
                                                                             ->isoFormat('Y-MM') . '-31 23:59:59';
+                                                                    if ($request->pelunasan == 'Lunas') {
+                                                                        if ($request->pajak == 'PPN') {
+                                                                            $sums = DB::table('bayar_piutangs')
+                                                                                ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
+                                                                                ->where('penjualans.pajak', '>', 0)
+                                                                                ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+                                                                                ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
+                                                                                ->where('penjualans.id_konsumens', $konsumen->id)
+                                                                                ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
+                                                                                ->get();
+                                                                        }
+                                                                    }
 
-                                                                    $sums = DB::table('bayar_piutangs')
-                                                                        ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
-                                                                        ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
-                                                                        ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
-                                                                        ->where('penjualans.id_konsumens', $konsumen->id)
-                                                                        ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
-                                                                        ->when($request->pajak == 'PPN', function ($query) {
-                                                                            return $query->where('penjualans.pajak', '==', 0);
-                                                                        })
-                                                                        ->when($request->pelunasan == 'Lunas', function ($query) {
-                                                                            return $query->where('konsumens.piutang', '==', 0);
-                                                                        })
-                                                                        ->get();
+                                                                    if ($request->pelunasan == 'Lunas') {
+                                                                        if ($request->pajak == 'NONPPN') {
+                                                                            $sums = DB::table('bayar_piutangs')
+                                                                                ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
+                                                                                ->where('penjualans.pajak', '<=', 0)
+                                                                                ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+                                                                                ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
+                                                                                ->where('penjualans.id_konsumens', $konsumen->id)
+                                                                                ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
+                                                                                ->get();
+                                                                        }
+                                                                    }
+                                                                    if ($request->pelunasan == 'Belum Lunas') {
+                                                                        if ($request->pajak == 'NONPPN') {
+                                                                            $sums = DB::table('penjualans')
+                                                                                ->where('penjualans.pajak', '<=', 0)
+                                                                                ->where('sisa', '>', 0)
+                                                                                ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+                                                                                ->where('penjualans.id_konsumens', $konsumen->id)
+                                                                                ->where('penjualans.pembayaran', '=', 'Credit')
+                                                                                ->where('penjualans.status', '=', 'Selesai')
+                                                                                ->select(DB::raw('sum(penjualans.sisa) as totaljual'))
+                                                                                ->whereBetween('penjualans.created_at', [$tanggalmulai, $tanggalselesai])
+                                                                                ->get();
+                                                                        }
+                                                                    }
+                                                                    if ($request->pelunasan == 'Belum Lunas') {
+                                                                        if ($request->pajak == 'PPN') {
+                                                                            $sums = DB::table('penjualans')
+                                                                                ->where('penjualans.pajak', '>', 0)
+                                                                                ->where('sisa', '>', 0)
+                                                                                ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+                                                                                ->where('penjualans.id_konsumens', $konsumen->id)
+                                                                                ->where('penjualans.pembayaran', '=', 'Credit')
+                                                                                ->where('penjualans.status', '=', 'Selesai')
+                                                                                ->select(DB::raw('sum(penjualans.sisa) as totaljual'))
+                                                                                ->whereBetween('penjualans.created_at', [$tanggalmulai, $tanggalselesai])
+                                                                                ->get();
+                                                                        }
+                                                                    }
 
                                                                     $sumsgrandtotal += $sums[0]->totaljual;
                                                                     $sumkonsumen += $sums[0]->totaljual;
-                                                                    $sumblm = $konsumen->piutang;
-                                                                    $totalpiutang += $konsumen->piutang;
                                                                 @endphp
 
                                                                 @if ($request->pelunasan == 'Lunas')
                                                                     <td style="text-align:right;">
                                                                         {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
                                                                     </td>
-                                                                @else
+                                                                @elseif($request->pelunasan == 'Belum Lunas')
                                                                     <td style="text-align:right;">
-                                                                        {{ number_format($konsumen->piutang, 0, ',', '.') }}
-
-                                                                    </td>
+                                                                        {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
                                                                 @endif
-                                                                {{-- <td style="text-align:right;">
-                                                                    {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
-                                                                </td> --}}
                                                             @endfor
-                                                            @if ($request->pelunasan == 'Lunas')
-                                                                <td style="text-align:right;">
-                                                                    {{ number_format($sumkonsumen, 0, ',', '.') }}
-                                                                </td>
-                                                            @else
-                                                                <td style="text-align:right;">
-                                                                    {{ number_format($sumblm, 0, ',', '.') }}
-                                                                </td>
-                                                            @endif
+                                                            <td style="text-align:right;">
+                                                                {{ number_format($sumkonsumen, 0, ',', '.') }}
+                                                            </td>
 
                                                         </tr>
 
@@ -442,7 +453,6 @@
                                                             }
                                                         </script>
                                                     @endforeach
-
                                                     <tr @if ($request->client != 'All') style="display:none;" @endif>
                                                         <td
                                                             style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
@@ -458,37 +468,60 @@
                                                                         ->addMonths($x)
                                                                         ->isoFormat('Y-MM') . '-31 23:59:59';
 
-                                                                $sums = DB::table('bayar_piutangs')
-                                                                    ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
-                                                                    ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
-                                                                    ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
-                                                                    ->when($request->pajak == 'PPN', function ($query) {
-                                                                        return $query->where('penjualans.pajak', '==', 0);
-                                                                    })
-                                                                    ->when($request->pelunasan == 'Lunas', function ($query) {
-                                                                        return $query->where('konsumens.piutang', '==', 0);
-                                                                    })
-                                                                    ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
-                                                                    ->get();
-                                                                // $totalblmlunas = 0;
+                                                                if ($request->pelunasan == 'Lunas') {
+                                                                    if ($request->pajak == 'PPN') {
+                                                                        $sums = DB::table('bayar_piutangs')
+                                                                            ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
+                                                                            ->where('penjualans.pajak', '>', 0)
+                                                                            ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+                                                                            ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
+                                                                            ->where('penjualans.id_konsumens', $konsumen->id)
+                                                                            ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
+                                                                            ->get();
+                                                                    }
+                                                                }
 
-                                                                // $totalblmlunas = DB::table('bayar_piutangs')
-                                                                //     ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
-                                                                //     ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
-                                                                //     ->select(DB::raw('sum(konsumens.piutang) as totaljual'))
-                                                                //     ->where('konsumens.piutang', '>', 0)
-                                                                //     ->when($request->pajak == 'PPN', function ($query) {
-                                                                //         return $query->where('penjualans.pajak', '==', 0);
-                                                                //     })
-                                                                //     ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
-                                                                //     ->get();
-                                                                // $totalblmlunas = DB::table('konsumens')
-                                                                //     ->select(DB::raw('SUM(piutang) as totalPiutang'))
-                                                                //     ->where('piutang', '>', 0)
-                                                                //     ->whereBetween('created_at', [$tanggalmulai, $tanggalselesai])
-                                                                //     ->get();
+                                                                if ($request->pelunasan == 'Lunas') {
+                                                                    if ($request->pajak == 'NONPPN') {
+                                                                        $sums = DB::table('bayar_piutangs')
+                                                                            ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
+                                                                            ->where('penjualans.pajak', '<=', 0)
+                                                                            ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+                                                                            ->select(DB::raw('sum(bayar_piutangs.nominal) as totaljual'))
+                                                                            ->where('penjualans.id_konsumens', $konsumen->id)
+                                                                            ->whereBetween('bayar_piutangs.created_at', [$tanggalmulai, $tanggalselesai])
+                                                                            ->get();
+                                                                    }
+                                                                }
+                                                                if ($request->pelunasan == 'Belum Lunas') {
+                                                                    if ($request->pajak == 'NONPPN') {
+                                                                        $sums = DB::table('penjualans')
+                                                                            ->where('penjualans.pajak', '<=', 0)
+                                                                            ->where('sisa', '>', 0)
+                                                                            ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+                                                                            ->where('penjualans.id_konsumens', $konsumen->id)
+                                                                            ->where('penjualans.pembayaran', '=', 'Credit')
+                                                                            ->where('penjualans.status', '=', 'Selesai')
+                                                                            ->select(DB::raw('sum(penjualans.sisa) as totaljual'))
+                                                                            ->whereBetween('penjualans.created_at', [$tanggalmulai, $tanggalselesai])
+                                                                            ->get();
+                                                                    }
+                                                                }
+                                                                if ($request->pelunasan == 'Belum Lunas') {
+                                                                    if ($request->pajak == 'PPN') {
+                                                                        $sums = DB::table('penjualans')
+                                                                            ->where('penjualans.pajak', '>', 0)
+                                                                            ->where('sisa', '>', 0)
+                                                                            ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+                                                                            ->where('penjualans.id_konsumens', $konsumen->id)
+                                                                            ->where('penjualans.pembayaran', '=', 'Credit')
+                                                                            ->where('penjualans.status', '=', 'Selesai')
+                                                                            ->select(DB::raw('sum(penjualans.sisa) as totaljual'))
+                                                                            ->whereBetween('penjualans.created_at', [$tanggalmulai, $tanggalselesai])
+                                                                            ->get();
+                                                                    }
+                                                                }
 
-                                                                // $totalPiutang = $totalblmlunas->first()->totalPiutang;
                                                             @endphp
                                                             @if ($request->pelunasan == 'Lunas')
                                                                 <td
@@ -498,13 +531,9 @@
                                                             @else
                                                                 <td
                                                                     style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
-                                                                    {{-- {{ number_format($sumsblmgrandtotal, 0, ',', '.') }} --}}
+                                                                    {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
                                                                 </td>
                                                             @endif
-                                                            {{-- <td
-                                                                style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
-                                                                {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
-                                                            </td> --}}
                                                         @endfor
                                                         @if ($request->pelunasan == 'Lunas')
                                                             <td
@@ -513,13 +542,12 @@
                                                         @else
                                                             <td
                                                                 style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
-                                                                {{ number_format($sumsblmgrandtotal, 0, ',', '.') }}
+                                                                {{ number_format($sumsgrandtotal, 0, ',', '.') }}</td>
                                                             </td>
                                                         @endif
-                                                        {{-- <td
-                                                            style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
-                                                            {{ number_format($sumsgrandtotal, 0, ',', '.') }}</td> --}}
+
                                                     </tr>
+
                                                 </tbody>
                                             </table>
                                         </div>
