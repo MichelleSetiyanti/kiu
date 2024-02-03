@@ -667,7 +667,8 @@
                 .done(function(data) {
                     let pecah = data.split("|");
                     if (pecah[0] == "ada") {
-                        window.open('/penjualan/penjualan-manual/edit-invoice/' + encryptid, '_self');
+                        window.open('/penjualan/penjualan-manual/edit-invoice/' + encryptid, '_Self');
+                        // location.reload();
                     } else {
                         Swal.fire('Peringatan', 'Password salah, transaksi tidak diedit!', 'error');
                     }

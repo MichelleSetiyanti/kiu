@@ -649,6 +649,7 @@ class PenjualanManualController extends Controller
   public function index_edit_invoice($param)
   {
     $id = Crypt::decrypt($param);
+    // dd($id);
 
     $penjualan = DB::table('penjualans')
       ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
@@ -671,7 +672,9 @@ class PenjualanManualController extends Controller
       ->where('aktif', '=', 'Active')
       ->get();
 
-    return view('apps.penjualan.penjualan-manual.edit-invoice', ['penjualan' => $penjualan, 'produks' => $produks, 'akuns' => $akuns, 'konsumens' => $konsumens]);
+    // dd($penjualan, $produks, $akuns, $konsumens);
+    return view('apps.penjualan.penjualan-manual.edit-detil', ['penjualan' => $penjualan, 'produks' => $produks, 'akuns' => $akuns, 'konsumens' => $konsumens]);
+    // return view('apps.penjualan.penjualan-manual.edit-invoice', ['penjualan' => $penjualan, 'produks' => $produks, 'akuns' => $akuns, 'konsumens' => $konsumens]);
   }
 
   public function proses_edit_invoice(Request $request)
