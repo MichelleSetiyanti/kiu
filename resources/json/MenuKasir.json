@@ -1,7 +1,5 @@
 {
   "menu": [
-
-
     {
       "url": "/home",
       "name": "Beranda",
@@ -81,7 +79,5 @@
       "name": "Manajemen Giro / Cek",
       "icon": "feather icon-list"
     }
-
   ]
 }
-

@@ -1,14 +1,26 @@
 {
   "menu": [
-
-
     {
       "url": "/home",
       "name": "Beranda",
       "slug": "Beranda",
       "icon": "feather icon-home"
     },
-
+    {
+      "url": "/",
+      "navheader": "Transaksi Penjualan",
+      "icon": ""
+    },
+    {
+      "url": "/penjualan/penjualan-manual",
+      "name": "Sales Order",
+      "icon": "feather icon-credit-card"
+    },
+    {
+      "url": "/penjualan/surat-jalan",
+      "name": "Surat Jalan",
+      "icon": "feather icon-truck"
+    },
     {
       "url": "/",
       "navheader": "Mutasi Stok Gudang Pabrik",
@@ -35,11 +47,6 @@
       "name": "Mutasi ke Toko",
       "icon": "feather icon-download-cloud"
     },
-    {
-      "url": "/mutasi/toko-gudang",
-      "name": "Mutasi ke Pabrik",
-      "icon": "feather icon-upload-cloud"
-    },
 
     {
       "url": "/",
@@ -64,11 +71,6 @@
         {
           "url": "/master/barang-beli",
           "name": "Barang",
-          "icon": "feather icon-circle"
-        },
-        {
-          "url": "/master/konsumen",
-          "name": "Konsumen",
           "icon": "feather icon-circle"
         }
       ]
@@ -99,16 +101,9 @@
       "icon": "feather icon-list"
     },
     {
-      "url": "/report/toko-gudang",
-      "name": "Mutasi ke Pabrik",
-      "icon": "feather icon-list"
-    },
-    {
       "url": "/report/mutasi-barang",
       "name": "Lap. Mutasi Barang",
       "icon": "feather icon-list"
     }
-
   ]
 }
-

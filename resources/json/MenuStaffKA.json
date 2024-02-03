@@ -1,7 +1,5 @@
 {
   "menu": [
-
-
     {
       "url": "/home",
       "name": "Beranda",
@@ -34,7 +32,52 @@
       "name": "Invoice",
       "icon": "feather icon-folder-plus"
     },
+    {
+      "url": "/",
+      "navheader": "Pelunasan Piutang",
+      "icon": ""
+    },
+    {
+      "url": "/penjualan/piutang-customer",
+      "name": "Pel. Piutang per Konsumen",
+      "icon": "feather icon-user"
+    },
+    {
+      "url": "/penjualan/cancel-pelunasan",
+      "name": "List Pelunasan Piutang",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/",
+      "navheader": "Mutasi Stok Gudang Pabrik",
+      "icon": ""
+    },
+    {
+      "url": "/mutasi/masuk",
+      "name": "Tambah Stok Barang",
+      "icon": "feather icon-plus"
+    },
+    {
+      "url": "/mutasi/keluar",
+      "name": "Kurangi Stok Barang",
+      "icon": "feather icon-minus"
+    },
 
+    {
+      "url": "/",
+      "navheader": "Mutasi Stok Barang",
+      "icon": ""
+    },
+    {
+      "url": "/mutasi/gudang-toko",
+      "name": "Mutasi ke Toko",
+      "icon": "feather icon-download-cloud"
+    },
+    {
+      "url": "/mutasi/toko-gudang",
+      "name": "Mutasi ke Pabrik",
+      "icon": "feather icon-upload-cloud"
+    },
     {
       "url": "/",
       "navheader": "Data Master",
@@ -134,4 +177,3 @@
     }
   ]
 }
-

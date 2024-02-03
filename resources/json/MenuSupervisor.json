@@ -1,7 +1,5 @@
 {
   "menu": [
-
-
     {
       "url": "/home",
       "name": "Beranda",
@@ -167,11 +165,6 @@
       "icon": "feather icon-list"
     },
     {
-      "url": "/report/toko-gudang",
-      "name": "Mutasi ke Pabrik",
-      "icon": "feather icon-list"
-    },
-    {
       "url": "/report/mutasi-barang",
       "name": "Lap. Mutasi Barang",
       "icon": "feather icon-list"
@@ -201,7 +194,5 @@
       "name": "Manajemen Giro / Cek",
       "icon": "feather icon-list"
     }
-
   ]
 }
-
