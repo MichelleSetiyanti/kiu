@@ -531,7 +531,7 @@
                                                             @else
                                                                 <td
                                                                     style="text-align:right;padding-right:10px;font-size:22px;font-weight:bold;">
-                                                                    {{ number_format($sums[0]->totaljual, 0, ',', '.') }}
+                                                                    {{-- {{ number_format($sums[0]->totaljual, 0, ',', '.') }} --}}
                                                                 </td>
                                                             @endif
                                                         @endfor

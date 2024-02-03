@@ -36,6 +36,12 @@ class LaporanPiutangController extends Controller
             $query->where('id', '=', $request->client);
           }
         }
+      )->where(
+        function ($query) use ($request) {
+          if ($request->pelunasan == "Belum Lunas") {
+            $query->where('piutang', '!=', 0);
+          }
+        }
       )
       ->orderBy('nama', 'asc')
       ->get();
