@@ -47,6 +47,11 @@
       "name": "Mutasi ke Toko",
       "icon": "feather icon-download-cloud"
     },
+    {
+      "url": "/mutasi/toko-gudang",
+      "name": "Mutasi ke Pabrik",
+      "icon": "feather icon-upload-cloud"
+    },
 
     {
       "url": "/",
@@ -98,6 +103,11 @@
     {
       "url": "/report/gudang-toko",
       "name": "Mutasi ke Toko",
+      "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/toko-gudang",
+      "name": "Mutasi ke Pabrik",
       "icon": "feather icon-list"
     },
     {
