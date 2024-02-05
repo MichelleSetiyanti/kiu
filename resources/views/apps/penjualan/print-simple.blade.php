@@ -362,6 +362,19 @@
                                                 </div>
                                             </div>
                                         </div> --}}
+
+                                        @if ($penjualan->dp > 0)
+                                            <div class="col-md-10 offset-md-1">
+                                                <div class="row">
+                                                    <div class="col-8 text-right" style="font-weight:bold;"> DP
+                                                    </div>
+                                                    <div class="col-4 text-right" style="font-weight:bold;">
+                                                        {{ number_format($penjualan->dp, 0, ',', '.') }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <div class="col-md-10 offset-md-1">
                                             <div class="row">
                                                 <div class="col-8 text-right" style="font-weight:bold;"> Diskon
@@ -376,7 +389,12 @@
                                                 <div class="col-8 text-right" style="font-weight:bold;"> Grand Total
                                                 </div>
                                                 <div class="col-4 text-right" style="font-weight:bold;">
-                                                    {{ number_format($penjualan->grandtotal, 0, ',', '.') }} </div>
+                                                    @if ($penjualan->dp > 0)
+                                                        {{ number_format($penjualan->grandtotal - $penjualan->dp, 0, ',', '.') }}
+                                                    @else
+                                                        {{ number_format($penjualan->grandtotal, 0, ',', '.') }}
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
 

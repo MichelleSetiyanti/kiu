@@ -373,26 +373,20 @@
                                         </p>
                                         <table style="width:40%">
                                             <tr>
-                                                <td style="text-transform: uppercase;font-size:20px;"> PONTIANAK,
-                                                    {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_inv)->isoFormat('D MMMM Y') }}
+                                                <td style="font-size:20px;padding-bottom:0px;">
+                                                    <p style="text-transform: uppercase;font-size:20px;margin:0px;">
+                                                        PONTIANAK,
+                                                        {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_inv)->isoFormat('D MMMM Y') }}
+                                                    </p>
+                                                    Kepada Yth: <label
+                                                        style="text-transform: uppercase;font-size:24px;font-weight: bold;margin:0px;">
+                                                        {{ $penjualan->namakonsumen }} </label>
+                                                    <label
+                                                        style="font-size:20px; padding-bottom:0px; padding-top:0px;margin:0px;">
+                                                        {!! nl2br($penjualan->alamat_inv) !!}
+                                                    </label>
                                                 </td>
                                             </tr>
-                                            <tr>
-                                                <td style="font-size:20px;"> Kepada Yth: <label
-                                                        style="text-transform: uppercase;font-size:24px;font-weight: bold;">
-                                                        {{ $penjualan->namakonsumen }} </label> </td>
-                                            </tr>
-                                            {{-- <tr>
-                                                <td style="text-transform: uppercase;font-size:24px;font-weight: bold;">
-                                                    {{ $penjualan->namakonsumen }} </td>
-                                            </tr> --}}
-                                            <tr>
-                                                <td style="font-size:20px; margin-bottom:0px;"> {!! nl2br($penjualan->alamat_inv) !!}
-                                                </td>
-                                            </tr>
-                                            {{--                    <tr> --}}
-                                            {{--                      <td style="text-transform: uppercase;font-size:20px;"> HP : {{ $penjualan->nohpkonsumen }} ({{ $penjualan->cpkonsumen }}) </td> --}}
-                                            {{--                    </tr> --}}
                                         </table>
                                     </div>
                                 @endif
