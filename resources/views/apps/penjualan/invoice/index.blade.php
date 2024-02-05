@@ -638,11 +638,14 @@
                                 });
                                 f_loadtable();
 
+
                                 if (jenisprint == "Simple") {
                                     window.open('/penjualan/invoice/print-simple/' + encryptid, '_blank');
                                 } else {
                                     window.open('/penjualan/invoice/print/' + encryptid, '_blank');
                                 }
+                                // location.reload();
+                                window.open('/penjualan/invoice', '_blank');
                             });
                     } else {
                         toastr.error('Limit Piutang Tidak Cukup.', 'Peringatan!!', {
