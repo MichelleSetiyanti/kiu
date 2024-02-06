@@ -97,11 +97,11 @@ class InvoiceController extends Controller
       $penjualanlama = DB::table('penjualans')->where('id', $request->idpenjualan)->first();
 
       if ($penjualanlama->pajak > 0) {
-        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('MONTH(tanggal)'), $month)->where(DB::raw('YEAR(tanggal)'), $year)->where('kode_inv', 'like', 'F-%')->orderBy('created_at', 'desc')->get();
+        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'F-%')->get();
 
         $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
       } else {
-        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('MONTH(tanggal)'), $month)->where(DB::raw('YEAR(tanggal)'), $year)->where('kode_inv', 'like', 'FTS-%')->orderBy('created_at', 'desc')->get();
+        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FTS-%')->get();
 
         $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
       }
@@ -162,7 +162,7 @@ class InvoiceController extends Controller
       $month = \Carbon\Carbon::now()->format('m');
       $year = \Carbon\Carbon::now()->format('Y');
 
-      $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal)'), $year)->where('kode_inv', 'like', 'FCS-%')->get();
+      $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FCS-%')->get();
 
       $kodetransaksi = "FCS-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
 
