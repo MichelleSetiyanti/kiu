@@ -104,6 +104,8 @@ class PiutangCustomerController extends Controller
 
       $kode = "K-" . date("y-", strtotime("now")) . str_pad($kodeterakhir + 1, 4, "0", STR_PAD_LEFT);
 
+      dd($kode);
+      die();
       $datas = $request->datas;
 
       $konsumen = DB::table('konsumens')->where('id', $request->konsumen)->first();
