@@ -314,7 +314,7 @@
                                 <div class="row gutters">
                                     <div class="col-lg-12 col-md-12 col-sm-12">
                                         <div class="table-responsive">
-                                            <table class="table custom-table m-0">
+                                            <table class="table custom-table m-0" id="laporanPiutang">
                                                 <thead>
                                                     @php
                                                         $this_month = Carbon\Carbon::createFromFormat('m-Y', $request->tanggalmulai);
@@ -437,7 +437,6 @@
                                                             <td style="text-align:right;">
                                                                 {{ number_format($sumkonsumen, 0, ',', '.') }}
                                                             </td>
-
                                                         </tr>
 
                                                         <script>
@@ -602,6 +601,22 @@
             pdf.save("Laporan Pemjualan Detil.pdf");
             $(".no-print").show();
         });
+    }
+
+    window.onload = function(){
+      // document.querySelector("#Konsumen6").style.display = "none";
+      const rows = document.getElementById("laporanPiutang").getElementsByTagName('tr');
+      for (let i = 1; i < rows.length; i++) {
+        const cells = rows[i].querySelectorAll("td:last-child");
+        if (cells.length > 0) {
+          const lastColumnValue = cells[0].textContent.trim();
+          if (lastColumnValue === "0") {
+            rows[i].style.display = "none";
+          }
+        } else {
+          console.error("Elemen td terakhir tidak ditemukan pada baris " + (i + 1));
+        }
+      }
     }
 </script>
 
