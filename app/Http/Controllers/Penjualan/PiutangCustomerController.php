@@ -56,7 +56,8 @@ class PiutangCustomerController extends Controller
         return '
                 <div class="fonticon-container">
                   <span class="fonticon-wrap ' . $class . '" onclick="window.open(\'/penjualan/piutang-customer/print-data/' . $encrypt . '\',\'_blank\')"><i class="feather icon-printer" data-toggle="tooltip" title="Cetak Pelunasan"></i></span>
-                  <span class="fonticon-wrap ' . $class . '" onclick="f_delete(' . $penjualans->id . ')"><i class="feather icon-x-circle" data-toggle="tooltip" title="Cancel Pelunasan"></i></span>
+                  <span class="fonticon-wrap ' . $class . '" onclick="f_delete(' . $penjualans->id . ')"><i class="feather icon-x-circle" data-toggle="tooltip" title="Cancel Pelunasan"></i></span></span>
+                  <span class="fonticon-wrap ' . $class . '" onclick="f_delete(' . $penjualans->id . ')"><i class="feather icon-send" data-toggle="tooltip" title="Cancel Pelunasan"></i></span>
                 </div>
               ';
       })
@@ -84,9 +85,6 @@ class PiutangCustomerController extends Controller
 
   public function pelunasan(Request $request)
   {
-
-    // dd($request->keterangan);
-    // die();
     DB::beginTransaction();
 
     try {
@@ -104,8 +102,6 @@ class PiutangCustomerController extends Controller
 
       $kode = "K-" . date("y-", strtotime("now")) . str_pad($kodeterakhir + 1, 4, "0", STR_PAD_LEFT);
 
-      dd($kode);
-      die();
       $datas = $request->datas;
 
       $konsumen = DB::table('konsumens')->where('id', $request->konsumen)->first();
@@ -272,43 +268,114 @@ class PiutangCustomerController extends Controller
 
   public function cetakKuitansi(Request $request)
   {
-    // id barangnya, untuk tau nama konsumen create add dll encrpt penjualan id
-    //print data memerlukan nama konsumen, kode pelunasan, nominal pelunasan, (Bayar piutang detail dan penjualan details)
-    // dd($request->all());
-    // dd($request->datas);
-    // dd($request->konsumen);
-    $querypiutang = DB::table('bayar_piutang_konsumens')->where('kode', 'like', 'K-' . date("y-", strtotime("now")) . '%')->orderBy('id', 'desc');
+    DB::beginTransaction();
 
-    if ($querypiutang->exists()) {
-      $pengembalian_pinjaman_konsumens = $querypiutang->first();
-      $pecah = explode('-', $pengembalian_pinjaman_konsumens->kode);
+    try {
 
-      $kodeterakhir = $pecah[2];
-    } else {
-      $kodeterakhir = 0;
+      $querypiutang = DB::table('bayar_piutang_konsumens')->where('kode', 'like', 'K-' . date("y-", strtotime("now")) . '%')->orderBy('id', 'desc');
+
+      if ($querypiutang->exists()) {
+        $pengembalian_pinjaman_konsumens = $querypiutang->first();
+        $pecah = explode('-', $pengembalian_pinjaman_konsumens->kode);
+
+        $kodeterakhir = $pecah[2];
+      } else {
+        $kodeterakhir = 0;
+      }
+
+      $kode = "K-" . date("y-", strtotime("now")) . str_pad($kodeterakhir + 1, 4, "0", STR_PAD_LEFT);
+
+      $datas = $request->datas;
+
+      $konsumen = DB::table('konsumens')->where('id', $request->konsumen)->first();
+
+      $sumtotalpelunasan = 0;
+      $kodepelunasan = "";
+
+      for ($x = 0; $x < count($datas); $x++) {
+        $penjualan = DB::table('penjualans')->where('id', $datas[$x])->first();
+
+        $sisa = $penjualan->sisa;
+
+        // update sisa utang
+        DB::table('penjualans')->where('id', $datas[$x])->update([
+          'sisa' => '0',
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+
+        // input tabel bayar_piutangs
+        $idpelunasan = DB::table('bayar_piutangs')->insertGetId([
+          'id_penjualans' => $datas[$x],
+          'id_users' => Auth::user()->id,
+          'nominal' => $sisa,
+          'pelunasan_konsumen' => 'Y',
+          "created_at" => \Carbon\Carbon::now(),
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+
+        $sumtotalpelunasan = $sumtotalpelunasan + $sisa;
+        $kodepelunasan = $kodepelunasan . $idpelunasan . ',';
+      }
+
+      $piutanglama = $konsumen->piutang;
+      $piutangbaru = $piutanglama - $sumtotalpelunasan;
+
+      DB::table('konsumens')->where('id', $penjualan->id_konsumens)->update([
+        'piutang' => $piutangbaru,
+        "updated_at" => \Carbon\Carbon::now()
+      ]);
+
+      $idbayarpiutang = DB::table('bayar_piutang_konsumens')->insertGetId([
+        'kode' => $kode,
+        'kodepelunasan' => $kodepelunasan,
+        'id_users' => Auth::User()->id,
+        'id_konsumens' => $request->konsumen,
+        'nominal' => $sumtotalpelunasan,
+        'status' => 'Unpaid',
+        "created_at" =>  \Carbon\Carbon::now(),
+        "updated_at" => \Carbon\Carbon::now()
+      ]);
+
+      DB::commit();
+
+      return Crypt::encrypt($idbayarpiutang);
+    } catch (Exception $e) {
+      DB::rollBack();
+
+      return 'gagal';
     }
+    // $querypiutang = DB::table('bayar_piutang_konsumens')->where('kode', 'like', 'K-' . date("y-", strtotime("now")) . '%')->orderBy('id', 'desc');
 
-    $kode = "K-" . date("y-", strtotime("now")) . str_pad($kodeterakhir + 1, 4, "0", STR_PAD_LEFT);
+    // if ($querypiutang->exists()) {
+    //   $pengembalian_pinjaman_konsumens = $querypiutang->first();
+    //   $pecah = explode('-', $pengembalian_pinjaman_konsumens->kode);
 
-    $datas = $request->datas;
+    //   $kodeterakhir = $pecah[2];
+    // } else {
+    //   $kodeterakhir = 0;
+    // }
 
-    $konsumen = DB::table('konsumens')->where('id', $request->konsumen)->first();
+    // $kode = "K-" . date("y-", strtotime("now")) . str_pad($kodeterakhir + 1, 4, "0", STR_PAD_LEFT);
 
-    $sumtotalpelunasan = 0;
+    // $datas = $request->datas;
 
-    for ($x = 0; $x < count($datas); $x++) {
-      $penjualan = DB::table('penjualans')->where('id', $datas[$x])->first();
+    // $konsumen = DB::table('konsumens')->where('id', $request->konsumen)->first();
 
-      $sisa = $penjualan->sisa;
-      $sumtotalpelunasan = $sumtotalpelunasan + $sisa;
-    }
+    // $sumtotalpelunasan = 0;
 
-    return view('apps.penjualan.piutang-customer.print-kwitansi', [
-      'kode' => $kode,
-      'id_users' => Auth::User()->id,
-      'nama' => $konsumen->nama,
-      'nofaktur' => $request->nofaktur,
-      'nominal' => $sumtotalpelunasan,
-    ]);
+    // for ($x = 0; $x < count($datas); $x++) {
+    //   $penjualan = DB::table('penjualans')->where('id', $datas[$x])->first();
+
+    //   $sisa = $penjualan->sisa;
+    //   $sumtotalpelunasan = $sumtotalpelunasan + $sisa;
+    // }
+
+    // return view('apps.penjualan.piutang-customer.print-kwitansi', [
+    //   'kode' => $kode,
+    //   'id_users' => Auth::User()->id,
+    //   'nama' => $konsumen->nama,
+    //   'nofaktur' => $request->nofaktur,
+    //   'nominal' => $sumtotalpelunasan,
+    // ]);
   }
 }

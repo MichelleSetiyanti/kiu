@@ -574,11 +574,13 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(data) {
-                            var newWindow = window.open();
-                            newWindow.document.write(data);
-                            newWindow.document.close();
+                            toastr.success('Proses pelunasan berhasil.', 'Berhasil', {
+                                positionClass: 'toast-top-right',
+                                containerId: 'toast-top-right',
+                                "closeButton": true
+                            });
+                            window.open('/penjualan/piutang-customer/print-data/' + data, '_blank');
                             location.reload();
-
                         },
                         error: function() {
                             console.log('error');
