@@ -544,6 +544,7 @@
         }
 
         function f_invoice(idpenjualan, encryptid, keterangan, kodeinv, pembayaran) {
+            console.log(keterangan);
             if (kodeinv == "") {
                 $("#idpenjualan").val(idpenjualan);
                 $("#encryptid").val(encryptid);

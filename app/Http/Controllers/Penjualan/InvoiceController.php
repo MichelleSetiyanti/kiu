@@ -51,11 +51,11 @@ class InvoiceController extends Controller
       })
       ->orderBy('updated_at', 'desc')
       ->get();
-
     return datatables()::of($penjualans)
       ->addColumn('action', function ($penjualans) {
         $encrypt = Crypt::encrypt($penjualans->id);
 
+        $keterangan = str_replace(["\r\n", "\r", "\n"], ' ', $penjualans->keterangan);
         $classedit = "hidden";
         $class = "";
 
@@ -75,7 +75,7 @@ class InvoiceController extends Controller
         return '
           <div class="fonticon-container">
             <span class="fonticon-wrap" onclick="f_datadetil(' . $penjualans->id . ')"><i class="feather icon-eye" data-toggle="tooltip" title="Lihat Detil Penjualan"></i></span>
-            <span class="fonticon-wrap" onclick="f_invoice(' . $penjualans->id . ', \'' . $encrypt . '\', \'' . $penjualans->keterangan . '\', \'' . $penjualans->kode_inv . '\', \'' . $penjualans->pembayaran . '\' )"><i class="feather icon-printer" data-toggle="tooltip" title="Cetak Invoice"></i></span>
+            <span class="fonticon-wrap" onclick="f_invoice(' . $penjualans->id . ', \'' . $encrypt . '\', \'' . $keterangan . '\', \'' . $penjualans->kode_inv . '\', \'' . $penjualans->pembayaran . '\' )"><i class="feather icon-printer" data-toggle="tooltip" title="Cetak Invoice"></i></span>
             <span class="fonticon-wrap" onclick="f_invoicesimple(' . $penjualans->id . ', \'' . $encrypt . '\', \'' . $penjualans->kode_inv . '\', \'' . $penjualans->pembayaran . '\' )"><i class="feather icon-inbox" data-toggle="tooltip" title="Cetak Faktur Simple"></i></span>
             <span class="fonticon-wrap ' . $class . '" onclick="f_kwitansi(' . $penjualans->id . ', \'' . $encrypt . '\', \'' . $penjualans->kode_inv . '\', \'' . $penjualans->pembayaran . '\' )"><i class="feather icon-file-text" data-toggle="tooltip" title="Cetak Kwitansi Cash"></i></span>
             <span class="fonticon-wrap ' . $classedit . '" onclick="f_editinvoice(' . $penjualans->id . ', \'' . $encrypt . '\')"><i class="feather icon-edit" data-toggle="tooltip" title="Edit Data Invoice"></i></span>
