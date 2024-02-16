@@ -48,17 +48,21 @@ class PiutangCustomerController extends Controller
         $encrypt = Crypt::encrypt($penjualans->id);
 
         $class = "";
+        $classbayar = "";
 
         if ($penjualans->status == "Cancel") {
           $class = "hidden";
+        }
+        if ($penjualans->status == "Paid") {
+          $classbayar = "hidden";
         }
 
         return '
                 <div class="fonticon-container">
                   <span class="fonticon-wrap ' . $class . '" onclick="window.open(\'/penjualan/piutang-customer/print-data/' . $encrypt . '\',\'_blank\')"><i class="feather icon-printer" data-toggle="tooltip" title="Cetak Pelunasan"></i></span>
                   <span class="fonticon-wrap ' . $class . '" onclick="f_delete(' . $penjualans->id . ')"><i class="feather icon-x-circle" data-toggle="tooltip" title="Cancel Pelunasan"></i></span></span>
-                  <span class="fonticon-wrap ' . $class . '" onclick="f_delete(' . $penjualans->id . ')"><i class="feather icon-send" data-toggle="tooltip" title="Cancel Pelunasan"></i></span>
-                </div>
+                  <span class="fonticon-wrap ' . $class . $classbayar . '" onclick="f_keterangan(' . $penjualans->id . ')"><i class="feather icon-send" data-toggle="tooltip" title="Proses Pelunasan"></i></span>
+                  </div>
               ';
       })
       ->addIndexColumn()
@@ -86,79 +90,41 @@ class PiutangCustomerController extends Controller
   public function pelunasan(Request $request)
   {
     DB::beginTransaction();
+    // dd($request->konsumen);
+    // dd($request->id);
 
     try {
 
-      $querypiutang = DB::table('bayar_piutang_konsumens')->where('kode', 'like', 'K-' . date("y-", strtotime("now")) . '%')->orderBy('id', 'desc');
+      $piutangkonsumen = DB::table('bayar_piutang_konsumens')->where('id', $request->id)->first();
 
-      if ($querypiutang->exists()) {
-        $pengembalian_pinjaman_konsumens = $querypiutang->first();
-        $pecah = explode('-', $pengembalian_pinjaman_konsumens->kode);
+      $stringid = $piutangkonsumen->kodepelunasan;
 
-        $kodeterakhir = $pecah[2];
-      } else {
-        $kodeterakhir = 0;
+      if (substr($stringid, -1, 1) == ',') {
+        $stringid = substr($stringid, 0, -1);
       }
 
-      $kode = "K-" . date("y-", strtotime("now")) . str_pad($kodeterakhir + 1, 4, "0", STR_PAD_LEFT);
+      $arrayid = explode(',', $stringid);
 
-      $datas = $request->datas;
+      $bayarpiutangss = DB::table('bayar_piutangs')->whereIn('id', $arrayid)->get();
 
-      $konsumen = DB::table('konsumens')->where('id', $request->konsumen)->first();
+      foreach ($bayarpiutangss as $bayarpiutangs) {
+        DB::table('bayar_piutangs')->where('id', $bayarpiutangs->id)->update([
+          'status' => 'Paid',
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+      }
 
-      $sumtotalpelunasan = 0;
-      $kodepelunasan = "";
       $keterangan = $request->keterangan;
 
-      for ($x = 0; $x < count($datas); $x++) {
-        $penjualan = DB::table('penjualans')->where('id', $datas[$x])->first();
-
-        $sisa = $penjualan->sisa;
-
-        // update sisa utang
-        DB::table('penjualans')->where('id', $datas[$x])->update([
-          'sisa' => '0',
-          "updated_at" => \Carbon\Carbon::now()
-        ]);
-
-        // input tabel bayar_piutangs
-        $idpelunasan = DB::table('bayar_piutangs')->insertGetId([
-          'id_penjualans' => $datas[$x],
-          'id_users' => Auth::user()->id,
-          'nominal' => $sisa,
-          // 'keterangan' => $keterangan,
-          'pelunasan_konsumen' => 'Y',
-          "created_at" => \Carbon\Carbon::now(),
-          "updated_at" => \Carbon\Carbon::now()
-        ]);
-
-        $sumtotalpelunasan = $sumtotalpelunasan + $sisa;
-        $kodepelunasan = $kodepelunasan . $idpelunasan . ',';
-      }
-
-      $piutanglama = $konsumen->piutang;
-      $piutangbaru = $piutanglama - $sumtotalpelunasan;
-
-      DB::table('konsumens')->where('id', $penjualan->id_konsumens)->update([
-        'piutang' => $piutangbaru,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
-
-      $idbayarpiutang = DB::table('bayar_piutang_konsumens')->insertGetId([
-        'kode' => $kode,
-        'kodepelunasan' => $kodepelunasan,
-        'id_users' => Auth::User()->id,
-        'id_konsumens' => $request->konsumen,
-        'nominal' => $sumtotalpelunasan,
-        'keterangan' => $keterangan,
+      DB::table('bayar_piutang_konsumens')->where('id', $request->id)->update([
         'status' => 'Paid',
-        "created_at" =>  \Carbon\Carbon::now(),
+        'keterangan' => $keterangan,
         "updated_at" => \Carbon\Carbon::now()
       ]);
-      // dd($idbayarpiutang);
+
       DB::commit();
 
-      return Crypt::encrypt($idbayarpiutang);
+      return 'berhasil';
     } catch (Exception $e) {
       DB::rollBack();
 
@@ -308,6 +274,7 @@ class PiutangCustomerController extends Controller
           'id_penjualans' => $datas[$x],
           'id_users' => Auth::user()->id,
           'nominal' => $sisa,
+          'status' => 'Unpaid',
           'pelunasan_konsumen' => 'Y',
           "created_at" => \Carbon\Carbon::now(),
           "updated_at" => \Carbon\Carbon::now()

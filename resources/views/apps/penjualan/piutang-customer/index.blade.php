@@ -386,20 +386,12 @@
                     }
                 ],
                 buttons: [{
-                        text: "<i class='feather icon-send mr-1'></i> Proses Pelunasan",
-                        action: function() {
-                            f_keterangan()
-                        },
-                        className: "btn bg-gradient-success waves-effect waves-light custom-btn rounded-btn mr-2",
+                    text: "<i class='feather icon-download mr-1'></i> Print Kwitansi",
+                    action: function() {
+                        f_printKwitansi()
                     },
-                    {
-                        text: "<i class='feather icon-download mr-1'></i> Print Kwitansi",
-                        action: function() {
-                            f_printKwitansi()
-                        },
-                        className: "btn bg-gradient-primary waves-effect waves-light custom-btn rounded-btn mr-2",
-                    }
-                ],
+                    className: "btn bg-gradient-primary waves-effect waves-light custom-btn rounded-btn mr-2",
+                }],
                 scrollCollapse: true,
                 'columnDefs': [{
                     'targets': 0,

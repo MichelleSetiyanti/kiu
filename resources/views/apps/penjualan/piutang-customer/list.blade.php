@@ -115,6 +115,36 @@
 
     </section>
     {{-- Data list view end --}}
+    {{-- Modal --}}
+    <div class="modal fade text-left" id="modal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel3"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel3">Masukkan Keterangan</h4>
+                    <button type="button" class="close" data-dismiss="modal" id="btntutup3" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="height:160px;">
+                    <div class="row">
+                        <div class="col-sm-12 mb-1 data-field-col">
+                            <label for="keterangan">Keterangan</label>
+                            <textarea class="form-control" name="keterangan" id="keterangan" rows="3" placeholder="keterangan"></textarea>
+                            <input type="hidden" name="id" id="id" value="">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-sm-12 text-right mt-2 mb-1">
+                        <button type="button" class="btn btn-primary" value="Simpan" id="btnsubmit" name="btnsubmit"
+                            onclick="f_prosespelunasan()">Submit</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('vendor-script')
     {{-- vendor js files --}}
@@ -232,6 +262,67 @@
         function f_tocurrency(param) {
             let value = $("#" + param).val();
             $("#" + param).val(accounting.formatNumber(value, 0, ".", ","));
+        }
+
+        function f_keterangan(param) {
+            $("#keterangan").val("");
+            $("#id").val(param);
+            $("#modal3").modal();
+
+        }
+
+        function f_hitungtotal() {
+            let tblData = dataListView.rows('.selected').data();
+            let Countrow = 0;
+            var items = [];
+
+            totalpelunasan = 0;
+
+            $.each(tblData, function(i, val) {
+                totalpelunasan = totalpelunasan + tblData[i]['sisa'];
+            });
+
+            $("#totalpelunasan").val(accounting.formatNumber(totalpelunasan, 0, ".", ","));
+        }
+
+        function f_prosespelunasan() {
+            let keterangan = $("#keterangan").val();
+            let id = $("#id").val();
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: "Apakah anda yakin untuk cancel data pelunasan ini?",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya',
+                cancelButtonText: 'Tidak',
+                confirmButtonClass: 'btn btn-primary',
+                cancelButtonClass: 'btn btn-danger ml-1',
+                buttonsStyling: false,
+            }).then(function(result) {
+                if (result.value) {
+                    let link = "/penjualan/piutang-customer/pelunasan"; // Link untuk hapus
+
+                    $.post(link, {
+                            id: id,
+                            keterangan: keterangan,
+                            _token: '{{ csrf_token() }}'
+                        })
+                        .done(function(data) {
+                            $("#modal3").modal('hide');
+                            if (data == "berhasil") {
+                                toastr.success('Data ini berhasil dihapus.', 'Berhasil', {
+                                    positionClass: 'toast-top-right',
+                                    containerId: 'toast-top-right',
+                                    "closeButton": true
+                                });
+                                f_loadtable();
+                                f_hitungtotal();
+                            } else {
+                                Swal.fire('Peringatan', 'Data gagal tersimpan!', 'error');
+                            }
+                        });
+                }
+            })
         }
 
         function f_delete(param) {
