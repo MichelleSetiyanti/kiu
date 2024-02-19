@@ -290,7 +290,7 @@
             let id = $("#id").val();
             Swal.fire({
                 title: 'Konfirmasi',
-                text: "Apakah anda yakin untuk cancel data pelunasan ini?",
+                text: "Apakah anda yakin untuk  proses pelunasan?",
                 type: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Ya',
