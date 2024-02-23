@@ -335,18 +335,24 @@ if ($nilai < 12) { $temp=' ' . $huruf[$nilai]; } elseif ($nilai < 20) { $temp=pe
                                                             </td>
                                                         </tr>
                                                     </table>
-
                                                     <div
                                                         style="width:500px;border-top:2px double black;border-bottom: 2px double black;text-align:center;margin-bottom:20px;font-size:30px;">
                                                         Rp : # {{ number_format($bayarpiutang->nominal, 2, ',', '.') }}
                                                         #
                                                     </div>
 
+                                                    @if($bayarpiutang->tanggal_cetak != null)
                                                     <div
                                                         style="width:50%;text-align:center;margin-bottom:30px;font-size:20px;margin-left:50%;margin-top:-50px">
                                                         Pontianak, {{ Carbon\Carbon::createFromFormat('Y-m-d',
                                                         $bayarpiutang->tanggal_cetak)->isoFormat('D MMMM Y') }}
                                                     </div>
+                                                    @else
+                                                    <div
+                                                        style="width:50%;text-align:center;margin-bottom:30px;font-size:20px;margin-left:50%;margin-top:-50px">
+                                                        Pontianak, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}
+                                                    </div>
+                                                    @endif
 
                                                 </td>
                                             </tr>
