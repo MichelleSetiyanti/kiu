@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
+use \Carbon\Carbon;
 use File;
 use Matrix\Exception;
 
@@ -235,7 +236,6 @@ class PiutangCustomerController extends Controller
   public function cetakKuitansi(Request $request)
   {
     DB::beginTransaction();
-
     try {
 
       $querypiutang = DB::table('bayar_piutang_konsumens')->where('kode', 'like', 'K-' . date("y-", strtotime("now")) . '%')->orderBy('id', 'desc');
@@ -257,6 +257,7 @@ class PiutangCustomerController extends Controller
 
       $sumtotalpelunasan = 0;
       $kodepelunasan = "";
+      $tanggalcetak = \Carbon\Carbon::createFromFormat("Y-m-d", $request->tanggalcetak)->isoFormat('D MMMM Y');
 
       for ($x = 0; $x < count($datas); $x++) {
         $penjualan = DB::table('penjualans')->where('id', $datas[$x])->first();
@@ -299,7 +300,8 @@ class PiutangCustomerController extends Controller
         'id_konsumens' => $request->konsumen,
         'nominal' => $sumtotalpelunasan,
         'status' => 'Unpaid',
-        "created_at" =>  \Carbon\Carbon::now(),
+        'tanggal_cetak' => $request->tanggalcetak,
+        "created_at" => \Carbon\Carbon::now(),
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
