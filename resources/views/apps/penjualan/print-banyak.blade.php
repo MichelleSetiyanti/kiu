@@ -343,7 +343,7 @@
                                 @if ($penjualan->sumpajak == 0)
                                     <div class="row gutters decoration space-line">
                                         <h2 style="width:50%;text-align:center;margin-top:20px;">
-                                            <u><b>FAKTURs</b></u> <br />{{ $penjualan->kode_inv }}
+                                            <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
                                         </h2>
                                         <table style="width:50%">
                                             <tr>
@@ -373,7 +373,7 @@
                                         <!--    <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}-->
                                         <!--</h2>-->
                                         <p style="font-size:26px;width:30%;text-align:center;margin-top:20px;">
-                                            <u><b>FAKTURs</b></u> <br />{{ $penjualan->kode_inv }}
+                                            <u><b>FAKTUR</b></u> <br />{{ $penjualan->kode_inv }}
                                         </p>
                                         <table style="width:40%;">
                                             <tr>
