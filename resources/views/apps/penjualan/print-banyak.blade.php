@@ -348,7 +348,7 @@
                                         <table style="width:50%">
                                             <tr>
                                                 <td style="text-transform: uppercase;font-size:20px;"> PONTIANAK,
-                                                    {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_inv)->isoFormat('D MMMM Y') }}
+                                                    {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualanterbaru->tanggal_inv)->isoFormat('D MMMM Y') }}
                                                 </td>
                                             </tr>
                                             <tr>
@@ -378,7 +378,7 @@
                                         <table style="width:40%;">
                                             <tr>
                                                 <td style="text-transform: uppercase;font-size:20px;"> PONTIANAK,
-                                                    {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_inv)->isoFormat('D MMMM Y') }}
+                                                    {{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualanterbaru->tanggal_inv)->isoFormat('D MMMM Y') }}
                                                 </td>
                                             </tr>
                                             <tr>

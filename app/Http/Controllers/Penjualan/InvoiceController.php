@@ -99,11 +99,11 @@ class InvoiceController extends Controller
       if ($penjualanlama->pajak > 0) {
         $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'F-%')->get();
 
-        $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+        $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
       } else {
         $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FTS-%')->get();
 
-        $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+        $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
       }
       if ($request->kodeinvoice != "Baru") {
         $kodetransaksi = $request->kodeinvoice;
@@ -164,7 +164,7 @@ class InvoiceController extends Controller
 
       $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FCS-%')->get();
 
-      $kodetransaksi = "FCS-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+      $kodetransaksi = "FCS-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
 
       if ($request->kodeinvoice != "Baru") {
         $kodetransaksi = $request->kodeinvoice;
@@ -261,6 +261,13 @@ class InvoiceController extends Controller
         ->groupBy('penjualans.kode_inv')
         ->first();
 
+      $penjualanterbaru = DB::table('penjualans')
+        ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+        ->select('penjualans.*', 'konsumens.nama as namakonsumen', 'konsumens.alamat as alamatkonsumen', 'konsumens.no_hp as nohpkonsumen', 'konsumens.contact_person as cpkonsumen')
+        ->where('penjualans.kode_inv', $penjualan->kode_inv)
+        ->orderBy('tanggal_inv', 'desc')
+        ->first();
+
       $penjualandetails = DB::table('penjualan_details')
         ->join('barangs', 'penjualan_details.id_barangs', '=', 'barangs.id')
         ->join('penjualans', 'penjualan_details.id_penjualans', 'penjualans.id')
@@ -270,7 +277,8 @@ class InvoiceController extends Controller
         ->groupBy('penjualan_details.id_barangs')
         ->get();
 
-      return view('apps.penjualan.print-banyak', ['penjualan' => $penjualan, 'penjualandetails' => $penjualandetails]);
+      // dd($penjualanterbaru);
+      return view('apps.penjualan.print-banyak', ['penjualan' => $penjualan, 'penjualandetails' => $penjualandetails, 'penjualanterbaru' => $penjualanterbaru]);
     } else {
       return view('apps.penjualan.print', ['penjualan' => $penjualan, 'penjualandetails' => $penjualandetails]);
     }
