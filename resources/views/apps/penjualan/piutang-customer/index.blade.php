@@ -117,7 +117,7 @@
             <select class="form-control select" name="konsumen" id="konsumen" onchange="f_loadtable();" required>
                 @foreach ($konsumens as $konsumen)
                 <option value="{{ $konsumen->id }}" data-foo="{{ $konsumen->kode }} - {{ $konsumen->keterangan }}">{{
-                    $konsumen->nama }}</option>
+        $konsumen->nama }}</option>
                 @endforeach
             </select>
         </div>

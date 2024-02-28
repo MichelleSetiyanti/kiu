@@ -263,7 +263,6 @@ class PiutangCustomerController extends Controller
         $penjualan = DB::table('penjualans')->where('id', $datas[$x])->first();
 
         $sisa = $penjualan->sisa;
-
         // update sisa utang
         DB::table('penjualans')->where('id', $datas[$x])->update([
           'sisa' => '0',
@@ -285,6 +284,7 @@ class PiutangCustomerController extends Controller
         $kodepelunasan = $kodepelunasan . $idpelunasan . ',';
       }
 
+      // dd($penjualan);
       $piutanglama = $konsumen->piutang;
       $piutangbaru = $piutanglama - $sumtotalpelunasan;
 
@@ -292,18 +292,33 @@ class PiutangCustomerController extends Controller
         'piutang' => $piutangbaru,
         "updated_at" => \Carbon\Carbon::now()
       ]);
+      if ($penjualan->pajak == 0) {
+        $idbayarpiutang = DB::table('bayar_piutang_konsumens')->insertGetId([
+          'kode' => "-",
+          'kodepelunasan' => $kodepelunasan,
+          'id_users' => Auth::User()->id,
+          'id_konsumens' => $request->konsumen,
+          'nominal' => $sumtotalpelunasan,
+          'status' => 'Unpaid',
+          'tanggal_cetak' => $request->tanggalcetak,
+          "created_at" => \Carbon\Carbon::now(),
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
 
-      $idbayarpiutang = DB::table('bayar_piutang_konsumens')->insertGetId([
-        'kode' => $kode,
-        'kodepelunasan' => $kodepelunasan,
-        'id_users' => Auth::User()->id,
-        'id_konsumens' => $request->konsumen,
-        'nominal' => $sumtotalpelunasan,
-        'status' => 'Unpaid',
-        'tanggal_cetak' => $request->tanggalcetak,
-        "created_at" => \Carbon\Carbon::now(),
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
+      } else {
+
+        $idbayarpiutang = DB::table('bayar_piutang_konsumens')->insertGetId([
+          'kode' => $kode,
+          'kodepelunasan' => $kodepelunasan,
+          'id_users' => Auth::User()->id,
+          'id_konsumens' => $request->konsumen,
+          'nominal' => $sumtotalpelunasan,
+          'status' => 'Unpaid',
+          'tanggal_cetak' => $request->tanggalcetak,
+          "created_at" => \Carbon\Carbon::now(),
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+      }
 
       DB::commit();
 

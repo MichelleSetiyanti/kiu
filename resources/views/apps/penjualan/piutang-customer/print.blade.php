@@ -272,9 +272,13 @@ if ($nilai < 12) { $temp=' ' . $huruf[$nilai]; } elseif ($nilai < 20) { $temp=pe
                                                     KWITANSI </td>
                                             </tr>
                                             <tr>
+                                            @if($bayarpiutang->kode == "-")
+
+                                            @else
                                                 <td
                                                     style="font-weight:bold;border: 1px solid black;font-size:36px;text-align:center;">
                                                     {{ $bayarpiutang->kode }} </td>
+                                            @endif
                                             </tr>
                                             <tr>
                                                 <td style="border: 1px solid black;font-size:24px;" colspan="2">
@@ -303,17 +307,17 @@ if ($nilai < 12) { $temp=' ' . $huruf[$nilai]; } elseif ($nilai < 20) { $temp=pe
                                                         </tr>
 
                                                         @php
-                                                        $kode = [];
-                                                        $value = '';
+$kode = [];
+$value = '';
                                                         @endphp
 
                                                         @foreach ($penjualandetails ?? '' as $penjualandetail)
                                                         @php
-                                                        if (in_array($penjualandetail->kode_inv, $kode) == false) {
-                                                        $value = $value . $penjualandetail->kode_inv . ', ';
-                                                        }
+    if (in_array($penjualandetail->kode_inv, $kode) == false) {
+        $value = $value . $penjualandetail->kode_inv . ', ';
+    }
 
-                                                        array_push($kode, $penjualandetail->kode_inv);
+    array_push($kode, $penjualandetail->kode_inv);
                                                         @endphp
                                                         @endforeach
 
@@ -344,8 +348,10 @@ if ($nilai < 12) { $temp=' ' . $huruf[$nilai]; } elseif ($nilai < 20) { $temp=pe
                                                     @if($bayarpiutang->tanggal_cetak != null)
                                                     <div
                                                         style="width:50%;text-align:center;margin-bottom:30px;font-size:20px;margin-left:50%;margin-top:-50px">
-                                                        Pontianak, {{ Carbon\Carbon::createFromFormat('Y-m-d',
-                                                        $bayarpiutang->tanggal_cetak)->isoFormat('D MMMM Y') }}
+                                                        Pontianak, {{ Carbon\Carbon::createFromFormat(
+        'Y-m-d',
+        $bayarpiutang->tanggal_cetak
+    )->isoFormat('D MMMM Y') }}
                                                     </div>
                                                     @else
                                                     <div
