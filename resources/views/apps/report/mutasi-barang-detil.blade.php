@@ -265,6 +265,49 @@ use Illuminate\Support\Facades\DB;
                 <div class="col-lg-12 col-md-12 col-sm-12">
                   <div class="table-responsive">
 
+                    <table class="table custom-table m-0 mt-4" @if($invoices->isEmpty()) style="display:none;" @endif>
+                      <thead>
+                      <tr>
+                        <th colspan="5" style="text-align:center;font-size:16px;">INVOICE</th>
+                      </tr>
+                      <tr>
+                        <th style="text-align:center;">No.</th>
+                        <th style="text-align:center;">No Invoice</th>
+                        <th style="text-align:center;">Nama Konsumen</th>
+                        <th style="text-align:center;">Tanggal</th>
+                        {{-- <th style="text-align:center;">User</th> --}}
+                        <th style="text-align:center;">Qty</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      @php
+                        $sumsInvoices = 0;
+                        $x = 1;
+                      @endphp
+
+                      @foreach($invoices ?? '' as $invoice)
+
+                        <tr>
+                          <td style="text-align:center;">{{ $x }}</td>
+                          <td>{{$invoice->p_kode_inv}}</td>
+                          <td>{{$invoice->k_namakonsumen}}</td>
+                          <td>{{ Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $invoice->p_created_at)->isoFormat('D MMMM Y') }}</td>
+                          {{-- <td>{{$invoice->namauser}}</td> --}}
+                          <td style="text-align:right;">{{ number_format($invoice->pd_total_jual,2,',','.') }}</td>
+                        </tr>
+                        @php
+                          $sumsInvoices = $sumsInvoices + $invoice->pd_total_jual;
+                          $x++;
+                        @endphp
+
+                      @endforeach
+                      <tr>
+                        <td colspan="4" style="text-align:right;padding-right:10px;font-size:16px;font-weight:bold;background-color:yellow;"> TOTAL </td>
+                        <td style="padding-left:10px;font-size:16px;font-weight:bold;background-color:yellow;">{{ number_format($sumsInvoices,0,',','.') }}</td>
+                      </tr>
+                      </tbody>
+                    </table>
+
                     <table class="table custom-table m-0 mt-4" @if($mutasigudangtokos->isEmpty()) style="display:none;" @endif>
                       <thead>
                       <tr>
