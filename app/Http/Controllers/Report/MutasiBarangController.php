@@ -81,6 +81,18 @@ class MutasiBarangController extends Controller
         })
         ->get();
 
-      return view('apps.report.mutasi-barang-detil',[ 'barang' => $barang, 'mutasimasuks' => $mutasimasuks, 'mutasikeluars' => $mutasikeluars, 'mutasigudangtokos' => $mutasigudangtokos, 'mutasitokogudangs' => $mutasitokogudangs, 'request' => $request ]);
+      $invoices = DB::table('penjualans')
+          ->join('penjualan_details', 'penjualans.id', '=', 'penjualan_details.id_penjualans')
+          ->join('barangs', 'penjualan_details.id_barangs', '=', 'barangs.id')
+          ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+        // ->select('penjualans.*', 'konsumens.nama as namakonsumen', 'konsumens.alamat as alamatkonsumen', 'konsumens.no_hp as nohpkonsumen', 'konsumens.contact_person as cpkonsumen')
+        // ->select('penjualan_details.*', 'barangs.nama as namabarang', 'barangs.kode as kodebarang', 'barangs.satuan as satuanbarang','penjualans.*')
+          ->select('penjualans.kode_inv as p_kode_inv', 'penjualans.created_at as p_created_at', 'penjualan_details.total_jual as pd_total_jual', 'barangs.nama as b_namabarang', 'barangs.kode as b_kodebarang', 'barangs.satuan as b_satuanbarang','konsumens.nama as k_namakonsumen')
+          ->where('penjualan_details.id_barangs', $request->produks)
+          ->whereBetween('penjualans.created_at', [$createdatmulai, $createdatselesai])
+          // ->groupBy('penjualan_details.id_penjualans')
+          ->get();
+
+      return view('apps.report.mutasi-barang-detil',[ 'invoices'=> $invoices, 'barang' => $barang, 'mutasimasuks' => $mutasimasuks, 'mutasikeluars' => $mutasikeluars, 'mutasigudangtokos' => $mutasigudangtokos, 'mutasitokogudangs' => $mutasitokogudangs, 'request' => $request ]);
   }
 }
