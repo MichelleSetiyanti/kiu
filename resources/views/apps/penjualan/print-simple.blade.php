@@ -332,6 +332,11 @@
                                 <div class="row gutters">
                                     <div class="col-lg-12 col-md-12 col-sm-12">
 
+                                      @php
+//                                        echo "<pre>".print_r($penjualandetails,true)."</pre>";
+                                        $totalDiskon = 0;
+                                      @endphp
+
                                         @foreach ($penjualandetails ?? '' as $penjualandetail)
                                             <div class="col-md-10 offset-md-1">
                                                 <div class="row">
@@ -339,6 +344,10 @@
                                                     <div class="col-5 text-right">
                                                         {{-- {{ number_format($penjualandetail->subtotal, 0, ',', '.') }} --}}
                                                         {{ number_format($penjualandetail->total_jual * $penjualandetail->harga, 0, ',', '.') }}
+{{--                                                       {{ $penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra }}--}}
+                                                      @php
+                                                      $totalDiskon += $penjualandetail->total_jual * ($penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra);
+                                                      @endphp
                                                     </div>
                                                 </div>
                                             </div>
@@ -380,7 +389,8 @@
                                                 <div class="col-8 text-right" style="font-weight:bold;"> Diskon
                                                 </div>
                                                 <div class="col-4 text-right" style="font-weight:bold;">
-                                                    {{ number_format(($penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra) * $penjualandetail->total_jual + $penjualan->diskon, 0, ',', '.') }}
+{{--                                                    {{ number_format(($penjualandetail->diskon + $penjualandetail->diskon_paket + $penjualandetail->diskon_extra) * $penjualandetail->total_jual + $penjualan->diskon, 0, ',', '.') }}--}}
+                                                    {{ number_format($totalDiskon,0,',','.') }}
                                                 </div>
                                             </div>
                                         </div>
