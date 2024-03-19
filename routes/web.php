@@ -649,9 +649,12 @@ Route::group(['prefix' => 'penjualan'], function () {
     Route::get('/list-detil', 'Penjualan\PenjualanManualController@listdetil');
 
     Route::post('/store-detil', 'Penjualan\PenjualanManualController@store_detil');
+    Route::post('/store-detil-invoice', 'Penjualan\PenjualanManualController@store_detil_invoice');
     Route::post('/update-detil', 'Penjualan\PenjualanManualController@update_detil');
+    Route::post('/update-detil-invoice', 'Penjualan\PenjualanManualController@update_detil_invoice');
     Route::post('/input-tara', 'Penjualan\PenjualanManualController@input_tara');
     Route::post('/drop-detil', 'Penjualan\PenjualanManualController@drop_detil');
+    Route::post('/drop-detil-invoice', 'Penjualan\PenjualanManualController@drop_detil_invoice');
     Route::post('/request-data-detil', 'Penjualan\PenjualanManualController@requestdata_detil');
     Route::post('/request-total-detil', 'Penjualan\PenjualanManualController@requesttotal_detil');
 
