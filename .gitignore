@@ -1,4 +1,6 @@
-.env
 .idea
-vendor/
-node_modules/
+/vendor
+/node_modules
+.env
+.env.backup
+.env.production
