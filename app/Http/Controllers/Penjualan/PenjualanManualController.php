@@ -257,6 +257,76 @@ class PenjualanManualController extends Controller
       ->make(true);
   }
 
+  public function store_detil_invoice(Request $request)
+  {
+
+    DB::beginTransaction();
+
+    try {
+
+      $produk = $request->produk;
+
+
+      $stock = DB::table('barangs')->where('id', $produk)->value('stok');
+
+      $subtotal = $request->totaljual * ($request->harga - $request->diskon - $request->diskonpaket - $request->diskonextra);
+
+      if ($stock >= $request->totaljual) {
+        $idtabel = DB::table('penjualan_details')->insertGetId([
+          'id_penjualans' => $request->idpenjualan,
+          'id_barangs' => $request->produk,
+          'catatan' => $request->catatan,
+          'harga' => $request->harga,
+          'total_jual' => $request->totaljual,
+          'diskon' => $request->diskon,
+          'diskon_paket' => $request->diskonpaket,
+          'diskon_extra' => $request->diskonextra,
+          'subtotal' => $subtotal,
+          "created_at" =>  \Carbon\Carbon::now(),
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+
+        $barang = DB::table('barangs')->where('id', $produk)->first();
+        $stoklama = $barang->stok;
+        $stokbaru = $stoklama - $request->totaljual;
+
+
+        DB::table('barangs')->where('id', $produk)->update([
+          'stok' => $stokbaru,
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+
+        DB::commit();
+
+        return $idtabel;
+      } else {
+
+        return 'stockhabis';
+
+        // DB::table('penjualan_details')->insertGetId([
+        //   'id_penjualans' => $request->idpenjualan,
+        //   'id_barangs' => $request->produk,
+        //   'catatan' => $request->catatan,
+        //   'harga' => $request->harga,
+        //   'total_jual' => $request->totaljual,
+        //   'diskon' => $request->diskon,
+        //   'diskon_paket' => $request->diskonpaket,
+        //   'diskon_extra' => $request->diskonextra,
+        //   'subtotal' => $subtotal,
+        //   "created_at" =>  \Carbon\Carbon::now(),
+        //   "updated_at" => \Carbon\Carbon::now()
+        // ]);
+
+        // DB::commit();
+
+      }
+    } catch (Exception $e) {
+      DB::rollBack();
+
+      return 'gagal';
+    }
+  }
+
   public function store_detil(Request $request)
   {
 
@@ -316,9 +386,55 @@ class PenjualanManualController extends Controller
     }
   }
 
-  public function update_detil(Request $request)
+  public function update_detil_invoice(Request $request)
   {
 
+    DB::beginTransaction();
+    try {
+
+      $subtotal = $request->totaljual * ($request->harga - $request->diskon - $request->diskonpaket - $request->diskonextra);
+
+      $penjualan_detil = DB::table('penjualan_details')->where('id', $request->id_temp)->first();
+      $totaljuallama = $penjualan_detil->total_jual;
+      $idbarang = $penjualan_detil->id_barangs;
+
+      $barang = DB::table('barangs')->where('id', $idbarang)->first();
+      $stoklama = $barang->stok;
+      $stokbaru = $stoklama + $totaljuallama - $request->totaljual;
+      
+      if ($stokbaru < 0) {
+        return "stockhabis";
+      }
+
+      DB::table('penjualan_details')->where('id', $request->id_temp)->update([
+        'catatan' => $request->catatan,
+        'harga' => $request->harga,
+        'total_jual' => $request->totaljual,
+        'diskon' => $request->diskon,
+        'diskon_paket' => $request->diskonpaket,
+        'diskon_extra' => $request->diskonextra,
+        'subtotal' => $subtotal,
+        "updated_at" => \Carbon\Carbon::now()
+      ]);
+
+      DB::table('barangs')->where('id', $idbarang)->update([
+        'stok' => $stokbaru,
+        "updated_at" => \Carbon\Carbon::now()
+      ]);
+
+
+      DB::commit();
+
+      return 'berhasil';
+    } catch (Exception $e) {
+      DB::rollBack();
+
+      return 'gagal';
+    }
+  }
+
+  public function update_detil(Request $request)
+  {
     DB::beginTransaction();
     try {
 
@@ -370,6 +486,36 @@ class PenjualanManualController extends Controller
     }
   }
 
+  public function drop_detil_invoice(Request $request)
+  {
+    DB::beginTransaction();
+
+    try {
+
+      $penjualan_detil = DB::table('penjualan_details')->where('id', $request->id)->first();
+      $totaljual = $penjualan_detil->total_jual;
+      $idbarang = $penjualan_detil->id_barangs;
+
+      $barang = DB::table('barangs')->where('id', $idbarang)->first();
+      $stoklama = $barang->stok;
+      $stokbaru = $stoklama + $totaljual;
+
+      DB::table('barangs')->where('id', $idbarang)->update([
+        'stok' => $stokbaru,
+        "updated_at" => \Carbon\Carbon::now()
+      ]);
+
+      DB::table('penjualan_details')->where('id', $request->id)->delete();
+
+      DB::commit();
+
+      return 'berhasil';
+    } catch (Exception $e) {
+      DB::rollBack();
+
+      return 'gagal';
+    }
+  }
   public function drop_detil(Request $request)
   {
     DB::beginTransaction();
@@ -387,7 +533,6 @@ class PenjualanManualController extends Controller
       return 'gagal';
     }
   }
-
   public function proses_detil(Request $request)
   {
     DB::beginTransaction();
@@ -673,8 +818,8 @@ class PenjualanManualController extends Controller
       ->get();
 
     // dd($penjualan, $produks, $akuns, $konsumens);
-    return view('apps.penjualan.penjualan-manual.edit-detil', ['penjualan' => $penjualan, 'produks' => $produks, 'akuns' => $akuns, 'konsumens' => $konsumens]);
-    // return view('apps.penjualan.penjualan-manual.edit-invoice', ['penjualan' => $penjualan, 'produks' => $produks, 'akuns' => $akuns, 'konsumens' => $konsumens]);
+    // return view('apps.penjualan.penjualan-manual.edit-detil', ['penjualan' => $penjualan, 'produks' => $produks, 'akuns' => $akuns, 'konsumens' => $konsumens]);
+    return view('apps.penjualan.penjualan-manual.edit-invoice', ['penjualan' => $penjualan, 'produks' => $produks, 'akuns' => $akuns, 'konsumens' => $konsumens]);
   }
 
   public function proses_edit_invoice(Request $request)
