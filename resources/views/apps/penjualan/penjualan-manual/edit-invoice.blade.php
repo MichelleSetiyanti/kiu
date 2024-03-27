@@ -94,7 +94,7 @@
                                                 <div class="col-sm-12 col-md-6 mb-1">
                                                     <label>Tanggal SJ</label>
                                                     <input type="text" class="form-control" readonly
-                                                        value="{{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_sj)->isoFormat('D MMMM Y') }}">
+                                                        value="{{ Carbon\Carbon::createFromFormat('Y-m-d', $penjualan->tanggal_sj ? $penjualan->tanggal_sj : date('Y-m-d'))->isoFormat('D MMMM Y') }}">
                                                 </div>
 
                                             </div>

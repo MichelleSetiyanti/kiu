@@ -97,17 +97,28 @@ class InvoiceController extends Controller
       $penjualanlama = DB::table('penjualans')->where('id', $request->idpenjualan)->first();
 
       if ($penjualanlama->pajak > 0) {
-        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'F-%')->get();
+        // $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'F-%')->get();
 
-        $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+        // $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+        $invoices = DB::table('penjualans')->select('kode_inv')->distinct()->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'F-%')->get();
+        $countinvoice = $invoices->count();
+        $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int)$countinvoice + 1, 4, "0", STR_PAD_LEFT);
       } else {
-        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FTS-%')->get();
+        // $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FTS-%')->get();
 
-        $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+        // $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+
+        $invoices = DB::table('penjualans')->select('kode_inv')->distinct()->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FTS-%')->get();
+        $countinvoice = $invoices->count();
+        $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad((int)$countinvoice + 1, 4, "0", STR_PAD_LEFT);
       }
       if ($request->kodeinvoice != "Baru") {
         $kodetransaksi = $request->kodeinvoice;
       }
+
+
+
+
 
       // dd($kodetransaksi);
       // die();
