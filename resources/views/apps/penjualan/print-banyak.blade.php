@@ -2,7 +2,20 @@
     function penyebut($nilai)
     {
         $nilai = abs($nilai);
-        $huruf = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+        $huruf = [
+            '',
+            'satu',
+            'dua',
+            'tiga',
+            'empat',
+            'lima',
+            'enam',
+            'tujuh',
+            'delapan',
+            'sembilan',
+            'sepuluh',
+            'sebelas',
+        ];
         $temp = '';
         if ($nilai < 12) {
             $temp = ' ' . $huruf[$nilai];
@@ -443,7 +456,7 @@
                                                             <td colspan="3" rowspan="2"
                                                                 style="vertical-align: top;text-align: left;">
                                                                 KETERANGAN :
-                                                                {!! nl2br($penjualan->keterangan) !!}</td>
+                                                                {!! nl2br($penjualanterbaru->keterangan) !!}</td>
                                                             <td style="text-align:right;font-weight: bold;">DOWN PAYMENT
                                                                 : </td>
                                                             <td style="text-align:right;font-weight: bold;">
@@ -460,7 +473,7 @@
                                                         <tr>
                                                             <td colspan="3"
                                                                 style="vertical-align: top;text-align: left;">KETERANGAN
-                                                                : {!! nl2br($penjualan->keterangan) !!}</td>
+                                                                : {!! nl2br($penjualanterbaru->keterangan) !!}</td>
                                                             <td style="text-align:right;font-weight: bold;">TOTAL AKHIR
                                                                 : </td>
                                                             <td style="text-align:right;font-weight: bold;">
