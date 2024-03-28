@@ -401,7 +401,7 @@ class PenjualanManualController extends Controller
       $barang = DB::table('barangs')->where('id', $idbarang)->first();
       $stoklama = $barang->stok;
       $stokbaru = $stoklama + $totaljuallama - $request->totaljual;
-      
+
       if ($stokbaru < 0) {
         return "stockhabis";
       }
@@ -818,6 +818,10 @@ class PenjualanManualController extends Controller
       ->get();
 
     // dd($penjualan, $produks, $akuns, $konsumens);
+    if ($penjualan->tanggal_sj == null || $penjualan->kode_sj == null) {
+      return back()->with('failed', 'Surat jalan belum ada');
+    }
+
     // return view('apps.penjualan.penjualan-manual.edit-detil', ['penjualan' => $penjualan, 'produks' => $produks, 'akuns' => $akuns, 'konsumens' => $konsumens]);
     return view('apps.penjualan.penjualan-manual.edit-invoice', ['penjualan' => $penjualan, 'produks' => $produks, 'akuns' => $akuns, 'konsumens' => $konsumens]);
   }
