@@ -228,7 +228,8 @@ class PiutangCustomerController extends Controller
       ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
       ->select('penjualans.*', 'bayar_piutangs.nominal as nominalpelunasan')
       ->whereIn('bayar_piutangs.id', $arrayid)
-      ->orderBy('bayar_piutangs.created_at', 'asc')->get();
+      // ->orderBy('bayar_piutangs.created_at', 'asc')
+      ->get();
 
     return view('apps.penjualan.piutang-customer.print', ['bayarpiutang' => $bayarpiutang, 'penjualandetails' => $penjualan_details]);
   }
@@ -304,7 +305,6 @@ class PiutangCustomerController extends Controller
           "created_at" => \Carbon\Carbon::now(),
           "updated_at" => \Carbon\Carbon::now()
         ]);
-
       } else {
 
         $idbayarpiutang = DB::table('bayar_piutang_konsumens')->insertGetId([
