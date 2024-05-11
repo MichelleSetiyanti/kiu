@@ -85,142 +85,132 @@ class InvoiceController extends Controller
       ->addIndexColumn()
       ->make(true);
   }
+public function store(Request $request){
 
-  public function store(Request $request)
-  {
+
     DB::beginTransaction();
 
-    try {
-      $month = \Carbon\Carbon::createFromFormat('Y-m-d', $request->tanggal)->format('m');
+    try{
+      $month = \Carbon\Carbon::now()->format('m');
       $year = \Carbon\Carbon::createFromFormat('Y-m-d', $request->tanggal)->format('Y');
 
-      $penjualanlama = DB::table('penjualans')->where('id', $request->idpenjualan)->first();
+        $penjualanlama = DB::table('penjualans')->where('id',$request->idpenjualan)->first();
 
-      if ($penjualanlama->pajak > 0) {
-        // $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'F-%')->get();
+        if($penjualanlama->pajak > 0){
+            $invoices = DB::table('penjualans')->select('id')->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv','like','F-%')->get();
 
-        // $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
-        $invoices = DB::table('penjualans')->select('kode_inv')->distinct()->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'F-%')->get();
-        $countinvoice = $invoices->count();
-        $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int)$countinvoice + 1, 4, "0", STR_PAD_LEFT);
-      } else {
-        // $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FTS-%')->get();
+            $countinvoice = $invoices->count();
+            $countinvoiceFinal = $countinvoice+1;
 
-        // $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+            $kodetransaksi = "F-".substr($year,-2)."-".str_pad((int)$countinvoiceFinal,4,"0",STR_PAD_LEFT);
+        }else{
+            $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv','like','FTS-%')->get();
 
-        $invoices = DB::table('penjualans')->select('kode_inv')->distinct()->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FTS-%')->get();
-        $countinvoice = $invoices->count();
-        $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad((int)$countinvoice + 1, 4, "0", STR_PAD_LEFT);
-      }
-      if ($request->kodeinvoice != "Baru") {
-        $kodetransaksi = $request->kodeinvoice;
+            $kodetransaksi = "FTS-".substr($year,-2)."-".str_pad((int)$invoices[0]->nomor_max + 1,4,"0",STR_PAD_LEFT);
+        }
+
+      if($request->kodeinvoice != "Baru"){
+          $kodetransaksi = $request->kodeinvoice;
       }
 
-
-
-
-
-      // dd($kodetransaksi);
-      // die();
-      DB::table('penjualans')->where('id', $request->idpenjualan)->update([
+      DB::table('penjualans')->where('id',$request->idpenjualan)->update([
         'kode_inv' => $kodetransaksi,
         'tanggal_inv' => $request->tanggal,
         'alamat_inv' => $request->alamat,
-        'keterangan' => $request->keterangan,
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
-      $penjualanlama = DB::table('penjualans')->where('id', $request->idpenjualan)->first();
+      $penjualanlama = DB::table('penjualans')->where('id',$request->idpenjualan)->first();
 
-      if ($penjualanlama->pembayaran == "Credit") {
+      if($penjualanlama->pembayaran == "Credit"){
 
         $jatuhtempo = \Carbon\Carbon::createFromFormat('Y-m-d', $request->tanggal)->addDays($request->termin);
 
-        DB::table('penjualans')->where('id', $request->idpenjualan)->update([
+        DB::table('penjualans')->where('id',$request->idpenjualan)->update([
           'jatuh_tempo' => $jatuhtempo,
           'termin' => $request->termin,
           "updated_at" => \Carbon\Carbon::now()
         ]);
 
-        $konsumen = DB::table('konsumens')->where('id', $penjualanlama->id_konsumens)->first();
+        $konsumen = DB::table('konsumens')->where('id',$penjualanlama->id_konsumens)->first();
 
         $piutanglama = $konsumen->piutang;
         $piutangbaru = $piutanglama + $penjualanlama->grandtotal;
 
-        DB::table('konsumens')->where('id', $penjualanlama->id_konsumens)->update([
+        DB::table('konsumens')->where('id',$penjualanlama->id_konsumens)->update([
           'piutang' => $piutangbaru,
           "updated_at" => \Carbon\Carbon::now()
         ]);
+
       }
 
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    }catch (Exception $e){
       DB::rollBack();
 
       return 'gagal';
     }
   }
 
-  public function store_kas(Request $request)
-  {
+  public function store_kas(Request $request){
 
 
     DB::beginTransaction();
 
-    try {
+    try{
       $month = \Carbon\Carbon::now()->format('m');
-      $year = \Carbon\Carbon::now()->format('Y');
+        $year = \Carbon\Carbon::createFromFormat('Y-m-d', $request->tanggal)->format('Y');
 
-      $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FCS-%')->get();
+    $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv','like','FCS-%')->get();
 
-      $kodetransaksi = "FCS-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+    $kodetransaksi = "FCS-".substr($year,-2)."-".str_pad((int)$invoices[0]->nomor_max + 1,4,"0",STR_PAD_LEFT);
 
-      if ($request->kodeinvoice != "Baru") {
-        $kodetransaksi = $request->kodeinvoice;
+      if($request->kodeinvoice != "Baru"){
+          $kodetransaksi = $request->kodeinvoice;
       }
 
-      DB::table('penjualans')->where('id', $request->idpenjualan)->update([
+      DB::table('penjualans')->where('id',$request->idpenjualan)->update([
         'kode_inv' => $kodetransaksi,
         'tanggal_inv' => $request->tanggal,
         'alamat_inv' => $request->alamat,
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
-      $penjualanlama = DB::table('penjualans')->where('id', $request->idpenjualan)->first();
+      $penjualanlama = DB::table('penjualans')->where('id',$request->idpenjualan)->first();
 
-      if ($penjualanlama->pembayaran == "Credit") {
+      if($penjualanlama->pembayaran == "Credit"){
 
         $jatuhtempo = \Carbon\Carbon::createFromFormat('Y-m-d', $request->tanggal)->addDays($request->termin);
 
-        DB::table('penjualans')->where('id', $request->idpenjualan)->update([
+        DB::table('penjualans')->where('id',$request->idpenjualan)->update([
           'jatuh_tempo' => $jatuhtempo,
           'termin' => $request->termin,
           "updated_at" => \Carbon\Carbon::now()
         ]);
 
-        $konsumen = DB::table('konsumens')->where('id', $penjualanlama->id_konsumens)->first();
+        $konsumen = DB::table('konsumens')->where('id',$penjualanlama->id_konsumens)->first();
 
         $piutanglama = $konsumen->piutang;
         $piutangbaru = $piutanglama + $penjualanlama->grandtotal;
 
-        DB::table('konsumens')->where('id', $penjualanlama->id_konsumens)->update([
+        DB::table('konsumens')->where('id',$penjualanlama->id_konsumens)->update([
           'piutang' => $piutangbaru,
           "updated_at" => \Carbon\Carbon::now()
         ]);
+
       }
 
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    }catch (Exception $e){
       DB::rollBack();
 
       return 'gagal';
     }
   }
-
   public function ceklimit(Request $request)
   {
     $penjualanlama = DB::table('penjualans')->where('id', $request->idpenjualan)->first();
