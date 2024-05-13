@@ -97,12 +97,15 @@ public function store(Request $request){
         $penjualanlama = DB::table('penjualans')->where('id',$request->idpenjualan)->first();
 
         if($penjualanlama->pajak > 0){
-            $invoices = DB::table('penjualans')->select('id')->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv','like','F-%')->get();
+            // $invoices = DB::table('penjualans')->select('id')->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv','like','F-%')->where('pajak','!=','0')->get();
 
-            $countinvoice = $invoices->count();
-            $countinvoiceFinal = $countinvoice+1;
+            // $countinvoice = $invoices->count();
+            // $countinvoiceFinal = $countinvoice+1;
 
-            $kodetransaksi = "F-".substr($year,-2)."-".str_pad((int)$countinvoiceFinal,4,"0",STR_PAD_LEFT);
+            // $kodetransaksi = "F-".substr($year,-2)."-".str_pad((int)$countinvoiceFinal,4,"0",STR_PAD_LEFT);
+            $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv','like','F-%')->get();
+
+            $kodetransaksi = "F-".substr($year,-2)."-".str_pad((int)$invoices[0]->nomor_max + 1,4,"0",STR_PAD_LEFT);
         }else{
             $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv','like','FTS-%')->get();
 
