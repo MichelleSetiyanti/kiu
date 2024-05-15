@@ -104,12 +104,22 @@ public function store(Request $request){
 
             // $kodetransaksi = "F-".substr($year,-2)."-".str_pad((int)$countinvoiceFinal,4,"0",STR_PAD_LEFT);
             $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv','like','F-%')->get();
-
-            $kodetransaksi = "F-".substr($year,-2)."-".str_pad((int)$invoices[0]->nomor_max + 1,4,"0",STR_PAD_LEFT);
+            $kode_inv_exists = substr($penjualanlama->kode_inv, -4);
+            if((int)$invoices[0]->nomor_max == $kode_inv_exists){
+              $kodetransaksi = $kode_inv_exists;
+              $kodetransaksi = "F-".substr($year,-2)."-".str_pad($kodetransaksi,4,"0",STR_PAD_LEFT);
+            }else{
+              $kodetransaksi = "F-".substr($year,-2)."-".str_pad((int)$invoices[0]->nomor_max + 1,4,"0",STR_PAD_LEFT);
+            }
         }else{
             $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv','like','FTS-%')->get();
-
-            $kodetransaksi = "FTS-".substr($year,-2)."-".str_pad((int)$invoices[0]->nomor_max + 1,4,"0",STR_PAD_LEFT);
+            $kode_inv_exists = substr($penjualanlama->kode_inv, -4);
+            if((int)$invoices[0]->nomor_max == $kode_inv_exists){
+              $kodetransaksi = $kode_inv_exists;
+              $kodetransaksi = "FTS-".substr($year,-2)."-".str_pad($kodetransaksi,4,"0",STR_PAD_LEFT);
+            }else{
+              $kodetransaksi = "FTS-".substr($year,-2)."-".str_pad((int)$invoices[0]->nomor_max + 1,4,"0",STR_PAD_LEFT);
+            }
         }
 
       if($request->kodeinvoice != "Baru"){
