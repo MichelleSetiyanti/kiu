@@ -130,6 +130,7 @@ public function store(Request $request){
         'kode_inv' => $kodetransaksi,
         'tanggal_inv' => $request->tanggal,
         'alamat_inv' => $request->alamat,
+        'keterangan' => $request->keterangan,
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
