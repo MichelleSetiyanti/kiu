@@ -52,6 +52,13 @@ class LaporanPiutangController extends Controller
           $query->where('piutang', '=', 0);
         }
       })
+      ->where(
+        function ($query) use ($request) {
+          if ($request->client != "All") {
+            $query->where('id', '=', $request->client);
+          }
+        }
+      )
       ->orderBy('nama', 'asc')
       ->get();
 

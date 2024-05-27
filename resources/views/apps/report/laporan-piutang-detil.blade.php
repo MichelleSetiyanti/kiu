@@ -370,6 +370,7 @@
                                                                     if ($request->pelunasan == 'Lunas') {
                                                                         if ($request->pajak == 'PPN') {
                                                                             $sums = DB::table('bayar_piutangs')
+                                                                                ->where('bayar_piutangs.status', 'Paid')
                                                                                 ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
                                                                                 ->where('penjualans.pajak', '>', 0)
                                                                                 ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
@@ -383,6 +384,7 @@
                                                                     if ($request->pelunasan == 'Lunas') {
                                                                         if ($request->pajak == 'NONPPN') {
                                                                             $sums = DB::table('bayar_piutangs')
+                                                                                ->where('bayar_piutangs.status', 'Paid')
                                                                                 ->join('penjualans', 'bayar_piutangs.id_penjualans', '=', 'penjualans.id')
                                                                                 ->where('penjualans.pajak', '<=', 0)
                                                                                 ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
