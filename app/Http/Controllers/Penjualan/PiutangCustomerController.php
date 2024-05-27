@@ -81,7 +81,9 @@ class PiutangCustomerController extends Controller
       ->where('penjualans.kode_inv', '!=', '')
       ->where('penjualans.sisa', '>', '0')
       ->orderBy('created_at', 'desc')
-      ->get();
+      ->get()->filter(function ($penjualan) {
+        return DB::table('bayar_piutangs')->where('id_penjualans', '=', $penjualan->id)->first() == NULL;
+      });
 
     return datatables()::of($penjualans)
       ->addIndexColumn()
@@ -98,6 +100,16 @@ class PiutangCustomerController extends Controller
 
       $piutangkonsumen = DB::table('bayar_piutang_konsumens')->where('id', $request->id)->first();
 
+      $konsumen =  DB::table('konsumens')->where('id', $piutangkonsumen->id_konsumens)->first();
+      if (!$konsumen) throw new Exception("error");
+      $piutanglama = $konsumen->piutang;
+      $piutangbaru = $piutanglama - $piutangkonsumen->nominal;
+
+      DB::table('konsumens')->where('id', $piutangkonsumen->id_konsumens)->update([
+        'piutang' => $piutangbaru,
+        "updated_at" => \Carbon\Carbon::now()
+      ]);
+
       $stringid = $piutangkonsumen->kodepelunasan;
 
       if (substr($stringid, -1, 1) == ',') {
@@ -109,6 +121,12 @@ class PiutangCustomerController extends Controller
       $bayarpiutangss = DB::table('bayar_piutangs')->whereIn('id', $arrayid)->get();
 
       foreach ($bayarpiutangss as $bayarpiutangs) {
+        // update sisa utang
+        DB::table('penjualans')->where('id', $bayarpiutangs->id_penjualans)->update([
+          'sisa' => '0',
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+
         DB::table('bayar_piutangs')->where('id', $bayarpiutangs->id)->update([
           'status' => 'Paid',
           "updated_at" => \Carbon\Carbon::now()
@@ -265,10 +283,10 @@ class PiutangCustomerController extends Controller
 
         $sisa = $penjualan->sisa;
         // update sisa utang
-        DB::table('penjualans')->where('id', $datas[$x])->update([
-          'sisa' => '0',
-          "updated_at" => \Carbon\Carbon::now()
-        ]);
+        // DB::table('penjualans')->where('id', $datas[$x])->update([
+        //   'sisa' => '0',
+        //   "updated_at" => \Carbon\Carbon::now()
+        // ]);
 
         // input tabel bayar_piutangs
         $idpelunasan = DB::table('bayar_piutangs')->insertGetId([
@@ -289,10 +307,10 @@ class PiutangCustomerController extends Controller
       $piutanglama = $konsumen->piutang;
       $piutangbaru = $piutanglama - $sumtotalpelunasan;
 
-      DB::table('konsumens')->where('id', $penjualan->id_konsumens)->update([
-        'piutang' => $piutangbaru,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
+      // DB::table('konsumens')->where('id', $penjualan->id_konsumens)->update([
+      //   'piutang' => $piutangbaru,
+      //   "updated_at" => \Carbon\Carbon::now()
+      // ]);
       if ($penjualan->pajak == 0) {
         $idbayarpiutang = DB::table('bayar_piutang_konsumens')->insertGetId([
           'kode' => "-",
