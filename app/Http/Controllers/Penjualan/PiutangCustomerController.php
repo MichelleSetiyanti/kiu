@@ -82,7 +82,7 @@ class PiutangCustomerController extends Controller
       ->where('penjualans.sisa', '>', '0')
       ->orderBy('created_at', 'desc')
       ->get()->filter(function ($penjualan) {
-        return DB::table('bayar_piutangs')->where('id_penjualans', '=', $penjualan->id)->first() == NULL;
+        return DB::table('bayar_piutangs')->where('id_penjualans', '=', $penjualan->id)->latest()->first() == NULL || DB::table('bayar_piutangs')->where('id_penjualans', '=', $penjualan->id)->latest()->first()->status == 'Cancel';
       });
 
     return datatables()::of($penjualans)
