@@ -40,7 +40,7 @@ class PenjualanManualController extends Controller
       $year = \Carbon\Carbon::createFromFormat('Y-m-d', $request->tanggal)->format('Y');
       $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode,-4)) as nomor_max'))->where(DB::raw('MONTH(tanggal)'), $month)->where(DB::raw('YEAR(tanggal)'), $year)->where('kode', 'like', 'SO%')->get();
 
-      $kodetransaksi = "SO" . substr($year, -2) . $month . "-" . Auth::id() . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+      $kodetransaksi = "SO" . substr($year, -2) . $month . "-" . Auth::id() . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
 
       DB::table('penjualans')->insert([
         'kode' => $kodetransaksi,
@@ -50,8 +50,8 @@ class PenjualanManualController extends Controller
         'keterangan' => $data['keterangan'],
         'pembayaran' => $data['pembayaran'],
         'status' => 'Belum Selesai',
-        "tanggal" =>  $request->tanggal,
-        "created_at" =>  \Carbon\Carbon::now(),
+        "tanggal" => $request->tanggal,
+        "created_at" => \Carbon\Carbon::now(),
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
@@ -282,7 +282,7 @@ class PenjualanManualController extends Controller
           'diskon_paket' => $request->diskonpaket,
           'diskon_extra' => $request->diskonextra,
           'subtotal' => $subtotal,
-          "created_at" =>  \Carbon\Carbon::now(),
+          "created_at" => \Carbon\Carbon::now(),
           "updated_at" => \Carbon\Carbon::now()
         ]);
 
@@ -303,21 +303,21 @@ class PenjualanManualController extends Controller
 
         return 'stockhabis';
 
-        // DB::table('penjualan_details')->insertGetId([
-        //   'id_penjualans' => $request->idpenjualan,
-        //   'id_barangs' => $request->produk,
-        //   'catatan' => $request->catatan,
-        //   'harga' => $request->harga,
-        //   'total_jual' => $request->totaljual,
-        //   'diskon' => $request->diskon,
-        //   'diskon_paket' => $request->diskonpaket,
-        //   'diskon_extra' => $request->diskonextra,
-        //   'subtotal' => $subtotal,
-        //   "created_at" =>  \Carbon\Carbon::now(),
-        //   "updated_at" => \Carbon\Carbon::now()
-        // ]);
+        DB::table('penjualan_details')->insertGetId([
+          'id_penjualans' => $request->idpenjualan,
+          'id_barangs' => $request->produk,
+          'catatan' => $request->catatan,
+          'harga' => $request->harga,
+          'total_jual' => $request->totaljual,
+          'diskon' => $request->diskon,
+          'diskon_paket' => $request->diskonpaket,
+          'diskon_extra' => $request->diskonextra,
+          'subtotal' => $subtotal,
+          "created_at" => \Carbon\Carbon::now(),
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
 
-        // DB::commit();
+        DB::commit();
 
       }
     } catch (Exception $e) {
@@ -352,7 +352,7 @@ class PenjualanManualController extends Controller
           'diskon_paket' => $request->diskonpaket,
           'diskon_extra' => $request->diskonextra,
           'subtotal' => $subtotal,
-          "created_at" =>  \Carbon\Carbon::now(),
+          "created_at" => \Carbon\Carbon::now(),
           "updated_at" => \Carbon\Carbon::now()
         ]);
 
@@ -371,7 +371,7 @@ class PenjualanManualController extends Controller
           'diskon_paket' => $request->diskonpaket,
           'diskon_extra' => $request->diskonextra,
           'subtotal' => $subtotal,
-          "created_at" =>  \Carbon\Carbon::now(),
+          "created_at" => \Carbon\Carbon::now(),
           "updated_at" => \Carbon\Carbon::now()
         ]);
 
@@ -403,6 +403,25 @@ class PenjualanManualController extends Controller
       $stokbaru = $stoklama + $totaljuallama - $request->totaljual;
 
       if ($stokbaru < 0) {
+        DB::table('penjualan_details')->where('id', $request->id_temp)->update([
+          'catatan' => $request->catatan,
+          'harga' => $request->harga,
+          'total_jual' => $request->totaljual,
+          'diskon' => $request->diskon,
+          'diskon_paket' => $request->diskonpaket,
+          'diskon_extra' => $request->diskonextra,
+          'subtotal' => $subtotal,
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+
+        DB::table('barangs')->where('id', $idbarang)->update([
+          'stok' => $stokbaru,
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+
+
+        DB::commit();
+
         return "stockhabis";
       }
 
@@ -963,7 +982,7 @@ class PenjualanManualController extends Controller
       DB::table('penjualan_passwords')->insert([
         'id_penjualans' => $request->idpenjualan,
         'password' => $password,
-        "created_at" =>  \Carbon\Carbon::now(),
+        "created_at" => \Carbon\Carbon::now(),
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
