@@ -175,8 +175,10 @@ class PiutangCustomerController extends Controller
 
         $sisa = $penjualan->sisa;
         $nominalpelunasan = $bayarpiutangs->nominal;
-
-        $sisabaru = $sisa + $nominalpelunasan;
+        $sisabaru = $sisa;
+        if ($bayarpiutangs->status == 'Paid') {
+          $sisabaru += $nominalpelunasan;
+        }
 
         // update sisa utang
         DB::table('penjualans')->where('id', $bayarpiutangs->id_penjualans)->update([
