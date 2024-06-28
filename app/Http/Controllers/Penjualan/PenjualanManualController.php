@@ -301,7 +301,6 @@ class PenjualanManualController extends Controller
         return $idtabel;
       } else {
 
-        return 'stockhabis';
 
         DB::table('penjualan_details')->insertGetId([
           'id_penjualans' => $request->idpenjualan,
@@ -318,6 +317,7 @@ class PenjualanManualController extends Controller
         ]);
 
         DB::commit();
+        return 'stockhabis';
 
       }
     } catch (Exception $e) {

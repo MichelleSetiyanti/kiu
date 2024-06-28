@@ -834,7 +834,7 @@ use Illuminate\Support\Facades\Crypt;
                             _token: '{{ csrf_token() }}'
                         })
                         .done(function(data) {
-                            if (data != "gagal" && data != "stockhabis") {
+                            if (data != "gagal") {
                                 f_clear();
                                 toastr.success('Data ini berhasil disimpan.', 'Berhasil', {
                                     positionClass: 'toast-top-right',
