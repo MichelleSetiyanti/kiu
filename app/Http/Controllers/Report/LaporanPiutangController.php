@@ -24,8 +24,7 @@ class LaporanPiutangController extends Controller
       ->orderBy('nama', 'asc')
       ->get();
 
-    return view('apps.report.laporan-piu
-    tang', ['clients' => $clients]);
+    return view('apps.report.laporan-piutang', ['clients' => $clients]);
   }
 
   public function list(Request $request)
