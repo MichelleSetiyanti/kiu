@@ -1,0 +1,30 @@
+{
+  "menu": [
+    {
+      "url": "/home",
+      "name": "Beranda",
+      "slug": "Beranda",
+      "icon": "feather icon-home"
+    },
+    {
+      "url": "/",
+      "navheader": "Transaksi Penjualan",
+      "icon": ""
+    },
+    {
+      "url": "/penjualan/penjualan-manual",
+      "name": "Sales Order",
+      "icon": "feather icon-credit-card"
+    },
+    {
+      "url": "/penjualan/surat-jalan",
+      "name": "Surat Jalan",
+      "icon": "feather icon-truck"
+    },
+    {
+      "url": "/penjualan/invoice",
+      "name": "Invoice",
+      "icon": "feather icon-folder-plus"
+    }
+  ]
+}
