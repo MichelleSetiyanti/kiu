@@ -80,17 +80,18 @@ class SuratJalanController extends Controller
           $kodetransaksi = $kode_inv_exists;
           $kodetransaksi = "S-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 4, "0", STR_PAD_LEFT);
         } else {
-          $kodetransaksi = "S-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+          $kodetransaksi = "S-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4 , "0", STR_PAD_LEFT);
         }
 
       } else {
-        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_sj,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal)'), $year)->where('kode_sj', 'like', 'SJS-%')->get();
-        $kode_inv_exists = substr($penjualanlama->kode_sj, -4);
+        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_sj,-5)) as nomor_max'))->where(DB::raw('YEAR(tanggal)'), $year)->where('kode_sj', 'like', 'SJS-%')->get();
+        $kode_inv_exists = substr($penjualanlama->kode_sj, -5);
         if ((int) $invoices[0]->nomor_max == $kode_inv_exists) {
           $kodetransaksi = $kode_inv_exists;
-          $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 4, "0", STR_PAD_LEFT);
-        } else {
-          $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+          $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 5, "0", STR_PAD_LEFT);
+        } else {  
+          $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 5, "0", STR_PAD_LEFT);
+
         }
       }
 
