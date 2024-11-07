@@ -241,7 +241,7 @@
             let pajak = $("#pajak").val();
             let pelunasan = $("#pelunasan").val();
 
-            if (tanggalmulai == "" || tanggalselesai == "") {
+            if (tanggalmulai === "" || tanggalselesai === "") {
                 alert('Pilih tanggal untuk melihat Laporan Rekap Penjualan');
                 return;
             }
@@ -254,7 +254,6 @@
                 "&pajak=" + pajak;
 
             window.open(link, '_blank');
-
         }
     </script>
 
