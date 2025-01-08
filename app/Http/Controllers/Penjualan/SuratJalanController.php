@@ -72,28 +72,47 @@ class SuratJalanController extends Controller
       $penjualanlama = DB::table('penjualans')->where('id', $request->idpenjualan)->first();
 
       if ($penjualanlama->pajak > 0) {
-        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_sj,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal)'), $year)->where('kode_sj', 'like', 'S-%')->get();
-
-        $kode_inv_exists = substr($penjualanlama->kode_sj, -4);
-
-        if ((int) $invoices[0]->nomor_max == $kode_inv_exists) {
-          $kodetransaksi = $kode_inv_exists;
-          $kodetransaksi = "S-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 4, "0", STR_PAD_LEFT);
+        $invoices = DB::table('penjualans')
+            ->select(DB::raw('max(substr(kode_sj, -4)) as nomor_max'))
+            ->where(DB::raw('YEAR(tanggal)'), $year)
+            ->where('kode_sj', 'like', 'S-%')
+            ->get();
+    
+        $kode_inv_exists = isset($penjualanlama->kode_sj) ? substr($penjualanlama->kode_sj, -4) : null;
+    
+        // Ambil nomor maksimum dari hasil query
+        $nomor_max = $invoices->isEmpty() || $invoices[0]->nomor_max === null ? 0 : (int) $invoices[0]->nomor_max;
+    
+        // Penomoran baru
+        if ($nomor_max === 0) {
+            $nomor_baru = 1; // Dimulai dari 1 jika tidak ada nomor sebelumnya
         } else {
-          $kodetransaksi = "S-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 4 , "0", STR_PAD_LEFT);
+            $nomor_baru = $nomor_max + 1; // Tambahkan nomor jika ada nomor sebelumnya
         }
-
-      } else {
-        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_sj,-5)) as nomor_max'))->where(DB::raw('YEAR(tanggal)'), $year)->where('kode_sj', 'like', 'SJS-%')->get();
-        $kode_inv_exists = substr($penjualanlama->kode_sj, -5);
-        if ((int) $invoices[0]->nomor_max == $kode_inv_exists) {
-          $kodetransaksi = $kode_inv_exists;
-          $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 5, "0", STR_PAD_LEFT);
-        } else {  
-          $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad((int)$invoices[0]->nomor_max + 1, 5, "0", STR_PAD_LEFT);
-
+    
+        // Format nomor transaksi
+        $kodetransaksi = "S-" . substr($year, -2) . "-" . str_pad($nomor_baru, 4, "0", STR_PAD_LEFT);
+    } else {
+        $invoices = DB::table('penjualans')
+            ->select(DB::raw('max(substr(kode_sj, -5)) as nomor_max'))
+            ->where(DB::raw('YEAR(tanggal)'), $year)
+            ->where('kode_sj', 'like', 'SJS-%')
+            ->get();
+    
+        $kode_inv_exists = isset($penjualanlama->kode_sj) ? substr($penjualanlama->kode_sj, -5) : null;
+    
+        $nomor_max = $invoices->isEmpty() || $invoices[0]->nomor_max === null ? 0 : (int) $invoices[0]->nomor_max;
+    
+        if ($nomor_max === 0) {
+            $nomor_baru = 1;
+        } else {
+            $nomor_baru = $nomor_max + 1;
         }
-      }
+    
+        $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad($nomor_baru, 5, "0", STR_PAD_LEFT);
+    }
+    
+    
 
       DB::table('penjualans')->where('id', $request->idpenjualan)->update([
         'kode_sj' => $kodetransaksi,

@@ -105,28 +105,49 @@ class InvoiceController extends Controller
 
         // $kodetransaksi = "F-".substr($year,-2)."-".str_pad((int)$countinvoiceFinal,4,"0",STR_PAD_LEFT);
         $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'F-%')->get();
-        $kode_inv_exists = substr($penjualanlama->kode_inv, -4);
-        if ((int) $invoices[0]->nomor_max == $kode_inv_exists) {
-          $kodetransaksi = $kode_inv_exists;
-          $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 4, "0", STR_PAD_LEFT);
+
+        $kode_inv_exists = isset($penjualanlama->kode_inv) ? substr($penjualanlama->kode_inv, -4) : null;
+        if ($invoices->isEmpty() || $invoices[0]->nomor_max === null) {
+          // Jika tidak ada nilai di database
+          $kodetransaksi = "F-" . substr($year, -2) . "-0001";
         } else {
-          $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+          $nomor_max = (int) $invoices[0]->nomor_max;
+          if ((int) $invoices[0]->nomor_max == $kode_inv_exists) {
+            $kodetransaksi = $kode_inv_exists;
+            $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 4, "0", STR_PAD_LEFT);
+
+          } else {
+            $kodetransaksi = "F-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+          }
         }
+
       } else {
-        $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FTS-%')->get();
-        $kode_inv_exists = substr($penjualanlama->kode_inv, -4);
-        if ((int) $invoices[0]->nomor_max == $kode_inv_exists) {
-          $kodetransaksi = $kode_inv_exists;
-          $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 4, "0", STR_PAD_LEFT);
+        $invoices = DB::table('penjualans')
+          ->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))
+          ->where(DB::raw('YEAR(tanggal_inv)'), $year)
+          ->where('kode_inv', 'like', 'FTS-%')
+          ->get();
+
+        $kode_inv_exists = isset($penjualanlama->kode_inv) ? substr($penjualanlama->kode_inv, -4) : null;
+
+        if ($invoices->isEmpty() || $invoices[0]->nomor_max === null) {
+          // Jika tidak ada nilai di database
+          $kodetransaksi = "FTS-" . substr($year, -2) . "-0001";
         } else {
-          $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+          $nomor_max = (int) $invoices[0]->nomor_max;
+          if ($nomor_max == (int) $kode_inv_exists) {
+            $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad($nomor_max, 4, "0", STR_PAD_LEFT);
+          } else {
+            $kodetransaksi = "FTS-" . substr($year, -2) . "-" . str_pad($nomor_max + 1, 4, "0", STR_PAD_LEFT);
+          }
         }
+
       }
+
 
       if ($request->kodeinvoice != "Baru") {
         $kodetransaksi = $request->kodeinvoice;
       }
-
       DB::table('penjualans')->where('id', $request->idpenjualan)->update([
         'kode_inv' => $kodetransaksi,
         'tanggal_inv' => $request->tanggal,
@@ -181,14 +202,19 @@ class InvoiceController extends Controller
       $year = \Carbon\Carbon::createFromFormat('Y-m-d', $request->tanggal)->format('Y');
 
       $invoices = DB::table('penjualans')->select(DB::raw('max(substr(kode_inv,-4)) as nomor_max'))->where(DB::raw('YEAR(tanggal_inv)'), $year)->where('kode_inv', 'like', 'FCS-%')->get();
-      $kode_inv_exists = substr($penjualanlama->kode_inv, -4);
-      if ((int) $invoices[0]->nomor_max == $kode_inv_exists) {
-        $kodetransaksi = $kode_inv_exists;
-        $kodetransaksi = "FCS-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 4, "0", STR_PAD_LEFT);
-      } else {
-        $kodetransaksi = "FCS-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
-      }
+      $kode_inv_exists = isset($penjualanlama->kode_inv) ? substr($penjualanlama->kode_inv, -4) : null;
 
+      if ($invoices->isEmpty() || $invoices[0]->nomor_max === null) {
+        $kodetransaksi = "FCS-" . substr($year, -2) . "-0001";
+      } else {
+        $nomor_max = (int) $invoices[0]->nomor_max;
+        if ((int) $invoices[0]->nomor_max == $kode_inv_exists) {
+          $kodetransaksi = $kode_inv_exists;
+          $kodetransaksi = "FCS-" . substr($year, -2) . "-" . str_pad($kodetransaksi, 4, "0", STR_PAD_LEFT);
+        } else {
+          $kodetransaksi = "FCS-" . substr($year, -2) . "-" . str_pad((int) $invoices[0]->nomor_max + 1, 4, "0", STR_PAD_LEFT);
+        }
+      }
 
       if ($request->kodeinvoice != "Baru") {
         $kodetransaksi = $request->kodeinvoice;
