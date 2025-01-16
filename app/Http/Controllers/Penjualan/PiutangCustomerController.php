@@ -73,17 +73,20 @@ class PiutangCustomerController extends Controller
   public function list(Request $request)
   {
     $penjualans = DB::table('penjualans')
-      ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+      ->leftJoin('bayar_piutangs', 'penjualans.id', '=', 'bayar_piutangs.id_penjualans')
+      ->leftJoin('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
       ->select('penjualans.*', 'konsumens.nama as namakonsumen')
       ->where('penjualans.pembayaran', '=', 'Credit')
       ->where('penjualans.status', '=', 'Selesai')
       ->where('penjualans.id_konsumens', '=', $request->konsumen)
       ->where('penjualans.kode_inv', '!=', '')
-      ->where('penjualans.sisa', '>', '0')
-      ->orderBy('created_at', 'desc')
-      ->get()->filter(function ($penjualan) {
-        return DB::table('bayar_piutangs')->where('id_penjualans', '=', $penjualan->id)->latest()->first() == NULL || DB::table('bayar_piutangs')->where('id_penjualans', '=', $penjualan->id)->latest()->first()->status == 'Cancel';
-      });
+      ->where('penjualans.sisa', '>', 0)
+      ->where(function ($query) {
+        $query->whereNull('bayar_piutangs.status')
+          ->orWhere('bayar_piutangs.status', '=', 'Cancel');
+      })
+      ->orderBy('penjualans.created_at', 'desc')
+      ->get();
 
     return datatables()::of($penjualans)
       ->addIndexColumn()
