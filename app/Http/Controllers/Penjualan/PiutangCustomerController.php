@@ -208,10 +208,12 @@ class PiutangCustomerController extends Controller
       $piutang = $konsumen->piutang;
       $piutangbaru = $piutang + $piutangkonsumen->nominal;
 
-      DB::table('konsumens')->where('id', $piutangkonsumen->id_konsumens)->update([
-        'piutang' => $piutangbaru,
-        "created_at" => \Carbon\Carbon::now(),
-      ]);
+      if ($piutangkonsumen->status == 'Paid') {
+        DB::table('konsumens')->where('id', $piutangkonsumen->id_konsumens)->update([
+          'piutang' => $piutangbaru,
+          "created_at" => \Carbon\Carbon::now(),
+        ]);
+      }
 
       DB::table('bayar_piutang_konsumens')->where('id', $request->id)->update([
         'status' => 'Cancel',
