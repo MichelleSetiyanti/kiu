@@ -295,16 +295,28 @@ class PiutangCustomerController extends Controller
         //   "updated_at" => \Carbon\Carbon::now()
         // ]);
 
-        // input tabel bayar_piutangs
-        $idpelunasan = DB::table('bayar_piutangs')->insertGetId([
-          'id_penjualans' => $datas[$x],
-          'id_users' => Auth::user()->id,
-          'nominal' => $sisa,
-          'status' => 'Unpaid',
-          'pelunasan_konsumen' => 'Y',
-          "created_at" => \Carbon\Carbon::now(),
-          "updated_at" => \Carbon\Carbon::now()
-        ]);
+        // Check if bayar piutangs already existed for id penjualans
+        $cancelledBayarPiutang = DB::table('bayar_piutangs')->where("id_penjualans", "=", $penjualan->id)->where("status", "Cancel")->first();
+        $isCancelBayarPiutangExist = isset($cancelledBayarPiutang);
+        if ($isCancelBayarPiutangExist) {
+          $idpelunasan = $cancelledBayarPiutang->id;
+          DB::table('bayar_piutangs')->where('id', $idpelunasan)->update([
+            'nominal' => $sisa,
+            'status' => 'Unpaid',
+            'pelunasan_konsumen' => 'Y',
+            "updated_at" => \Carbon\Carbon::now()
+          ]);
+        } else {
+          $idpelunasan = DB::table('bayar_piutangs')->insertGetId([
+            'id_penjualans' => $datas[$x],
+            'id_users' => Auth::user()->id,
+            'nominal' => $sisa,
+            'status' => 'Unpaid',
+            'pelunasan_konsumen' => 'Y',
+            "created_at" => \Carbon\Carbon::now(),
+            "updated_at" => \Carbon\Carbon::now()
+          ]);
+        }
 
         $sumtotalpelunasan = $sumtotalpelunasan + $sisa;
         $kodepelunasan = $kodepelunasan . $idpelunasan . ',';
@@ -318,6 +330,26 @@ class PiutangCustomerController extends Controller
       //   'piutang' => $piutangbaru,
       //   "updated_at" => \Carbon\Carbon::now()
       // ]);
+
+      $cancelledBayarPiutangKonsumen = DB::table('bayar_piutang_konsumens')->where('kodepelunasan', $kodepelunasan)->first();
+      $cancelledBayarPiutangKonsumenExist = isset($cancelledBayarPiutangKonsumen);
+
+      if ($cancelledBayarPiutangKonsumenExist) {
+        $idbayarpiutang = $cancelledBayarPiutangKonsumen->id;
+        DB::table('bayar_piutang_konsumens')->where('id', $idbayarpiutang)->update([
+          'kode' => $kode,
+          'kodepelunasan' => $kodepelunasan,
+          'id_users' => Auth::User()->id,
+          'id_konsumens' => $request->konsumen,
+          'nominal' => $sumtotalpelunasan,
+          'status' => 'Unpaid',
+          'tanggal_cetak' => $request->tanggalcetak,
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
+        DB::commit();
+        return Crypt::encrypt($idbayarpiutang);
+      }
+
       if ($penjualan->pajak == 0) {
         $idbayarpiutang = DB::table('bayar_piutang_konsumens')->insertGetId([
           'kode' => "-",
