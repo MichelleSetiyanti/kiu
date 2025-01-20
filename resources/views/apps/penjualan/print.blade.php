@@ -562,8 +562,11 @@ if ($nilai < 12) {
                                                 @endforeach
                                             </tbody>
                                             <tfoot>
+                                                <?php
+                                                $after2025 = date('Y', strtotime($penjualan->tanggal_inv)) > 2024;
+                                                ?>
                                                 <tr>
-                                                    <td @if ($penjualan->dp > 0) rowspan="5" @else rowspan="4" @endif
+                                                    <td @if ($penjualan->dp > 0 && $after2025) rowspan="5" @elseif ($penjualan->dp > 0 && !$after2025) rowspan="4" @elseif ($after2025) rowspan="4" @else rowspan="3" @endif
                                                         colspan="3">KETERANGAN : {!! nl2br($penjualan->keterangan) !!} </td>
                                                     <td style="text-align:right;font-weight: bold;">Sub Total (Rp)
                                                     </td>
@@ -571,18 +574,29 @@ if ($nilai < 12) {
                                                         {{ number_format($penjualan->subtotal, 0, ',', '.') }}
                                                     </td>
                                                 </tr>
+                                                @if ($after2025)
                                                 <tr>
                                                     <td style="text-align:right;font-weight: bold;"> DPP</td>
                                                     <td style="text-align:right;font-weight: bold;">
                                                         {{ number_format($penjualan->subtotal * 11 / 12, 0, ',', '.') }}
                                                     </td>
                                                 </tr>
+                                                @endif
+                                                @if ($after2025)
                                                 <tr>
-                                                    <td style="text-align:right;font-weight: bold;"> Pajak</td>
+                                                    <td style="text-align:right;font-weight: bold;"> Pajak </td>
                                                     <td style="text-align:right;font-weight: bold;">
                                                         {{ number_format($penjualan->pajak, 0, ',', '.') }}
                                                     </td>
                                                 </tr>
+                                                @else
+                                                <tr>
+                                                    <td style="text-align:right;font-weight: bold;"> Pajak 11%</td>
+                                                    <td style="text-align:right;font-weight: bold;">
+                                                        {{ number_format($penjualan->pajak, 0, ',', '.') }}
+                                                    </td>
+                                                </tr>
+                                                @endif
                                                 @if ($penjualan->dp > 0)
                                                 <tr>
                                                     <td style="text-align:right;font-weight: bold;"> DP </td>
