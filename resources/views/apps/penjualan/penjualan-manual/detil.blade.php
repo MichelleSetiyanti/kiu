@@ -834,22 +834,19 @@ use Illuminate\Support\Facades\Crypt;
                             _token: '{{ csrf_token() }}'
                         })
                         .done(function(data) {
-                            if (data != "gagal") {
-                                f_clear();
-                                toastr.success('Data ini berhasil disimpan.', 'Berhasil', {
+                            const toastAttributes = {
                                     positionClass: 'toast-top-right',
                                     containerId: 'toast-top-right',
                                     "closeButton": true
-                                });
+                                };
+                            if (data == "stockhabis") {
+                                f_clear();
+                                toastr.error('Stock Tidak Mencukupi.', 'Warning', toastAttributes);
                                 f_loadtable();
                                 f_hitungtotal();
-                            } else if (data == "stockhabis") {
+                            } else if (data != "gagal") {
                                 f_clear();
-                                toastr.error('Stock Habis.', 'Warning', {
-                                    positionClass: 'toast-top-right',
-                                    containerId: 'toast-top-right',
-                                    "closeButton": true
-                                });
+                                toastr.success('Data ini berhasil disimpan.', 'Berhasil', toastAttributes);
                                 f_loadtable();
                                 f_hitungtotal();
                             } else {

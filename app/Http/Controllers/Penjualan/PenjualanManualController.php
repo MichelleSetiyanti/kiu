@@ -267,7 +267,7 @@ class PenjualanManualController extends Controller
       $produk = $request->produk;
 
 
-      $stock = DB::table('barangs')->where('id', $produk)->value('stok');
+      $stock = DB::table('barangs')->where('id', "=",$produk)->value('stok');
 
       $subtotal = $request->totaljual * ($request->harga - $request->diskon - $request->diskonpaket - $request->diskonextra);
 
@@ -318,7 +318,6 @@ class PenjualanManualController extends Controller
 
         DB::commit();
         return 'stockhabis';
-
       }
     } catch (Exception $e) {
       DB::rollBack();
@@ -337,7 +336,7 @@ class PenjualanManualController extends Controller
       $produk = $request->produk;
 
 
-      $stock = DB::table('barangs')->where('id', $produk)->value('stok');
+      $stock = DB::table('barangs')->where("id", "=", $produk)->value('stok');
 
       $subtotal = $request->totaljual * ($request->harga - $request->diskon - $request->diskonpaket - $request->diskonextra);
 
@@ -360,23 +359,7 @@ class PenjualanManualController extends Controller
 
         return $idtabel;
       } else {
-
-        DB::table('penjualan_details')->insertGetId([
-          'id_penjualans' => $request->idpenjualan,
-          'id_barangs' => $request->produk,
-          'catatan' => $request->catatan,
-          'harga' => $request->harga,
-          'total_jual' => $request->totaljual,
-          'diskon' => $request->diskon,
-          'diskon_paket' => $request->diskonpaket,
-          'diskon_extra' => $request->diskonextra,
-          'subtotal' => $subtotal,
-          "created_at" => \Carbon\Carbon::now(),
-          "updated_at" => \Carbon\Carbon::now()
-        ]);
-
-        DB::commit();
-
+        DB::rollBack();
         return 'stockhabis';
       }
     } catch (Exception $e) {
