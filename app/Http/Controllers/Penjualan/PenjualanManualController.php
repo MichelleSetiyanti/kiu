@@ -335,12 +335,17 @@ class PenjualanManualController extends Controller
 
       $produk = $request->produk;
 
+      $isProductExist = DB::table('penjualan_details')->where(['id_penjualans' => $request->idpenjualan, 'id_barangs' => $request->produk])->exists();
+
+      if ($isProductExist) {
+        return 'product-exist';
+      }
 
       $stock = DB::table('barangs')->where("id", "=", $produk)->value('stok');
 
       $subtotal = $request->totaljual * ($request->harga - $request->diskon - $request->diskonpaket - $request->diskonextra);
 
-      if ($stock > $request->totaljual) {
+      if ($stock >= $request->totaljual) {
         $idtabel = DB::table('penjualan_details')->insertGetId([
           'id_penjualans' => $request->idpenjualan,
           'id_barangs' => $request->produk,
@@ -442,20 +447,27 @@ class PenjualanManualController extends Controller
 
       $subtotal = $request->totaljual * ($request->harga - $request->diskon - $request->diskonpaket - $request->diskonextra);
 
-      DB::table('penjualan_details')->where('id', $request->id_temp)->update([
-        'catatan' => $request->catatan,
-        'harga' => $request->harga,
-        'total_jual' => $request->totaljual,
-        'diskon' => $request->diskon,
-        'diskon_paket' => $request->diskonpaket,
-        'diskon_extra' => $request->diskonextra,
-        'subtotal' => $subtotal,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
+      $stock = DB::table('barangs')->where("id", "=", $request->product)->value('stok');
 
-      DB::commit();
+      if ($stock >= $request->totaljual) {
+        DB::table('penjualan_details')->where('id', $request->id_temp)->update([
+          'catatan' => $request->catatan,
+          'harga' => $request->harga,
+          'total_jual' => $request->totaljual,
+          'diskon' => $request->diskon,
+          'diskon_paket' => $request->diskonpaket,
+          'diskon_extra' => $request->diskonextra,
+          'subtotal' => $subtotal,
+          "updated_at" => \Carbon\Carbon::now()
+        ]);
 
-      return 'berhasil';
+        DB::commit();
+  
+        return 'berhasil';
+      } else {
+        DB::rollback();
+        return 'stockhabis';
+      }
     } catch (Exception $e) {
       DB::rollBack();
 

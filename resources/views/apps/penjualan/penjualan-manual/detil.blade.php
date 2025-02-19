@@ -840,10 +840,9 @@ use Illuminate\Support\Facades\Crypt;
                                     "closeButton": true
                                 };
                             if (data == "stockhabis") {
-                                f_clear();
                                 toastr.error('Stock Tidak Mencukupi.', 'Warning', toastAttributes);
-                                f_loadtable();
-                                f_hitungtotal();
+                            } else if(data == "product-exist") {
+                                toastr.error('Produk sudah ada pada Detail.', 'Produk Gagal Ditambahkan', toastAttributes);
                             } else if (data != "gagal") {
                                 f_clear();
                                 toastr.success('Data ini berhasil disimpan.', 'Berhasil', toastAttributes);
@@ -883,6 +882,12 @@ use Illuminate\Support\Facades\Crypt;
                                 $("#modal").modal('hide');
                                 f_loadtable();
                                 f_hitungtotal();
+                            } else if(data == "stockhabis") {
+                                toastr.error('Stock Tidak Mencukupi.', 'Warning', {
+                                    positionClass: 'toast-top-right',
+                                    containerId: 'toast-top-right',
+                                    "closeButton": true
+                                });
                             } else {
                                 Swal.fire('Peringatan', 'Data gagal tersimpan!', 'error');
                             }
