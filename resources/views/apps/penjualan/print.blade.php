@@ -584,7 +584,7 @@ if ($nilai < 12) {
                                                 @endif
                                                 @if ($after2025)
                                                 <tr>
-                                                    <td style="text-align:right;font-weight: bold;"> Pajak </td>
+                                                    <td style="text-align:right;font-weight: bold;"> PPN </td>
                                                     <td style="text-align:right;font-weight: bold;">
                                                         {{ number_format($penjualan->pajak, 0, ',', '.') }}
                                                     </td>
@@ -615,7 +615,7 @@ if ($nilai < 12) {
                                                 </tr>
                                                 @else
                                                 <tr>
-                                                    <td style="text-align:right;font-weight: bold;"> TOTAL
+                                                    <td style="text-align:right;font-weight: bold;"> Total (Rp)
                                                     </td>
                                                     <td style="text-align:right;font-weight: bold;">
                                                         {{ number_format($penjualan->grandtotal, 0, ',', '.') }}
