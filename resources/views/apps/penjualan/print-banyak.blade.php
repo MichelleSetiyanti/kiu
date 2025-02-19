@@ -584,7 +584,7 @@ if ($nilai < 12) {
 
                                                     @if ($after2025)
                                                     <tr>
-                                                        <td style="text-align:right;font-weight: bold;"> Pajak </td>
+                                                        <td style="text-align:right;font-weight: bold;"> PPN </td>
                                                         <td style="text-align:right;font-weight: bold;">
                                                             {{ number_format($penjualan->sumpajak, 0, ',', '.') }}
                                                         </td>
@@ -606,7 +606,7 @@ if ($nilai < 12) {
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td style="text-align:right;font-weight: bold;"> TOTAL
+                                                        <td style="text-align:right;font-weight: bold;"> Total (Rp)
                                                         </td>
                                                         <td style="text-align:right;font-weight: bold;">
                                                             {{ number_format($penjualan->sumgrandtotal - $penjualan->sumdp, 0, ',', '.') }}
@@ -614,7 +614,7 @@ if ($nilai < 12) {
                                                     </tr>
                                                     @else
                                                     <tr>
-                                                        <td style="text-align:right;font-weight: bold;"> TOTAL
+                                                        <td style="text-align:right;font-weight: bold;"> Total (Rp)
                                                         </td>
                                                         <td style="text-align:right;font-weight: bold;">
                                                             {{ number_format($penjualan->sumgrandtotal, 0, ',', '.') }}
