@@ -177,11 +177,6 @@
       "icon": "feather icon-list"
     },
     {
-      "url": "/report/mutasi-keluar",
-      "name": "Pengurangan Stok Barang Pabrik",
-      "icon": "feather icon-list"
-    },
-    {
       "url": "/report/mutasi-barang",
       "name": "Lap. Mutasi Barang",
       "icon": "feather icon-list"
