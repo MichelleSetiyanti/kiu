@@ -213,12 +213,15 @@
 
     });
 
+    let currentStock = 0;
+
     function getstokbarang(param){
         let link = "/mutasi/toko-gudang/getstok"; // Ubah link untuk update
 
         $.post(link,{param:param, _token: '{{csrf_token()}}'})
             .done(function(data){
                 $("#stokbarang").html("Stok Saat Ini : "+data);
+                currentStock = parseInt(data);
             });
     }
 
@@ -355,12 +358,21 @@
         if($( this ).prop( 'required' )){ if ( ! $( this ).val() ) { empty = true; } }
       });
 
+      
+      // Validate qty input based on currentStock
+      let qty = accounting.unformat($("#qty").val() , ',');
+      if (qty > currentStock) {
+          toastr.warning('Quantity melebihi stok saat ini.', 'Peringatan', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
+          return;
+      } else if (qty <= 0) {
+          toastr.warning('Jumlah input minimal Quantity adalah 1.', 'Peringatan', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
+          return;
+      }
+
       //tuliskan coding didalam if kalau udh ga ada field required yg kosong
       if (empty == false) {
         let link = "/mutasi/toko-gudang/store"; // Link default untuk simpan
         let data = $("#form").serialize();
-
-        let qty = accounting.unformat($("#qty").val() , ',');
 
         if(param == "Edit"){
           link = "/mutasi/toko-gudang/update"; // Ubah link untuk update
