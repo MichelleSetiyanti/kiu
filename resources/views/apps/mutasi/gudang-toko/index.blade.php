@@ -221,7 +221,7 @@
         $.post(link,{param:param, _token: '{{csrf_token()}}'})
             .done(function(data){
                 $("#stokbarang").html("Stok Saat Ini : "+data);
-                currentStock = parseInt(data);
+                currentStock = parseFloat(data);
             });
     }
 
