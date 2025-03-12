@@ -373,6 +373,18 @@
           return;
         }
 
+        let currentStock = parseInt($("#stokbarang").text().replace(/[^0-9-]/g, '')) || 0;
+        
+        if (qty > currentStock){
+          Swal.fire({
+            title: 'Warning',
+            text: "Kuantiti Pengurangan Melebihi Stok Saat ini",
+            type: 'warning',
+          });
+          $("#btnsubmit").attr("disabled", false);
+          return;
+        }
+
         if(param == "Edit"){
           link = "/mutasi/keluar/update"; // Ubah link untuk update
         }
@@ -384,6 +396,7 @@
             toastr.success('Pendapatan berhasil terinput.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
             f_loadtable();
           });
+        $("#btnsubmit").attr("disabled", false);
       }
 
     }

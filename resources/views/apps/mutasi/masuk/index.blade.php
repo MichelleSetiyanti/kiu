@@ -383,6 +383,7 @@
             toastr.success('Pendapatan berhasil terinput.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
             f_loadtable();
           });
+        $("#btnsubmit").attr("disabled", false);
       }
 
     }
