@@ -348,6 +348,7 @@
 
     function f_simpan(param){
       $("#form").addClass('was-validated');
+      $("#btnsubmit").attr("disabled", true);
 
       //cek kalau ada field required yang masih kosong
       let empty = false;
@@ -367,6 +368,7 @@
             text: "Kuantiti Penambahan Minimal Berjumlah 1",
             type: 'warning',
           });
+          $("#btnsubmit").attr("disabled", false);
           return;
         }
 
@@ -376,6 +378,7 @@
 
         $.post(link,{data:data, qty:qty, _token: '{{csrf_token()}}'})
           .done(function(data){
+            $("#btnsubmit").attr("disabled", false);
             f_clear();
             toastr.success('Pendapatan berhasil terinput.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
             f_loadtable();
