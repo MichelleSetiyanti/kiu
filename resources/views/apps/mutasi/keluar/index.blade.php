@@ -362,6 +362,15 @@
 
         let qty = accounting.unformat($("#qty").val() , ',');
 
+        if (qty <= 0){
+          Swal.fire({
+            title: 'Warning',
+            text: "Kuantiti Pengurangan Minimal Berjumlah 1",
+            type: 'warning',
+          });
+          return;
+        }
+
         if(param == "Edit"){
           link = "/mutasi/keluar/update"; // Ubah link untuk update
         }

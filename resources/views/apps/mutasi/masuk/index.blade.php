@@ -361,6 +361,14 @@
         let data = $("#form").serialize();
 
         let qty = accounting.unformat($("#qty").val() , ',');
+        if (qty <= 0){
+          Swal.fire({
+            title: 'Warning',
+            text: "Kuantiti Penambahan Minimal Berjumlah 1",
+            type: 'warning',
+          });
+          return;
+        }
 
         if(param == "Edit"){
           link = "/mutasi/masuk/update"; // Ubah link untuk update
