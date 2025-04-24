@@ -347,55 +347,62 @@
     }
 
     function f_simpan(param){
-      $("#form").addClass('was-validated');
-      $("#btnsubmit").attr("disabled", true);
+      try
+      {
 
-      //cek kalau ada field required yang masih kosong
-      let empty = false;
-      $('#form').find('select, textarea, input').each(function(){
-        if($( this ).prop( 'required' )){ if ( ! $( this ).val() ) { empty = true; } }
-      });
-
-      //tuliskan coding didalam if kalau udh ga ada field required yg kosong
-      if (empty == false) {
-        let link = "/mutasi/keluar/store"; // Link default untuk simpan
-        let data = $("#form").serialize();
-
-        let qty = accounting.unformat($("#qty").val() , ',');
-
-        if (qty <= 0){
-          Swal.fire({
-            title: 'Warning',
-            text: "Kuantiti Pengurangan Minimal Berjumlah 1",
-            type: 'warning',
-          });
-          $("#btnsubmit").attr("disabled", false);
-          return;
+        $("#form").addClass('was-validated');
+  
+        //cek kalau ada field required yang masih kosong
+        let empty = false;
+        $('#form').find('select, textarea, input').each(function(_, element){
+          if($( element ).prop( 'required' )){ if ( ! $( element ).val() ) { empty = true; } }
+        });
+  
+        //tuliskan coding didalam if kalau udh ga ada field required yg kosong
+        if (empty == false) {
+          let link = "/mutasi/keluar/store"; // Link default untuk simpan
+          let data = $("#form").serialize();
+  
+          let qty = accounting.unformat($("#qty").val() , ',');
+  
+          if (qty <= 0){
+            Swal.fire({
+              title: 'Warning',
+              text: "Kuantiti Pengurangan Minimal Berjumlah 1",
+              type: 'warning',
+            });
+            return;
+          }
+  
+          let currentStock = parseInt($("#stokbarang").text().replace(/[^0-9-]/g, '')) || 0;
+          
+          if (qty > currentStock){
+            Swal.fire({
+              title: 'Warning',
+              text: "Kuantiti Pengurangan Melebihi Stok Saat ini",
+              type: 'warning',
+            });
+            return;
+          }
+  
+          if(param == "Edit"){
+            link = "/mutasi/keluar/update"; // Ubah link untuk update
+          }
+  
+          $("#btnsubmit").attr("disabled", true);
+  
+          $.post(link,{data:data, qty:qty, _token: '{{csrf_token()}}'})
+            .done(function(data){
+              $("#btnsubmit").attr("disabled", false);
+              f_clear();
+              toastr.success('Pendapatan berhasil terinput.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
+              f_loadtable();
+            });
         }
-
-        let currentStock = parseInt($("#stokbarang").text().replace(/[^0-9-]/g, '')) || 0;
-        
-        if (qty > currentStock){
-          Swal.fire({
-            title: 'Warning',
-            text: "Kuantiti Pengurangan Melebihi Stok Saat ini",
-            type: 'warning',
-          });
-          $("#btnsubmit").attr("disabled", false);
-          return;
-        }
-
-        if(param == "Edit"){
-          link = "/mutasi/keluar/update"; // Ubah link untuk update
-        }
-
-        $.post(link,{data:data, qty:qty, _token: '{{csrf_token()}}'})
-          .done(function(data){
-            $("#btnsubmit").attr("disabled", false);
-            f_clear();
-            toastr.success('Pendapatan berhasil terinput.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
-            f_loadtable();
-          });
+      }
+      catch(e){
+        console.log(e);
+        toastr.error('Terjadi kesalahan, silahkan coba lagi.', 'Error', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
         $("#btnsubmit").attr("disabled", false);
       }
 

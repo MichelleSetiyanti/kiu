@@ -350,40 +350,51 @@
     }
 
     function f_simpan(param){
-      $("#form").addClass('was-validated');
+      try
+      {
 
-      //cek kalau ada field required yang masih kosong
-      let empty = false;
-      $('#form').find('select, textarea, input').each(function(){
-        if($( this ).prop( 'required' )){ if ( ! $( this ).val() ) { empty = true; } }
-      });
-
-      
-      // Validate qty input based on currentStock
-      let qty = accounting.unformat($("#qty").val() , ',');
-      if (qty > currentStock) {
-          toastr.warning('Quantity melebihi stok saat ini.', 'Peringatan', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
-          return;
-      } else if (qty <= 0) {
-          toastr.warning('Jumlah input minimal Quantity adalah 1.', 'Peringatan', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
-          return;
-      }
-
-      //tuliskan coding didalam if kalau udh ga ada field required yg kosong
-      if (empty == false) {
-        let link = "/mutasi/toko-gudang/store"; // Link default untuk simpan
-        let data = $("#form").serialize();
-
-        if(param == "Edit"){
-          link = "/mutasi/toko-gudang/update"; // Ubah link untuk update
+        $("#form").addClass('was-validated');
+  
+        //cek kalau ada field required yang masih kosong
+        let empty = false;
+        $('#form').find('select, textarea, input').each(function(){
+          if($( this ).prop( 'required' )){ if ( ! $( this ).val() ) { empty = true; } }
+        });
+  
+        
+        // Validate qty input based on currentStock
+        let qty = accounting.unformat($("#qty").val() , ',');
+        if (qty > currentStock) {
+            toastr.warning('Quantity melebihi stok saat ini.', 'Peringatan', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
+            return;
+        } else if (qty <= 0) {
+            toastr.warning('Jumlah input minimal Quantity adalah 1.', 'Peringatan', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
+            return;
         }
-
-        $.post(link,{data:data, qty:qty, _token: '{{csrf_token()}}'})
-          .done(function(data){
-            f_clear();
-            toastr.success('Pendapatan berhasil terinput.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
-            f_loadtable();
-          });
+  
+        //tuliskan coding didalam if kalau udh ga ada field required yg kosong
+        if (empty == false) {
+          let link = "/mutasi/toko-gudang/store"; // Link default untuk simpan
+          let data = $("#form").serialize();
+  
+          if(param == "Edit"){
+            link = "/mutasi/toko-gudang/update"; // Ubah link untuk update
+          }
+  
+          $("#btnsubmit").attr("disabled", true);
+          $.post(link,{data:data, qty:qty, _token: '{{csrf_token()}}'})
+            .done(function(data){
+              f_clear();
+              $("#btnsubmit").attr("disabled", false);
+              toastr.success('Pendapatan berhasil terinput.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
+              f_loadtable();
+            });
+        }
+      }
+      catch(e){
+        console.log(e);
+        toastr.error('Terjadi kesalahan, silahkan coba lagi.', 'Error', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
+        $("#btnsubmit").attr("disabled", false);
       }
 
     }

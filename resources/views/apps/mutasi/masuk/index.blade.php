@@ -347,42 +347,48 @@
     }
 
     function f_simpan(param){
-      $("#form").addClass('was-validated');
-      $("#btnsubmit").attr("disabled", true);
-
-      //cek kalau ada field required yang masih kosong
-      let empty = false;
-      $('#form').find('select, textarea, input').each(function(){
-        if($( this ).prop( 'required' )){ if ( ! $( this ).val() ) { empty = true; } }
-      });
-
-      //tuliskan coding didalam if kalau udh ga ada field required yg kosong
-      if (empty == false) {
-        let link = "/mutasi/masuk/store"; // Link default untuk simpan
-        let data = $("#form").serialize();
-
-        let qty = accounting.unformat($("#qty").val() , ',');
-        if (qty <= 0){
-          Swal.fire({
-            title: 'Warning',
-            text: "Kuantiti Penambahan Minimal Berjumlah 1",
-            type: 'warning',
-          });
-          $("#btnsubmit").attr("disabled", false);
-          return;
+      try
+      {
+        $("#form").addClass('was-validated');
+  
+        //cek kalau ada field required yang masih kosong
+        let empty = false;
+        $('#form').find('select, textarea, input').each(function(_, element){
+          if($( element ).prop( 'required' )){ if ( ! $( element ).val() ) { empty = true; } }
+        });
+  
+        //tuliskan coding didalam if kalau udh ga ada field required yg kosong
+        if (empty == false) {
+          let link = "/mutasi/masuk/store"; // Link default untuk simpan
+          let data = $("#form").serialize();
+  
+          let qty = accounting.unformat($("#qty").val() , ',');
+          if (qty <= 0){
+            Swal.fire({
+              title: 'Warning',
+              text: "Kuantiti Penambahan Minimal Berjumlah 1",
+              type: 'warning',
+            });
+            return;
+          }
+  
+          if(param == "Edit"){
+            link = "/mutasi/masuk/update"; // Ubah link untuk update
+          }
+          $("#btnsubmit").attr("disabled", true);
+          $.post(link,{data:data, qty:qty, _token: '{{csrf_token()}}'})
+            .done(function(data){
+              $("#btnsubmit").attr("disabled", false);
+              f_clear();
+              toastr.success('Pendapatan berhasil terinput.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
+              f_loadtable();
+            });
         }
-
-        if(param == "Edit"){
-          link = "/mutasi/masuk/update"; // Ubah link untuk update
-        }
-
-        $.post(link,{data:data, qty:qty, _token: '{{csrf_token()}}'})
-          .done(function(data){
-            $("#btnsubmit").attr("disabled", false);
-            f_clear();
-            toastr.success('Pendapatan berhasil terinput.', 'Berhasil', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
-            f_loadtable();
-          });
+        
+      }
+      catch(e){
+        console.log(e);
+        toastr.error('Terjadi kesalahan, silahkan coba lagi.', 'Error', { positionClass: 'toast-top-right', containerId: 'toast-top-right', "closeButton": true });
         $("#btnsubmit").attr("disabled", false);
       }
 

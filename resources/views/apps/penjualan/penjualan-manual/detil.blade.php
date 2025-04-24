@@ -805,10 +805,16 @@ use Illuminate\Support\Facades\Crypt;
             } else {
                 Swal.fire('Peringatan', 'Pilih Produk terlebih dahulu!', 'error');
             }
-
+            
         }
-
+        
         function f_addtemp() {
+            const toastAttributes = {
+                    positionClass: 'toast-top-right',
+                    containerId: 'toast-top-right',
+                    "closeButton": true
+                };
+
             let produks = document.getElementById('produks').value;
             let action = $("#action").val();
 
@@ -820,6 +826,12 @@ use Illuminate\Support\Facades\Crypt;
                 let diskon = accounting.unformat($("#diskon").val(), ',');
                 let diskonpaket = accounting.unformat($("#diskonpaket").val(), ',');
                 let diskonextra = accounting.unformat($("#diskonextra").val(), ',');
+
+                // Validate
+                if(totaljual <= 0){
+                    toastr.error('Input Qty minimal berjumlah 1.', 'Warning', toastAttributes);
+                    return;
+                }
 
                 if (action == "Simpan") {
                     $.post('/penjualan/penjualan-manual/store-detil', {
@@ -834,11 +846,6 @@ use Illuminate\Support\Facades\Crypt;
                             _token: '{{ csrf_token() }}'
                         })
                         .done(function(data) {
-                            const toastAttributes = {
-                                    positionClass: 'toast-top-right',
-                                    containerId: 'toast-top-right',
-                                    "closeButton": true
-                                };
                             if (data == "stockhabis") {
                                 toastr.error('Stock Tidak Mencukupi.', 'Warning', toastAttributes);
                             } else if(data == "product-exist") {
