@@ -827,13 +827,14 @@ use Illuminate\Support\Facades\Crypt;
                 let diskonpaket = accounting.unformat($("#diskonpaket").val(), ',');
                 let diskonextra = accounting.unformat($("#diskonextra").val(), ',');
 
-                // Validate
-                if(totaljual <= 0){
-                    toastr.error('Input Qty minimal berjumlah 1.', 'Warning', toastAttributes);
-                    return;
-                }
-
+                
                 if (action == "Simpan") {
+                    // Validate
+                    if(totaljual <= 0){
+                        toastr.error('Input Qty minimal berjumlah 1.', 'Warning', toastAttributes);
+                        return;
+                    }
+                    
                     $.post('/penjualan/penjualan-manual/store-detil', {
                             idpenjualan: idpenjualan,
                             produk: produks,
@@ -866,6 +867,12 @@ use Illuminate\Support\Facades\Crypt;
                     diskon = accounting.unformat($("#diskondetil").val(), ',');
                     diskonpaket = accounting.unformat($("#diskonpaketdetil").val(), ',');
                     diskonextra = accounting.unformat($("#diskonextradetil").val(), ',');
+
+                    // Validate
+                    if(totaljual <= 0){
+                        toastr.error('Input Qty minimal berjumlah 1.', 'Warning', toastAttributes);
+                        return;
+                    }
 
                     $.post('/penjualan/penjualan-manual/update-detil', {
                             id_temp: id_temp,
