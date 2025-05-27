@@ -62,8 +62,6 @@ class SuratJalanController extends Controller
 
   public function store(Request $request)
   {
-
-
     DB::beginTransaction();
 
     try {
@@ -73,46 +71,46 @@ class SuratJalanController extends Controller
 
       if ($penjualanlama->pajak > 0) {
         $invoices = DB::table('penjualans')
-            ->select(DB::raw('max(substr(kode_sj, -4)) as nomor_max'))
-            ->where(DB::raw('YEAR(tanggal)'), $year)
-            ->where('kode_sj', 'like', 'S-%')
-            ->get();
-    
+          ->select(DB::raw('max(substr(kode_sj, -4)) as nomor_max'))
+          ->where(DB::raw('YEAR(tanggal)'), $year)
+          ->where('kode_sj', 'like', 'S-%')
+          ->get();
+
         $kode_inv_exists = isset($penjualanlama->kode_sj) ? substr($penjualanlama->kode_sj, -4) : null;
-    
+
         // Ambil nomor maksimum dari hasil query
         $nomor_max = $invoices->isEmpty() || $invoices[0]->nomor_max === null ? 0 : (int) $invoices[0]->nomor_max;
-    
+
         // Penomoran baru
         if ($nomor_max === 0) {
-            $nomor_baru = 1; // Dimulai dari 1 jika tidak ada nomor sebelumnya
+          $nomor_baru = 1; // Dimulai dari 1 jika tidak ada nomor sebelumnya
         } else {
-            $nomor_baru = $nomor_max + 1; // Tambahkan nomor jika ada nomor sebelumnya
+          $nomor_baru = $nomor_max + 1; // Tambahkan nomor jika ada nomor sebelumnya
         }
-    
+
         // Format nomor transaksi
         $kodetransaksi = "S-" . substr($year, -2) . "-" . str_pad($nomor_baru, 4, "0", STR_PAD_LEFT);
-    } else {
+      } else {
         $invoices = DB::table('penjualans')
-            ->select(DB::raw('max(substr(kode_sj, -5)) as nomor_max'))
-            ->where(DB::raw('YEAR(tanggal)'), $year)
-            ->where('kode_sj', 'like', 'SJS-%')
-            ->get();
-    
+          ->select(DB::raw('max(substr(kode_sj, -5)) as nomor_max'))
+          ->where(DB::raw('YEAR(tanggal)'), $year)
+          ->where('kode_sj', 'like', 'SJS-%')
+          ->get();
+
         $kode_inv_exists = isset($penjualanlama->kode_sj) ? substr($penjualanlama->kode_sj, -5) : null;
-    
+
         $nomor_max = $invoices->isEmpty() || $invoices[0]->nomor_max === null ? 0 : (int) $invoices[0]->nomor_max;
-    
+
         if ($nomor_max === 0) {
-            $nomor_baru = 1;
+          $nomor_baru = 1;
         } else {
-            $nomor_baru = $nomor_max + 1;
+          $nomor_baru = $nomor_max + 1;
         }
-    
+
         $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad($nomor_baru, 5, "0", STR_PAD_LEFT);
-    }
-    
-    
+      }
+
+
 
       DB::table('penjualans')->where('id', $request->idpenjualan)->update([
         'kode_sj' => $kodetransaksi,
@@ -130,6 +128,11 @@ class SuratJalanController extends Controller
         $stoklama = $barang->stok;
 
         $stokbaru = $stoklama - $penjualandetail->total_jual;
+
+        if ($stokbaru < 0) {
+          DB::rollBack();
+          return 'insufficient_stock';
+        }
 
         DB::table('barangs')->where('id', $penjualandetail->id_barangs)->update([
           'stok' => $stokbaru,

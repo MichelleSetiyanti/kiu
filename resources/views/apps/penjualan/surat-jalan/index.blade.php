@@ -530,6 +530,23 @@
                     _token: '{{ csrf_token() }}'
                 })
                 .done(function(data) {
+                    if (data == "insufficient_stock") {
+                        toastr.error('Stok barang kurang dari jumlah yang diminta.', 'Gagal', {
+                            positionClass: 'toast-top-right',
+                            containerId: 'toast-top-right',
+                            "closeButton": true
+                        });
+                        return;
+                    } else if (data == "gagal") {
+                        toastr.error('Data gagal disimpan.', 'Gagal', {
+                            positionClass: 'toast-top-right',
+                            containerId: 'toast-top-right',
+                            "closeButton": true
+                        });
+                        return;
+                    }
+
+
                     $("#modal3").modal('hide');
                     toastr.success('Data berhasil terinput.', 'Berhasil', {
                         positionClass: 'toast-top-right',
