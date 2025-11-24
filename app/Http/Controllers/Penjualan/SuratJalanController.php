@@ -120,29 +120,58 @@ class SuratJalanController extends Controller
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
-      $penjualan_details = DB::table('penjualan_details')->where('id_penjualans', $request->idpenjualan)->get();
+      $penjualan_details = DB::table('penjualan_details')
+                  ->where('id_penjualans', $request->idpenjualan)
+                  ->get();
 
-      foreach ($penjualan_details as $penjualandetail) {
-        $barang = DB::table('barangs')->where('id', $penjualandetail->id_barangs)->first();
+        foreach ($penjualan_details as $penjualandetail) {
 
-        $stoklama = $barang->stok;
+            $barang = DB::table('barangs')
+                ->where('id', $penjualandetail->id_barangs)
+                ->lockForUpdate()
+                ->first();
 
-        $stokbaru = $stoklama - $penjualandetail->total_jual;
+            if (! $barang) {
+                DB::rollBack();
+                return 'product_not_found';
+            }
 
-        if ($stokbaru < 0) {
-          DB::rollBack();
-          return 'insufficient_stock';
+            $stoklama = (int) $barang->stok;
+            $qty = (int) $penjualandetail->total_jual;
+            $stokbaru = $stoklama - $qty;
+
+            if ($stokbaru < 0) {
+                DB::rollBack();
+                return 'insufficient_stock';
+            }
+
+            // update stok di table barangs
+            DB::table('barangs')->where('id', $penjualandetail->id_barangs)->update([
+                'stok' => $stokbaru,
+                'updated_at' => \Carbon\Carbon::now()
+            ]);
+
+            // insert ke stock_movements untuk stok keluar (type = 'out')
+            DB::table('stock_movements')->insert([
+                'product_id'     => $penjualandetail->id_barangs,
+                'store_id'       => $request->store_id ?? null, // jika ada informasi store_id di request
+                'movement_date'  => \Carbon\Carbon::now(),
+                'type'           => 'out',
+                'quantity'       => $qty,
+                'before_stock'   => $stoklama,
+                'after_stock'    => $stokbaru,
+                'reference_type' => 'surat_jalan',
+                'reference_id'   => $request->idpenjualan, // referensi ke penjualan / surat jalan
+                'note'           => 'Surat Jalan / Penjualan #' . $request->idpenjualan,
+                'created_by'     => Auth::id(),
+                'created_at'     => \Carbon\Carbon::now(),
+                'updated_at'     => \Carbon\Carbon::now(),
+            ]);
         }
 
-        DB::table('barangs')->where('id', $penjualandetail->id_barangs)->update([
-          'stok' => $stokbaru,
-          "updated_at" => \Carbon\Carbon::now()
-        ]);
-      }
+        DB::commit();
 
-      DB::commit();
-
-      return 'berhasil';
+        return 'berhasil';
     } catch (Exception $e) {
       DB::rollBack();
 
