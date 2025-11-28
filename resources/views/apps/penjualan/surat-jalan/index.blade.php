@@ -198,8 +198,8 @@
                     <div class="modal-footer">
 
                         <div class="col-sm-12 text-right mt-2 mb-1">
-                            <button type="button" class="btn btn-primary" value="Simpan" id="btnsubmit"
-                                name="btnsubmit" onclick="f_simpansj()">Submit</button>
+                            <button type="button" class="btn btn-primary" value="Simpan" id="btnsubmit_sj"
+                                name="btnsubmit_sj" onclick="f_simpansj()">Submit</button>
                         </div>
 
                     </div>
@@ -519,45 +519,58 @@
             let alamat = $("#alamat").val();
             let encryptid = $("#encryptid").val();
 
-            let link = "/penjualan/surat-jalan/store"; // Ubah link untuk update
+            $("#btnsubmit_sj").prop("disabled", true);
+
+            let link = "/penjualan/surat-jalan/store";
 
             $.post(link, {
-                    tanggal: tanggal,
-                    idpenjualan: idpenjualan,
-                    ekspedisi: ekspedisi,
-                    alamat: alamat,
-                    encryptid: encryptid,
-                    _token: '{{ csrf_token() }}'
-                })
-                .done(function(data) {
-                    if (data == "insufficient_stock") {
-                        toastr.error('Stok barang kurang dari jumlah yang diminta.', 'Gagal', {
-                            positionClass: 'toast-top-right',
-                            containerId: 'toast-top-right',
-                            "closeButton": true
-                        });
-                        return;
-                    } else if (data == "gagal") {
-                        toastr.error('Data gagal disimpan.', 'Gagal', {
-                            positionClass: 'toast-top-right',
-                            containerId: 'toast-top-right',
-                            "closeButton": true
-                        });
-                        return;
-                    }
+                tanggal: tanggal,
+                idpenjualan: idpenjualan,
+                ekspedisi: ekspedisi,
+                alamat: alamat,
+                encryptid: encryptid,
+                _token: '{{ csrf_token() }}'
+            })
+            .done(function(data) {
 
-
-                    $("#modal3").modal('hide');
-                    toastr.success('Data berhasil terinput.', 'Berhasil', {
+                if (data == "insufficient_stock") {
+                    $("#btnsubmit_sj").prop("disabled", false);
+                    toastr.error('Stok barang kurang dari jumlah yang diminta.', 'Gagal', {
                         positionClass: 'toast-top-right',
                         containerId: 'toast-top-right',
-                        "closeButton": true
+                        closeButton: true
                     });
-                    f_loadtable();
+                    return;
+                }
 
-                    $("#ekspedisi").val("");
-                    window.open('/penjualan/surat-jalan/print/' + encryptid, '_blank');
+                if (data == "gagal") {
+                    $("#btnsubmit_sj").prop("disabled", false);
+                    toastr.error('Data gagal disimpan.', 'Gagal', {
+                        positionClass: 'toast-top-right',
+                        containerId: 'toast-top-right',
+                        closeButton: true
+                    });
+                    return;
+                }
+
+                $("#modal3").modal('hide');
+                toastr.success('Data berhasil terinput.', 'Berhasil', {
+                    positionClass: 'toast-top-right',
+                    containerId: 'toast-top-right',
+                    closeButton: true
                 });
+
+                f_loadtable();
+
+                $("#ekspedisi").val("");
+                window.open('/penjualan/surat-jalan/print/' + encryptid, '_blank');
+            })
+            .fail(function(){
+                $("#btnsubmit_sj").prop("disabled", false);
+                toastr.error('Terjadi kesalahan server, coba lagi.', 'Error', {
+                    closeButton: true
+                });
+            });
         }
     </script>
 

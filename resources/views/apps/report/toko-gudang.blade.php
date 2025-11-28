@@ -231,7 +231,7 @@
             serverSide: true,
             ajax: "/report/toko-gudang/list?tanggalmulai=" + tanggalmulai + "&tanggalselesai=" + tanggalselesai + "&produks=" + produks,
             columns: [
-                {data: 'DT_RowIndex', name: 'DT_RowIndex', searchable: false},
+                {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                 {data: 'kode', name: 'kode'},
                 {data: 'namabarang', name: 'namabarang'},
                 {data: 'qty', name: 'qty', render: $.fn.dataTable.render.number( '.', ',', 2, '' )},
@@ -246,9 +246,6 @@
             ],
             responsive: false,
             columnDefs: [
-                {
-                    orderable: true,
-                }
             ],
             dom:
                 '<"top"<"action-filters"Blf>><"clear">rt<"bottom"<"actions">pi>',

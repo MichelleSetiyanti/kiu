@@ -607,9 +607,17 @@ class PenjualanManualController extends Controller
         $query->where('penjualans.tipe_penjualan', '=', 'Manual');
         $query->where('penjualans.status', '=', 'Selesai');
       })
-      ->orderBy('updated_at', 'desc')
-      ->get();
+      ->orderBy('updated_at', 'desc');
     return datatables()::of($penjualans)
+      ->filter(function ($query) use ($request) {
+            $search = $request->get('search')['value'] ?? null;
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('penjualans.kode', 'like', "%{$search}%");
+                });
+            }
+        })
       ->addColumn('action', function ($penjualans) {
         $encrypt = Crypt::encrypt($penjualans->id);
 

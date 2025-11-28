@@ -24,25 +24,35 @@ class StockBarangController extends Controller
     return view('apps.report.stok-barang-beli',[ 'kategoris' => $kategoris ]);
   }
 
-  public function list(Request $request){
-    $barangs = DB::table('barangs')
-      ->join('kategori_barangs','barangs.id_kategori','=','kategori_barangs.id')
-      ->select('barangs.*','kategori_barangs.nama as namakategori')
-      ->orderBy('barangs.kode', 'asc')
-      ->where(function($query) use ($request)
-      {
+  public function list(Request $request)
+  {
+      $barangs = DB::table('barangs')
+          ->join('kategori_barangs', 'barangs.id_kategori', '=', 'kategori_barangs.id')
+          ->select('barangs.*', 'kategori_barangs.nama as namakategori')
+          ->where(function ($query) use ($request) {
 
-        if($request->kategori != "All"){
-          $query->where('barangs.id_kategori', $request->kategori);
-        }
+              if ($request->kategori != "All") {
+                  $query->where('barangs.id_kategori', $request->kategori);
+              }
 
-        $query->where('barangs.id','!=','0');
+              $query->where('barangs.id', '!=', '0');
+          })
+          ->orderBy('barangs.kode', 'asc');
 
-      })
-      ->get();
-    return datatables()::of($barangs)
-      ->addIndexColumn()
-      ->make(true);
+      return datatables()::of($barangs)
+          ->filter(function ($query) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
+
+              if ($search) {
+                  $query->where(function ($q) use ($search) {
+                      $q->where('barangs.kode', 'like', "%{$search}%")      
+                        ->orWhere('barangs.nama', 'like', "%{$search}%")  
+                        ->orWhere('kategori_barangs.nama', 'like', "%{$search}%");
+                  });
+              }
+          })
+          ->addIndexColumn()
+          ->make(true);
   }
 
 }

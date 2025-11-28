@@ -27,36 +27,51 @@ class GiroCekController extends Controller
       return view('apps.report.giro-cek',[ 'clients' => $konsumens ]);
     }
 
-    public function list(Request $request){
-      $girocek = DB::table('giros')
-        ->join('konsumens','giros.id_konsumens','=','konsumens.id')
-        ->select('giros.*','konsumens.nama as namakonsumen')
-        ->where(function($query) use ($request)
-        {
+    public function list(Request $request)
+    {
+        $girocek = DB::table('giros as g')
+            ->join('konsumens as k', 'g.id_konsumens', '=', 'k.id')
+            ->select(
+                'g.*',
+                'k.nama as namakonsumen'
+            )
+            ->where(function($query) use ($request) {
 
-          if ($request->konsumen != "All") {
-            $query->where('giros.id_konsumens', '=' , $request->konsumen);
-          }
+                if ($request->konsumen != "All") {
+                    $query->where('g.id_konsumens', $request->konsumen);
+                }
 
-          if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
-            $query->where('giros.tanggal_cair', '=' , $request->tanggalmulai);
-          }
+                if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
+                    $query->where('g.tanggal_cair', $request->tanggalmulai);
+                }
 
-          if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
-            $query->where('giros.tanggal_cair', '=' ,$request->tanggalselesai);
-          }
+                if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
+                    $query->where('g.tanggal_cair', $request->tanggalselesai);
+                }
 
-          if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
-            $query->whereBetween('giros.tanggal_cair', [$request->tanggalmulai, $request->tanggalselesai]);
-          }
+                if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
+                    $query->whereBetween('g.tanggal_cair', [
+                        $request->tanggalmulai,
+                        $request->tanggalselesai
+                    ]);
+                }
 
-          $query->where('giros.id','!=','0');
+                $query->where('g.id', '!=', '0');
+            })
+            ->orderBy('g.id', 'desc'); 
 
-        })
-        ->orderBy('giros.id', 'desc')
-        ->get();
-      return datatables()::of($girocek)
-        ->addIndexColumn()
-        ->make(true);
+        return datatables()::of($girocek)
+            ->filter(function ($query) use ($request) {
+                $search = $request->get('search')['value'] ?? null;
+
+                if ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('g.nomor_giro', 'like', "%{$search}%")   
+                          ->orWhere('k.nama', 'like', "%{$search}%");
+                    });
+                }
+            })
+            ->addIndexColumn()
+            ->make(true);
     }
 }

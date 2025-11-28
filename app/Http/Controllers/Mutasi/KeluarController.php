@@ -27,33 +27,58 @@ class KeluarController extends Controller
     return view('apps.mutasi.keluar.index',[ 'produks' => $produks ]);
   }
 
-  public function list(Request $request){
-    $mutasi_keluar_barangs = DB::table('mutasi_keluar_barangs')
-      ->join('users','mutasi_keluar_barangs.id_users','=','users.id')
-      ->join('barangs','mutasi_keluar_barangs.id_barangs','=','barangs.id')
-      ->select('mutasi_keluar_barangs.*','users.name as namauser','barangs.nama as namabarang')
-      ->where(DB::raw('MONTH(mutasi_keluar_barangs.created_at)'), substr($request->tanggal,0,2))
-      ->where(DB::raw('YEAR(mutasi_keluar_barangs.created_at)'), substr($request->tanggal,-4))
-      ->orderBy('id', 'desc')
-      ->get();
-    return datatables()::of($mutasi_keluar_barangs)
-      ->addColumn('action', function ($mutasi_keluar_barangs) {
+  public function list(Request $request)
+  {
+      $mutasi = DB::table('mutasi_keluar_barangs as m')
+          ->join('users as u', 'm.id_users', '=', 'u.id')
+          ->join('barangs as b', 'm.id_barangs', '=', 'b.id')
+          ->select(
+              'm.*',
+              'u.name as namauser',
+              'b.nama as namabarang',
+              'b.kode as kodebarang'
+          )
+          ->whereMonth('m.created_at', substr($request->tanggal, 0, 2))
+          ->whereYear('m.created_at', substr($request->tanggal, -4))
+          ->orderBy('m.id', 'desc');
 
-        $class = "";
+      return datatables()::of($mutasi)
+          ->filter(function ($query) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
 
-        if(Auth::user()->status != "Supervisor" && Auth::user()->status != "Super Admin" && Auth::user()->status != "Owner"){
-          $class = "hidden";
-        }
+              if ($search) {
+                  $query->where(function ($q) use ($search) {
+                      $q->where('m.kode', 'like', "%{$search}%") 
+                        ->orWhere('b.kode', 'like', "%{$search}%") 
+                        ->orWhere('b.nama', 'like', "%{$search}%"); 
+                  });
+              }
+          })
+          ->addColumn('action', function ($row) {
 
-        return '
-          <div class="fonticon-container">
-            <span class="fonticon-wrap '.$class.'" onclick="f_edit('.$mutasi_keluar_barangs->id.')"><i class="feather icon-edit" data-toggle="tooltip" title="Edit Data"></i></span>
-            <span class="fonticon-wrap '.$class.'" onclick="f_delete('.$mutasi_keluar_barangs->id.')"><i class="feather icon-trash" data-toggle="tooltip" title="Hapus Data"></i></span>
-          </div>
-        ';
-      })
-      ->addIndexColumn()
-      ->make(true);
+              $class = "";
+
+              if (
+                  Auth::user()->status != "Supervisor" &&
+                  Auth::user()->status != "Super Admin" &&
+                  Auth::user()->status != "Owner"
+              ) {
+                  $class = "hidden";
+              }
+
+              return '
+                <div class="fonticon-container">
+                  <span class="fonticon-wrap '.$class.'" onclick="f_edit('.$row->id.')">
+                    <i class="feather icon-edit" data-toggle="tooltip" title="Edit Data"></i>
+                  </span>
+                  <span class="fonticon-wrap '.$class.'" onclick="f_delete('.$row->id.')">
+                    <i class="feather icon-trash" data-toggle="tooltip" title="Hapus Data"></i>
+                  </span>
+                </div>
+              ';
+          })
+          ->addIndexColumn()
+          ->make(true);
   }
 
   public function store(Request $request){

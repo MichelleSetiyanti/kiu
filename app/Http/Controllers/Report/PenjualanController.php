@@ -28,73 +28,85 @@ class PenjualanController extends Controller
 
   public function list(Request $request)
   {
-    $table = DB::table('penjualans')
-      ->join('konsumens','penjualans.id_konsumens','=','konsumens.id')
-      ->select('penjualans.*','konsumens.nama as namakonsumen')
-      ->orderBy('penjualans.id', 'desc')
-      ->where(function($query) use ($request)
-      {
+      $query = DB::table('penjualans')
+          ->join('konsumens','penjualans.id_konsumens','=','konsumens.id')
+          ->select('penjualans.*','konsumens.nama as namakonsumen')
+          ->where(function($q) use ($request)
+          {
+              if ($request->client != "All") {
+                  $q->where('penjualans.id_konsumens', $request->client);
+              }
 
-        if($request->client != "All"){
-          $query->where('penjualans.id_konsumens', $request->client);
-        }
+              if ($request->divisi != "All") {
+                  $q->where('penjualans.kategori', $request->divisi);
+              }
 
-        if($request->divisi != "All"){
-          $query->where('penjualans.kategori', $request->divisi);
-        }
+              if ($request->metodepembayaran != "All") {
+                  $q->where('penjualans.pembayaran', $request->metodepembayaran);
+              }
 
-        if($request->metodepembayaran != "All"){
-          $query->where('penjualans.pembayaran', $request->metodepembayaran);
-        }
+              if ($request->jenis != "All") {
+                  $q->where('penjualans.tipe_penjualan', $request->jenis);
+              }
 
-        if($request->jenis != "All"){
-          $query->where('penjualans.tipe_penjualan', $request->jenis);
-        }
+              if ($request->pajak != "All") {
+                  if ($request->pajak == "Non-PPN") {
+                      $q->where('penjualans.pajak', '0');
+                  } else {
+                      $q->where('penjualans.pajak', '>', '0');
+                  }
+              }
 
-        if($request->pajak != "All"){
-            if($request->pajak == "Non-PPN"){
-                $query->where('penjualans.pajak', '0');
-            }else{
-                $query->where('penjualans.pajak', '>', '0');
-            }
-        }
+              if ($request->status != "All") {
+                  if ($request->status == "paid") {
+                      $q->where('penjualans.sisa', '0');
+                  } else {
+                      $q->where('penjualans.sisa', '>', '0');
+                  }
+              }
 
-        if($request->status != "All"){
-          if($request->status == "paid"){
-            $query->where('penjualans.sisa', '0');
-          }else{
-            $query->where('penjualans.sisa', '>', '0');
-          }
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
+                  $q->where('penjualans.tanggal', $request->tanggalmulai);
+              }
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
-          $query->where('penjualans.tanggal', '=' , $request->tanggalmulai);
-        }
+              if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
+                  $q->where('penjualans.tanggal', $request->tanggalselesai);
+              }
 
-        if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
-          $query->where('penjualans.tanggal', '=' ,$request->tanggalselesai);
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
+                  $q->whereBetween('penjualans.tanggal', [$request->tanggalmulai, $request->tanggalselesai]);
+              }
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
-          $query->whereBetween('penjualans.tanggal', [$request->tanggalmulai, $request->tanggalselesai]);
-        }
+              $q->where('penjualans.status','=','Selesai');
+          })
+          ->orderBy('penjualans.id', 'desc'); 
 
-        $query->where('penjualans.status','=','Selesai');
+      return datatables()::of($query)
+          ->filter(function ($q) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
 
-      })
-      ->get();
-    return datatables()::of($table)
-      ->addColumn('action', function ($table) {
-        $encrypt = Crypt::encrypt($table->id);
+              if ($search) {
+                  $q->where(function ($sub) use ($search) {
+                      $sub->where('penjualans.kode', 'like', "%{$search}%")       
+                          ->orWhere('penjualans.kode_inv', 'like', "%{$search}%")
+                          ->orWhere('penjualans.kode_sj', 'like', "%{$search}%")  
+                          ->orWhere('konsumens.nama', 'like', "%{$search}%"); 
+                  });
+              }
+          })
+          ->addColumn('action', function ($row) {
+              $encrypt = Crypt::encrypt($row->id);
 
-        return '
-          <div class="fonticon-container">
-              <span class="fonticon-wrap" onclick="f_datadetil(' . $table->id . ')"><i class="feather icon-eye" data-toggle="tooltip" title="Lihat Detil Pembelian"></i></span>
-          </div>
-        ';
-      })
-      ->addIndexColumn()
-      ->make(true);
+              return '
+                <div class="fonticon-container">
+                    <span class="fonticon-wrap" onclick="f_datadetil(' . $row->id . ')">
+                        <i class="feather icon-eye" data-toggle="tooltip" title="Lihat Detil Pembelian"></i>
+                    </span>
+                </div>
+              ';
+          })
+          ->addIndexColumn()
+          ->make(true);
   }
 
   public function list_detil(Request $request)

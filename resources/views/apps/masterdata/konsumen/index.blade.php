@@ -322,7 +322,7 @@
         serverSide: true,
         ajax: "/master/konsumen/list",
         columns: [
-          {data: 'DT_RowIndex', name: 'DT_RowIndex', searchable: false},
+          {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
           {data: 'kode', name: 'kode'},
           {data: 'nama', name: 'nama'},
           {data: 'alamat', name: 'alamat'},
@@ -333,9 +333,6 @@
         ],
         responsive: false,
         columnDefs: [
-          {
-            orderable: true,
-          }
         ],
         dom:
           '<"top"<"actions action-btns"B><"action-filters"lf>><"clear">rt<"bottom"<"actions">p>',
@@ -344,7 +341,7 @@
           sSearch: ""
         },
         aLengthMenu: [[50, 100, 200, -1], [50, 100, 200, 'All']],
-        order: [[0, "asc"]],
+        order: [[1, "asc"]],
         bInfo: false,
         pageLength: 50,
         buttons: [

@@ -31,9 +31,18 @@ class CancelPelunasanController extends Controller
             ->join('users','bayar_piutangs.id_users','=','users.id')
             ->select('penjualans.*','konsumens.nama as namakonsumen','users.name as namauser','bayar_piutangs.nominal as totalpelunasan','bayar_piutangs.created_at as waktupelunasan','bayar_piutangs.id as idpelunasan')
             ->where('bayar_piutangs.status','=','Paid')
-            ->orderBy('bayar_piutangs.created_at','desc')
-            ->get();
+            ->orderBy('bayar_piutangs.created_at','desc');
         return datatables()::of($penjualans)
+          ->filter(function ($query) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
+
+              if ($search) {
+                  $query->where(function ($q) use ($search) {
+                      $q->where('penjualans.kode_inv', 'like', "%{$search}%")
+                      ->orWhere('konsumens.nama', 'like', "%{$search}%");
+                  });
+              }
+          })
           ->addColumn('action', function ($penjualans) {
 
             return '

@@ -288,7 +288,7 @@
         serverSide: true,
         ajax: "/mutasi/gudang-toko/list?tanggal="+tanggal,
         columns: [
-          {data: 'DT_RowIndex', name: 'DT_RowIndex', searchable: false},
+          {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
           {data: 'kode', name: 'kode'},
           {data: 'namabarang', name: 'namabarang'},
           {data: 'qty', name: 'qty', render: $.fn.dataTable.render.number( '.', ',', 2, '' )},
@@ -304,9 +304,6 @@
         ],
         responsive: false,
         columnDefs: [
-          {
-            orderable: true,
-          }
         ],
         dom:
           '<"top"<"actions action-btns"B><"action-filters"lf>><"clear">rt<"bottom"<"actions">p>',
@@ -315,7 +312,7 @@
           sSearch: ""
         },
         aLengthMenu: [[10, 20, 50, -1], [10, 20, 50, 'All']],
-        order: [[0, "asc"]],
+        order: [[5, "asc"]],
         bInfo: false,
         pageLength: 10,
         buttons: [

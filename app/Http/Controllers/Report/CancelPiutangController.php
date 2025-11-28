@@ -30,46 +30,62 @@ class CancelPiutangController extends Controller
 
   public function list(Request $request)
   {
-    $table = DB::table('cancel_bayar_piutangs')
-      ->join('penjualans','cancel_bayar_piutangs.id_penjualans','=','penjualans.id')
-      ->join('konsumens','penjualans.id_konsumens','=','konsumens.id')
-      ->join('users','cancel_bayar_piutangs.id_users','=','users.id')
-      ->select('penjualans.*','konsumens.nama as namakonsumen','users.name as namauser','cancel_bayar_piutangs.nominal as totalpelunasan','cancel_bayar_piutangs.created_at as waktupelunasan','cancel_bayar_piutangs.id as idpelunasan')
-      ->orderBy('cancel_bayar_piutangs.created_at','desc')
-      ->where(function($query) use ($request)
-      {
+      $table = DB::table('cancel_bayar_piutangs as c')
+          ->join('penjualans as p', 'c.id_penjualans', '=', 'p.id')
+          ->join('konsumens as k', 'p.id_konsumens', '=', 'k.id')
+          ->join('users as u', 'c.id_users', '=', 'u.id')
+          ->select(
+              'p.*',
+              'k.nama as namakonsumen',
+              'u.name as namauser',
+              'c.nominal as totalpelunasan',
+              'c.created_at as waktupelunasan',
+              'c.id as idpelunasan'
+          )
+          ->where(function($query) use ($request) {
 
-        if($request->client != "All"){
-          $query->where('penjualans.id_konsumens', $request->client);
-        }
+              if ($request->client != "All") {
+                  $query->where('p.id_konsumens', $request->client);
+              }
 
-        if($request->akun != "All"){
-          $query->where('cancel_bayar_piutangs.kode_akun', $request->akun);
-        }
+              if ($request->akun != "All") {
+                  $query->where('c.kode_akun', $request->akun);
+              }
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
-          $createdatmulai = $request->tanggalmulai.' 00:00:00';
-          $createdatselesai = $request->tanggalmulai.' 23:59:59';
-          $query->whereBetween('cancel_bayar_piutangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
+                  $createdatmulai   = $request->tanggalmulai.' 00:00:00';
+                  $createdatselesai = $request->tanggalmulai.' 23:59:59';
+                  $query->whereBetween('c.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-        if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
-          $createdatmulai = $request->tanggalselesai.' 00:00:00';
-          $createdatselesai = $request->tanggalselesai.' 23:59:59';
-          $query->whereBetween('cancel_bayar_piutangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
+                  $createdatmulai   = $request->tanggalselesai.' 00:00:00';
+                  $createdatselesai = $request->tanggalselesai.' 23:59:59';
+                  $query->whereBetween('c.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
-          $createdatmulai = $request->tanggalmulai.' 00:00:00';
-          $createdatselesai = $request->tanggalselesai.' 23:59:59';
-          $query->whereBetween('cancel_bayar_piutangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
+                  $createdatmulai   = $request->tanggalmulai.' 00:00:00';
+                  $createdatselesai = $request->tanggalselesai.' 23:59:59';
+                  $query->whereBetween('c.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-      })
-      ->get();
-    return datatables()::of($table)
-      ->addIndexColumn()
-      ->make(true);
+          })
+          ->orderBy('c.created_at','desc');
+
+      return datatables()::of($table)
+          ->filter(function ($query) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
+
+              if ($search) {
+                  $query->where(function ($q) use ($search) {
+                      $q->where('p.kode_inv', 'like', "%{$search}%")
+                        ->orWhere('k.nama', 'like', "%{$search}%"); 
+                  });
+              }
+          })
+          ->addIndexColumn()
+          ->make(true);
   }
 
 }

@@ -27,44 +27,62 @@ class TokoGudangController extends Controller
     return view('apps.report.toko-gudang',[ 'produks' => $produks ]);
   }
 
-  public function list(Request $request){
-    $mutasi_toko_gudangs = DB::table('mutasi_toko_gudangs')
-      ->join('users','mutasi_toko_gudangs.id_users','=','users.id')
-      ->join('barangs','mutasi_toko_gudangs.id_barangs','=','barangs.id')
-      ->select('mutasi_toko_gudangs.*','users.name as namauser','barangs.nama as namabarang')
-      ->where(function($query) use ($request)
-      {
+  public function list(Request $request)
+  {
+      $mutasi = DB::table('mutasi_toko_gudangs as m')
+          ->join('users as u', 'm.id_users', '=', 'u.id')
+          ->join('barangs as b', 'm.id_barangs', '=', 'b.id')
+          ->select(
+              'm.*',
+              'u.name as namauser',
+              'b.nama as namabarang',
+              'b.kode as kodebarang'
+          )
+          ->where(function ($query) use ($request) {
 
-          if ($request->produks != "All") {
-              $query->where('mutasi_toko_gudangs.id_barangs', '=' , $request->produks);
-          }
+              if ($request->produks != "All") {
+                  $query->where('m.id_barangs', $request->produks);
+              }
 
-          if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
-              $createdatmulai = $request->tanggalmulai.' 00:00:00';
-              $createdatselesai = $request->tanggalmulai.' 23:59:59';
-              $query->whereBetween('mutasi_toko_gudangs.created_at', [$createdatmulai, $createdatselesai]);
-          }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
+                  $query->whereBetween('m.created_at', [
+                      $request->tanggalmulai.' 00:00:00',
+                      $request->tanggalmulai.' 23:59:59'
+                  ]);
+              }
 
-          if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
-              $createdatmulai = $request->tanggalselesai.' 00:00:00';
-              $createdatselesai = $request->tanggalselesai.' 23:59:59';
-              $query->whereBetween('mutasi_toko_gudangs.created_at', [$createdatmulai, $createdatselesai]);
-          }
+              if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
+                  $query->whereBetween('m.created_at', [
+                      $request->tanggalselesai.' 00:00:00',
+                      $request->tanggalselesai.' 23:59:59'
+                  ]);
+              }
 
-          if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
-              $createdatmulai = $request->tanggalmulai.' 00:00:00';
-              $createdatselesai = $request->tanggalselesai.' 23:59:59';
-              $query->whereBetween('mutasi_toko_gudangs.created_at', [$createdatmulai, $createdatselesai]);
-          }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
+                  $query->whereBetween('m.created_at', [
+                      $request->tanggalmulai.' 00:00:00',
+                      $request->tanggalselesai.' 23:59:59'
+                  ]);
+              }
 
-          $query->where('mutasi_toko_gudangs.id','!=','0');
+              $query->where('m.id', '!=', '0');
+          })
+          ->orderBy('m.id', 'desc');
 
-      })
-      ->orderBy('id', 'desc')
-      ->get();
-    return datatables()::of($mutasi_toko_gudangs)
-      ->addIndexColumn()
-      ->make(true);
+      return datatables()::of($mutasi)
+          ->filter(function ($query) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
+
+              if ($search) {
+                  $query->where(function ($q) use ($search) {
+                      $q->where('m.kode', 'like', "%{$search}%")
+                        ->orWhere('b.kode', 'like', "%{$search}%")
+                        ->orWhere('b.nama', 'like', "%{$search}%");
+                  });
+              }
+          })
+          ->addIndexColumn()
+          ->make(true);
   }
 
 }

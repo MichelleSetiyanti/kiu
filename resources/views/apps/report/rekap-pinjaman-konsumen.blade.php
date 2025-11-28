@@ -158,7 +158,7 @@
           sSearch: ""
         },
         aLengthMenu: [[50, 100, 200, -1], [50, 100, 200, 'All']],
-        order: [[0, "asc"]],
+        order: [[1, "asc"]],
         bInfo: false,
         pageLength: 50,
         "footerCallback": function ( row, data, start, end, display ) {

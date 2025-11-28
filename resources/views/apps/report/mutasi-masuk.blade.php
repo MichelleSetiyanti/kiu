@@ -245,7 +245,7 @@
         serverSide: true,
         ajax: link,
         columns: [
-          {data: 'DT_RowIndex', name: 'DT_RowIndex', searchable: false},
+          {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
           {data: 'kode', name: 'kode'},
           {data: 'namauser', name: 'namauser'},
           {data: 'namabarang', name: 'namabarang'},
@@ -262,9 +262,6 @@
         scrollX: true,
         scrollCollapse: true,
         columnDefs: [
-          {
-            orderable: true,
-          }
         ],
         dom:
           '<"top"<"action-filters"Blf>><"clear">rt<"bottom"<"actions">pi>',
@@ -277,7 +274,7 @@
           { extend: 'pdfHtml5', orientation: 'landscape', text: 'Export PDF', className: 'btn bg-gradient-info waves-effect waves-light mr-1 rounded-btn' }
         ],
         aLengthMenu: [[10, 20, 50, -1], [10, 20, 50, 'All']],
-        order: [[0, "asc"]],
+        order: [[6, "asc"]],
         bInfo: true,
         pageLength: 50,
         "footerCallback": function ( row, data, start, end, display ) {

@@ -23,12 +23,23 @@ class RekapPinjamanKonsumen extends Controller
         return view('apps.report.rekap-pinjaman-konsumen');
     }
 
-    public function list(){
-        $konsumens = DB::table('konsumens')
-            ->orderBy('piutang', 'desc')
-            ->where('id','!=','0')
-            ->get();
+    public function list(Request $request)
+    {
+        $konsumens = DB::table('konsumens as k')
+            ->where('k.id', '!=', '0')
+            ->orderBy('k.piutang', 'desc'); 
+
         return datatables()::of($konsumens)
+            ->filter(function ($query) use ($request) {
+                $search = $request->get('search')['value'] ?? null;
+
+                if ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('k.kode', 'like', "%{$search}%") 
+                          ->orWhere('k.nama', 'like', "%{$search}%"); 
+                    });
+                }
+            })
             ->addIndexColumn()
             ->make(true);
     }

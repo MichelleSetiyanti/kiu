@@ -30,47 +30,63 @@ class PiutangController extends Controller
 
   public function list(Request $request)
   {
-    $table = DB::table('bayar_piutangs')
-      ->join('penjualans','bayar_piutangs.id_penjualans','=','penjualans.id')
-      ->join('konsumens','penjualans.id_konsumens','=','konsumens.id')
-      ->join('users','bayar_piutangs.id_users','=','users.id')
-      ->select('penjualans.*','konsumens.nama as namakonsumen','users.name as namauser','bayar_piutangs.nominal as totalpelunasan','bayar_piutangs.created_at as waktupelunasan','bayar_piutangs.id as idpelunasan')
-      ->orderBy('bayar_piutangs.created_at','desc')
-      ->where(function($query) use ($request)
-      {
+      $table = DB::table('bayar_piutangs as b')
+          ->join('penjualans as p', 'b.id_penjualans', '=', 'p.id')
+          ->join('konsumens as k', 'p.id_konsumens', '=', 'k.id')
+          ->join('users as u', 'b.id_users', '=', 'u.id')
+          ->select(
+              'p.*',
+              'k.nama as namakonsumen',
+              'u.name as namauser',
+              'b.nominal as totalpelunasan',
+              'b.created_at as waktupelunasan',
+              'b.id as idpelunasan'
+          )
+          ->where(function($query) use ($request) {
 
-        if($request->client != "All"){
-          $query->where('penjualans.id_konsumens', $request->client);
-        }
+              if ($request->client != "All") {
+                  $query->where('p.id_konsumens', $request->client);
+              }
 
-        if($request->akun != "All"){
-          $query->where('bayar_piutangs.kode_akun', $request->akun);
-        }
+              if ($request->akun != "All") {
+                  $query->where('b.kode_akun', $request->akun);
+              }
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
-          $createdatmulai = $request->tanggalmulai.' 00:00:00';
-          $createdatselesai = $request->tanggalmulai.' 23:59:59';
-          $query->whereBetween('bayar_piutangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
+                  $createdatmulai   = $request->tanggalmulai.' 00:00:00';
+                  $createdatselesai = $request->tanggalmulai.' 23:59:59';
+                  $query->whereBetween('b.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-        if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
-          $createdatmulai = $request->tanggalselesai.' 00:00:00';
-          $createdatselesai = $request->tanggalselesai.' 23:59:59';
-          $query->whereBetween('bayar_piutangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
+                  $createdatmulai   = $request->tanggalselesai.' 00:00:00';
+                  $createdatselesai = $request->tanggalselesai.' 23:59:59';
+                  $query->whereBetween('b.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
-          $createdatmulai = $request->tanggalmulai.' 00:00:00';
-          $createdatselesai = $request->tanggalselesai.' 23:59:59';
-          $query->whereBetween('bayar_piutangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
+                  $createdatmulai   = $request->tanggalmulai.' 00:00:00';
+                  $createdatselesai = $request->tanggalselesai.' 23:59:59';
+                  $query->whereBetween('b.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-        $query->where('bayar_piutangs.status', $request->status);
-      })
-      ->get();
-    return datatables()::of($table)
-      ->addIndexColumn()
-      ->make(true);
+              $query->where('b.status', $request->status);
+          })
+          ->orderBy('b.created_at', 'desc');  
+
+      return datatables()::of($table)
+          ->filter(function ($query) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
+
+              if ($search) {
+                  $query->where(function ($q) use ($search) {
+                      $q->where('p.kode_inv', 'like', "%{$search}%") 
+                        ->orWhere('k.nama', 'like', "%{$search}%");   
+                  });
+              }
+          })
+          ->addIndexColumn()
+          ->make(true);
   }
 
 }

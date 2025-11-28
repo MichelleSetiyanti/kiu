@@ -22,28 +22,42 @@ class KonsumenController extends Controller
         return view('apps.masterdata.konsumen.index');
     }
 
-    public function list(){
+    public function list(Request $request)
+    {
         $konsumens = DB::table('konsumens')
-            ->orderBy('nama', 'asc')
-            ->where('id','!=','0')
-            ->get();
+            ->where('id', '!=', 0)
+            ->orderBy('nama', 'asc');
+
         return datatables()::of($konsumens)
-            ->addColumn('action', function ($konsumens) {
+            ->filter(function ($query) use ($request) {
+                $search = $request->get('search')['value'] ?? null;
+
+                if ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('kode', 'like', "%{$search}%")         
+                          ->orWhere('nama', 'like', "%{$search}%"); 
+                    });
+                }
+            })
+            ->addColumn('action', function ($konsumen) {
                 $count = DB::table('penjualans')
-                    ->where('id_konsumens',$konsumens->id)
+                    ->where('id_konsumens', $konsumen->id)
                     ->count();
-                $count = 0;
 
                 $class = "";
 
-                if($count > 0){
+                if ($count > 0) {
                     $class = "hidden";
                 }
 
                 return '
                   <div class="fonticon-container">
-                    <span class="fonticon-wrap" onclick="f_edit('.$konsumens->id.')"><i class="feather icon-edit" data-toggle="tooltip" title="Edit Data"></i></span>
-                    <span class="fonticon-wrap '.$class.'" onclick="f_delete('.$konsumens->id.')"><i class="feather icon-trash" data-toggle="tooltip" title="Hapus Data"></i></span>
+                    <span class="fonticon-wrap" onclick="f_edit('.$konsumen->id.')">
+                      <i class="feather icon-edit" data-toggle="tooltip" title="Edit Data"></i>
+                    </span>
+                    <span class="fonticon-wrap '.$class.'" onclick="f_delete('.$konsumen->id.')">
+                      <i class="feather icon-trash" data-toggle="tooltip" title="Hapus Data"></i>
+                    </span>
                   </div>
                 ';
             })

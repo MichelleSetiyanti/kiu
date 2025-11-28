@@ -42,11 +42,23 @@ class SuratJalanController extends Controller
         $query->where('penjualans.tipe_penjualan', '=', 'Manual');
         $query->where('penjualans.status', '=', 'Selesai');
       })
-      ->orderBy('id', 'desc')
-      ->get();
+      ->orderBy('id', 'desc');
     return datatables()::of($penjualans)
+      ->filter(function ($query) use ($request) {
+            $search = $request->get('search')['value'] ?? null;
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('penjualans.kode', 'like', "%{$search}%")
+                      ->orWhere('penjualans.kode_sj', 'like', "%{$search}%")
+                      ->orWhere('penjualans.kode_inv', 'like', "%{$search}%")
+                      ->orWhere('konsumens.nama', 'like', "%{$search}%")
+                      ->orWhere('penjualans.keterangan', 'like', "%{$search}%");
+                });
+            }
+        })
       ->addColumn('action', function ($penjualans) {
-        $encrypt = Crypt::encrypt($penjualans->id);
+        $encrypt = \Crypt::encrypt($penjualans->id);
 
         return '
           <div class="fonticon-container">
@@ -62,121 +74,124 @@ class SuratJalanController extends Controller
 
   public function store(Request $request)
   {
-    DB::beginTransaction();
+      DB::beginTransaction();
 
-    try {
-      $month = \Carbon\Carbon::now()->format('m');
-      $year = \Carbon\Carbon::now()->format('Y');
-      $penjualanlama = DB::table('penjualans')->where('id', $request->idpenjualan)->first();
+      try {
+          $month = \Carbon\Carbon::now()->format('m');
+          $year  = \Carbon\Carbon::now()->format('Y');
 
-      if ($penjualanlama->pajak > 0) {
-        $invoices = DB::table('penjualans')
-          ->select(DB::raw('max(substr(kode_sj, -4)) as nomor_max'))
-          ->where(DB::raw('YEAR(tanggal)'), $year)
-          ->where('kode_sj', 'like', 'S-%')
-          ->get();
+          $penjualanlama = DB::table('penjualans')
+              ->where('id', $request->idpenjualan)
+              ->lockForUpdate()
+              ->first();
 
-        $kode_inv_exists = isset($penjualanlama->kode_sj) ? substr($penjualanlama->kode_sj, -4) : null;
+          if (! $penjualanlama) {
+              DB::rollBack();
+              return 'gagal';
+          }
 
-        // Ambil nomor maksimum dari hasil query
-        $nomor_max = $invoices->isEmpty() || $invoices[0]->nomor_max === null ? 0 : (int) $invoices[0]->nomor_max;
+          if (!empty($penjualanlama->kode_sj)) {
+              DB::rollBack();
+              return 'already_processed';
+          }
 
-        // Penomoran baru
-        if ($nomor_max === 0) {
-          $nomor_baru = 1; // Dimulai dari 1 jika tidak ada nomor sebelumnya
-        } else {
-          $nomor_baru = $nomor_max + 1; // Tambahkan nomor jika ada nomor sebelumnya
-        }
-
-        // Format nomor transaksi
-        $kodetransaksi = "S-" . substr($year, -2) . "-" . str_pad($nomor_baru, 4, "0", STR_PAD_LEFT);
-      } else {
-        $invoices = DB::table('penjualans')
-          ->select(DB::raw('max(substr(kode_sj, -5)) as nomor_max'))
-          ->where(DB::raw('YEAR(tanggal)'), $year)
-          ->where('kode_sj', 'like', 'SJS-%')
-          ->get();
-
-        $kode_inv_exists = isset($penjualanlama->kode_sj) ? substr($penjualanlama->kode_sj, -5) : null;
-
-        $nomor_max = $invoices->isEmpty() || $invoices[0]->nomor_max === null ? 0 : (int) $invoices[0]->nomor_max;
-
-        if ($nomor_max === 0) {
-          $nomor_baru = 1;
-        } else {
-          $nomor_baru = $nomor_max + 1;
-        }
-
-        $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad($nomor_baru, 5, "0", STR_PAD_LEFT);
-      }
-
-
-
-      DB::table('penjualans')->where('id', $request->idpenjualan)->update([
-        'kode_sj' => $kodetransaksi,
-        'tanggal_sj' => $request->tanggal,
-        'alamat_sj' => $request->alamat,
-        'ekspedisi' => $request->ekspedisi,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
-
-      $penjualan_details = DB::table('penjualan_details')
-                  ->where('id_penjualans', $request->idpenjualan)
+          if ($penjualanlama->pajak > 0) {
+              $invoices = DB::table('penjualans')
+                  ->select(DB::raw('max(substr(kode_sj, -4)) as nomor_max'))
+                  ->where(DB::raw('YEAR(tanggal)'), $year)
+                  ->where('kode_sj', 'like', 'S-%')
                   ->get();
 
-        foreach ($penjualan_details as $penjualandetail) {
+              $nomor_max = $invoices->isEmpty() || $invoices[0]->nomor_max === null
+                  ? 0
+                  : (int) $invoices[0]->nomor_max;
 
-            $barang = DB::table('barangs')
-                ->where('id', $penjualandetail->id_barangs)
-                ->lockForUpdate()
-                ->first();
+              // Penomoran baru
+              $nomor_baru = $nomor_max === 0 ? 1 : $nomor_max + 1;
 
-            if (! $barang) {
-                DB::rollBack();
-                return 'product_not_found';
-            }
+              // Format nomor transaksi
+              $kodetransaksi = "S-" . substr($year, -2) . "-" . str_pad($nomor_baru, 4, "0", STR_PAD_LEFT);
+          } else {
+              $invoices = DB::table('penjualans')
+                  ->select(DB::raw('max(substr(kode_sj, -5)) as nomor_max'))
+                  ->where(DB::raw('YEAR(tanggal)'), $year)
+                  ->where('kode_sj', 'like', 'SJS-%')
+                  ->get();
 
-            $stoklama = (int) $barang->stok;
-            $qty = (int) $penjualandetail->total_jual;
-            $stokbaru = $stoklama - $qty;
+              $nomor_max = $invoices->isEmpty() || $invoices[0]->nomor_max === null
+                  ? 0
+                  : (int) $invoices[0]->nomor_max;
 
-            if ($stokbaru < 0) {
-                DB::rollBack();
-                return 'insufficient_stock';
-            }
+              $nomor_baru   = $nomor_max === 0 ? 1 : $nomor_max + 1;
+              $kodetransaksi = "SJS-" . substr($year, -2) . "-" . str_pad($nomor_baru, 5, "0", STR_PAD_LEFT);
+          }
 
-            // update stok di table barangs
-            DB::table('barangs')->where('id', $penjualandetail->id_barangs)->update([
-                'stok' => $stokbaru,
-                'updated_at' => \Carbon\Carbon::now()
-            ]);
+          // Update penjualan dengan kode_sj baru
+          DB::table('penjualans')->where('id', $request->idpenjualan)->update([
+              'kode_sj'    => $kodetransaksi,
+              'tanggal_sj' => $request->tanggal,
+              'alamat_sj'  => $request->alamat,
+              'ekspedisi'  => $request->ekspedisi,
+              "updated_at" => \Carbon\Carbon::now()
+          ]);
 
-            // insert ke stock_movements untuk stok keluar (type = 'out')
-            DB::table('stock_movements')->insert([
-                'product_id'     => $penjualandetail->id_barangs,
-                'store_id'       => $request->store_id ?? null, // jika ada informasi store_id di request
-                'movement_date'  => \Carbon\Carbon::now(),
-                'type'           => 'out',
-                'quantity'       => $qty,
-                'before_stock'   => $stoklama,
-                'after_stock'    => $stokbaru,
-                'reference_type' => 'surat_jalan',
-                'reference_id'   => $request->idpenjualan, // referensi ke penjualan / surat jalan
-                'note'           => 'Surat Jalan / Penjualan #' . $request->idpenjualan,
-                'created_by'     => Auth::id(),
-                'created_at'     => \Carbon\Carbon::now(),
-                'updated_at'     => \Carbon\Carbon::now(),
-            ]);
-        }
+          // ===== Proses stok per detil penjualan =====
+          $penjualan_details = DB::table('penjualan_details')
+              ->where('id_penjualans', $request->idpenjualan)
+              ->get();
 
-        DB::commit();
+          foreach ($penjualan_details as $penjualandetail) {
 
-        return 'berhasil';
-    } catch (Exception $e) {
-      DB::rollBack();
+              $barang = DB::table('barangs')
+                  ->where('id', $penjualandetail->id_barangs)
+                  ->lockForUpdate()   // kunci stok barang
+                  ->first();
 
-      return 'gagal';
-    }
+              if (!$barang) {
+                  DB::rollBack();
+                  return 'product_not_found';
+              }
+
+              $stoklama = (int) $barang->stok;
+              $qty      = (int) $penjualandetail->total_jual;
+              $stokbaru = $stoklama - $qty;
+
+              if ($stokbaru < 0) {
+                  DB::rollBack();
+                  return 'insufficient_stock';
+              }
+
+              // update stok di table barangs
+              DB::table('barangs')->where('id', $penjualandetail->id_barangs)->update([
+                  'stok'       => $stokbaru,
+                  'updated_at' => \Carbon\Carbon::now()
+              ]);
+
+              // insert ke stock_movements untuk stok keluar (type = 'out')
+              DB::table('stock_movements')->insert([
+                  'product_id'     => $penjualandetail->id_barangs,
+                  'store_id'       => $request->store_id ?? null,
+                  'movement_date'  => \Carbon\Carbon::now(),
+                  'type'           => 'out',
+                  'quantity'       => $qty,
+                  'before_stock'   => $stoklama,
+                  'after_stock'    => $stokbaru,
+                  'reference_type' => 'surat_jalan',
+                  'reference_id'   => $request->idpenjualan,
+                  'note'           => 'Surat Jalan / Penjualan #' . $request->idpenjualan,
+                  'created_by'     => Auth::id(),
+                  'created_at'     => \Carbon\Carbon::now(),
+                  'updated_at'     => \Carbon\Carbon::now(),
+              ]);
+          }
+
+          DB::commit();
+
+          return 'berhasil';
+      } catch (Exception $e) {
+          DB::rollBack();
+          return 'gagal';
+      }
   }
 
 

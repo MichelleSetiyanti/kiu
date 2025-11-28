@@ -29,41 +29,54 @@ class MutasiController extends Controller
 
   public function list_masuk(Request $request)
   {
-    $table = DB::table('mutasi_masuk_barangs')
-      ->join('users','mutasi_masuk_barangs.id_users','=','users.id')
-      ->join('barangs','mutasi_masuk_barangs.id_barangs','=','barangs.id')
-      ->select('mutasi_masuk_barangs.*','users.name as namauser','barangs.nama as namabarang')
-      ->orderBy('mutasi_masuk_barangs.created_at','desc')
-      ->where(function($query) use ($request)
-      {
+      $table = DB::table('mutasi_masuk_barangs as m')
+          ->join('users as u','m.id_users','=','u.id')
+          ->join('barangs as b','m.id_barangs','=','b.id')
+          ->select(
+              'm.*',
+              'u.name as namauser',
+              'b.nama as namabarang',
+              'b.kode as kodebarang'
+          )
+          ->where(function($query) use ($request)
+          {
+              if ($request->produks != "All") {
+                  $query->where('m.id_barangs', $request->produks);
+              }
 
-        if($request->produks != "All"){
-          $query->where('mutasi_masuk_barangs.id_barangs', $request->produks);
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
+                  $createdatmulai   = $request->tanggalmulai.' 00:00:00';
+                  $createdatselesai = $request->tanggalmulai.' 23:59:59';
+                  $query->whereBetween('m.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
-          $createdatmulai = $request->tanggalmulai.' 00:00:00';
-          $createdatselesai = $request->tanggalmulai.' 23:59:59';
-          $query->whereBetween('mutasi_masuk_barangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
+                  $createdatmulai   = $request->tanggalselesai.' 00:00:00';
+                  $createdatselesai = $request->tanggalselesai.' 23:59:59';
+                  $query->whereBetween('m.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-        if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
-          $createdatmulai = $request->tanggalselesai.' 00:00:00';
-          $createdatselesai = $request->tanggalselesai.' 23:59:59';
-          $query->whereBetween('mutasi_masuk_barangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
+                  $createdatmulai   = $request->tanggalmulai.' 00:00:00';
+                  $createdatselesai = $request->tanggalselesai.' 23:59:59';
+                  $query->whereBetween('m.created_at', [$createdatmulai, $createdatselesai]);
+              }
+          })
+          ->orderBy('m.created_at','desc');  
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
-          $createdatmulai = $request->tanggalmulai.' 00:00:00';
-          $createdatselesai = $request->tanggalselesai.' 23:59:59';
-          $query->whereBetween('mutasi_masuk_barangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+      return datatables()::of($table)
+          ->filter(function ($query) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
 
-      })
-      ->get();
-    return datatables()::of($table)
-      ->addIndexColumn()
-      ->make(true);
+              if ($search) {
+                  $query->where(function ($q) use ($search) {
+                      $q->where('m.kode', 'like', "%{$search}%")  
+                        ->orWhere('b.nama', 'like', "%{$search}%"); 
+                  });
+              }
+          })
+          ->addIndexColumn()
+          ->make(true);
   }
 
   public function index_keluar(){
@@ -77,41 +90,54 @@ class MutasiController extends Controller
 
   public function list_keluar(Request $request)
   {
-    $table = DB::table('mutasi_keluar_barangs')
-      ->join('users','mutasi_keluar_barangs.id_users','=','users.id')
-      ->join('barangs','mutasi_keluar_barangs.id_barangs','=','barangs.id')
-      ->select('mutasi_keluar_barangs.*','users.name as namauser','barangs.nama as namabarang')
-      ->orderBy('mutasi_keluar_barangs.created_at','desc')
-      ->where(function($query) use ($request)
-      {
+      $table = DB::table('mutasi_keluar_barangs as m')
+          ->join('users as u', 'm.id_users', '=', 'u.id')
+          ->join('barangs as b', 'm.id_barangs', '=', 'b.id')
+          ->select(
+              'm.*',
+              'u.name as namauser',
+              'b.nama as namabarang',
+              'b.kode as kodebarang'
+          )
+          ->where(function($query) use ($request)
+          {
+              if ($request->produks != "All") {
+                  $query->where('m.id_barangs', $request->produks);
+              }
 
-        if($request->produks != "All"){
-          $query->where('mutasi_keluar_barangs.id_barangs', $request->produks);
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
+                  $createdatmulai   = $request->tanggalmulai.' 00:00:00';
+                  $createdatselesai = $request->tanggalmulai.' 23:59:59';
+                  $query->whereBetween('m.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai == "") {
-          $createdatmulai = $request->tanggalmulai.' 00:00:00';
-          $createdatselesai = $request->tanggalmulai.' 23:59:59';
-          $query->whereBetween('mutasi_keluar_barangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
+                  $createdatmulai   = $request->tanggalselesai.' 00:00:00';
+                  $createdatselesai = $request->tanggalselesai.' 23:59:59';
+                  $query->whereBetween('m.created_at', [$createdatmulai, $createdatselesai]);
+              }
 
-        if ($request->tanggalmulai == "" && $request->tanggalselesai != "") {
-          $createdatmulai = $request->tanggalselesai.' 00:00:00';
-          $createdatselesai = $request->tanggalselesai.' 23:59:59';
-          $query->whereBetween('mutasi_keluar_barangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+              if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
+                  $createdatmulai   = $request->tanggalmulai.' 00:00:00';
+                  $createdatselesai = $request->tanggalselesai.' 23:59:59';
+                  $query->whereBetween('m.created_at', [$createdatmulai, $createdatselesai]);
+              }
+          })
+          ->orderBy('m.created_at', 'desc'); 
 
-        if ($request->tanggalmulai != "" && $request->tanggalselesai != "") {
-          $createdatmulai = $request->tanggalmulai.' 00:00:00';
-          $createdatselesai = $request->tanggalselesai.' 23:59:59';
-          $query->whereBetween('mutasi_keluar_barangs.created_at', [$createdatmulai, $createdatselesai]);
-        }
+      return datatables()::of($table)
+          ->filter(function ($query) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
 
-      })
-      ->get();
-    return datatables()::of($table)
-      ->addIndexColumn()
-      ->make(true);
+              if ($search) {
+                  $query->where(function ($q) use ($search) {
+                      $q->where('m.kode', 'like', "%{$search}%")    
+                        ->orWhere('b.nama', 'like', "%{$search}%"); 
+                  });
+              }
+          })
+          ->addIndexColumn()
+          ->make(true);
   }
 
 }

@@ -27,33 +27,57 @@ class TokoGudangController extends Controller
     return view('apps.mutasi.toko-gudang.index',[ 'produks' => $produks ]);
   }
 
-  public function list(Request $request){
-    $mutasi_toko_gudangs = DB::table('mutasi_toko_gudangs')
-      ->join('users','mutasi_toko_gudangs.id_users','=','users.id')
-      ->join('barangs','mutasi_toko_gudangs.id_barangs','=','barangs.id')
-      ->select('mutasi_toko_gudangs.*','users.name as namauser','barangs.nama as namabarang')
-      ->where(DB::raw('MONTH(mutasi_toko_gudangs.created_at)'), substr($request->tanggal,0,2))
-      ->where(DB::raw('YEAR(mutasi_toko_gudangs.created_at)'), substr($request->tanggal,-4))
-      ->orderBy('id', 'desc')
-      ->get();
-    return datatables()::of($mutasi_toko_gudangs)
-      ->addColumn('action', function ($mutasi_toko_gudangs) {
+  public function list(Request $request)
+  {
+      $mutasi = DB::table('mutasi_toko_gudangs as m')
+          ->join('users as u','m.id_users','=','u.id')
+          ->join('barangs as b','m.id_barangs','=','b.id')
+          ->select(
+              'm.*',
+              'u.name as namauser',
+              'b.nama as namabarang',
+              'b.kode as kodebarang'
+          )
+          ->whereMonth('m.created_at', substr($request->tanggal, 0, 2))
+          ->whereYear('m.created_at', substr($request->tanggal, -4))
+          ->orderBy('m.id', 'desc'); 
 
-        $class = "";
+      return datatables()::of($mutasi)
+          ->filter(function ($query) use ($request) {
+              $search = $request->get('search')['value'] ?? null;
 
-        if(Auth::user()->status != "Supervisor" && Auth::user()->status != "Super Admin" && Auth::user()->status != "Owner"){
-          $class = "hidden";
-        }
+              if ($search) {
+                  $query->where(function ($q) use ($search) {
+                      $q->where('m.kode', 'like', "%{$search}%")     
+                        ->orWhere('b.nama', 'like', "%{$search}%");
+                  });
+              }
+          })
+          ->addColumn('action', function ($row) {
 
-        return '
-          <div class="fonticon-container">
-            <span class="fonticon-wrap '.$class.'" onclick="f_edit('.$mutasi_toko_gudangs->id.')"><i class="feather icon-edit" data-toggle="tooltip" title="Edit Data"></i></span>
-            <span class="fonticon-wrap '.$class.'" onclick="f_delete('.$mutasi_toko_gudangs->id.')"><i class="feather icon-trash" data-toggle="tooltip" title="Hapus Data"></i></span>
-          </div>
-        ';
-      })
-      ->addIndexColumn()
-      ->make(true);
+              $class = "";
+
+              if (
+                  Auth::user()->status != "Supervisor" &&
+                  Auth::user()->status != "Super Admin" &&
+                  Auth::user()->status != "Owner"
+              ) {
+                  $class = "hidden";
+              }
+
+              return '
+                <div class="fonticon-container">
+                  <span class="fonticon-wrap '.$class.'" onclick="f_edit('.$row->id.')">
+                    <i class="feather icon-edit" data-toggle="tooltip" title="Edit Data"></i>
+                  </span>
+                  <span class="fonticon-wrap '.$class.'" onclick="f_delete('.$row->id.')">
+                    <i class="feather icon-trash" data-toggle="tooltip" title="Hapus Data"></i>
+                  </span>
+                </div>
+              ';
+          })
+          ->addIndexColumn()
+          ->make(true);
   }
 
   public function store(Request $request){
@@ -202,10 +226,29 @@ class TokoGudangController extends Controller
     }
   }
 
-    public function getstok(Request $request) {
-        $barang = DB::table('barangs')->where('id', $request->param)->first();
+  public function getstok(Request $request) {
+      if (!$request->filled('param') || $request->param === 'kosong') {
+          return response()->json([
+              'status' => true,
+              'stok'   => 0,
+              'satuan' => ''
+          ]);
+      }
 
-        return $barang->stok.' '.$barang->satuan;
-    }
+      $barang = DB::table('barangs')->where('id', $request->param)->first();
+
+      if (!$barang) {
+          return response()->json([
+              'status' => false,
+              'message' => 'Barang tidak ditemukan'
+          ], 404);
+      }
+
+      return response()->json([
+          'status' => true,
+          'stok' => $barang->stok,
+          'satuan' => $barang->satuan
+      ]);
+  }
 
 }

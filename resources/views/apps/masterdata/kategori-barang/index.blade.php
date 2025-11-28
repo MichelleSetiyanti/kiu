@@ -150,7 +150,7 @@
         serverSide: true,
         ajax: "/master/kategori-barang/list",
         columns: [
-          {data: 'DT_RowIndex', name: 'DT_RowIndex', searchable: false},
+          {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
           {data: 'kode', name: 'kode'},
           {data: 'nama', name: 'nama'},
           {data: 'keterangan', name: 'keterangan'},
@@ -159,9 +159,6 @@
         ],
         responsive: false,
         columnDefs: [
-          {
-            orderable: true,
-          }
         ],
         dom:
           '<"top"<"actions action-btns"B><"action-filters"lf>><"clear">rt<"bottom"<"actions">p>',
@@ -170,7 +167,7 @@
           sSearch: ""
         },
         aLengthMenu: [[10, 20, 50, -1], [10, 20, 50, 'All']],
-        order: [[0, "asc"]],
+        order: [[1, "asc"]],
         bInfo: false,
         pageLength: 20,
         buttons: [

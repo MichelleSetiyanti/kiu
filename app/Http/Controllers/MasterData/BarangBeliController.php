@@ -24,31 +24,50 @@ class BarangBeliController extends Controller
         return view('apps.masterdata.barang-beli.index',[ 'kategoris' => $kategoris ]);
     }
 
-    public function list(){
-        $barangs = DB::table('barangs')
-            ->join('kategori_barangs','barangs.id_kategori','=','kategori_barangs.id')
-            ->select('barangs.*','kategori_barangs.nama as namakategori')
-            ->orderBy('barangs.kode', 'asc')
-            ->where('barangs.id','!=','0')
-            ->get();
+    public function list(Request $request)
+    {
+        $barangs = DB::table('barangs as b')
+            ->join('kategori_barangs as k', 'b.id_kategori', '=', 'k.id')
+            ->select(
+                'b.*',
+                'k.nama as namakategori'
+            )
+            ->where('b.id', '!=', 0)
+            ->orderBy('b.kode', 'asc'); // TANPA get()
+
         return datatables()::of($barangs)
-            ->addColumn('action', function ($barangs) {
+            ->filter(function ($query) use ($request) {
+                $search = $request->get('search')['value'] ?? null;
+
+                if ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('b.kode', 'like', "%{$search}%")         
+                          ->orWhere('b.nama', 'like', "%{$search}%")     
+                          ->orWhere('k.nama', 'like', "%{$search}%");   
+                    });
+                }
+            })
+            ->addColumn('action', function ($row) {
                 $count = DB::table('penjualan_details')
-                    ->where('id_barangs',$barangs->id)
+                    ->where('id_barangs', $row->id)
                     ->count();
 
                 $class = "";
 
-                if($count > 0){
+                if ($count > 0) {
                     $class = "hidden";
                 }
 
                 return '
-          <div class="fonticon-container">
-            <span class="fonticon-wrap" onclick="f_edit('.$barangs->id.')"><i class="feather icon-edit" data-toggle="tooltip" title="Edit Data"></i></span>
-            <span class="fonticon-wrap '.$class.'" onclick="f_delete('.$barangs->id.')"><i class="feather icon-trash" data-toggle="tooltip" title="Hapus Data"></i></span>
-          </div>
-        ';
+                  <div class="fonticon-container">
+                    <span class="fonticon-wrap" onclick="f_edit('.$row->id.')">
+                      <i class="feather icon-edit" data-toggle="tooltip" title="Edit Data"></i>
+                    </span>
+                    <span class="fonticon-wrap '.$class.'" onclick="f_delete('.$row->id.')">
+                      <i class="feather icon-trash" data-toggle="tooltip" title="Hapus Data"></i>
+                    </span>
+                  </div>
+                ';
             })
             ->addIndexColumn()
             ->make(true);

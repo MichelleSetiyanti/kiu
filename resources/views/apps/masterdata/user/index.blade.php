@@ -196,7 +196,7 @@
                     [10, 20, 50, 'All']
                 ],
                 order: [
-                    [0, "asc"]
+                    [1, "asc"]
                 ],
                 bInfo: false,
                 pageLength: 10,
