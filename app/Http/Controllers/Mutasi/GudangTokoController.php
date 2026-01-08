@@ -112,19 +112,48 @@ class GudangTokoController extends Controller
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
-      // update stok barang
-      $barang = DB::table('barangs')->where('id',$data['produks'])->first();
+      $barang = DB::table('barangs')
+          ->where('id', $data['produks'])
+          ->lockForUpdate()
+          ->first();
 
-      $stockgudang = $barang->gudang;
-      $stocktoko = $barang->stok;
+      if (! $barang) {
+          DB::rollBack();
+          return 'product_not_found';
+      }
 
-      $stokgudangbaru = $stockgudang - $request->qty;
-      $stoktokobaru = $stocktoko + $request->qty;
+      $stokGudangLama = (int) $barang->gudang;
+      $stokTokoLama   = (int) $barang->stok;
+      $qty            = (int) $request->qty;
 
-      DB::table('barangs')->where('id',$data['produks'])->update([
-        'stok' => $stoktokobaru,
-        'gudang' => $stokgudangbaru,
-        "updated_at" => \Carbon\Carbon::now()
+      $stokGudangBaru = $stokGudangLama - $qty;
+      $stokTokoBaru   = $stokTokoLama + $qty;
+
+      if ($stokGudangBaru < 0) {
+          DB::rollBack();
+          return 'insufficient_stock';
+      }
+
+      DB::table('barangs')->where('id', $data['produks'])->update([
+          'stok'       => $stokTokoBaru,
+          'gudang'     => $stokGudangBaru,
+          'updated_at' => \Carbon\Carbon::now()
+      ]);
+
+      DB::table('stock_movements')->insert([
+          'product_id'     => $data['produks'],
+          'store_id'       => $request->store_id ?? null,
+          'movement_date'  => \Carbon\Carbon::now(),
+          'type'           => 'in',
+          'quantity'       => $qty,
+          'before_stock'   => $stokTokoLama,
+          'after_stock'    => $stokTokoBaru,
+          'reference_type' => 'mutasi_gudang_toko',
+          'reference_id'   => $kode,
+          'note'           => 'Mutasi Gudang ke Toko (' . $kode . ')',
+          'created_by'     => Auth::id(),
+          'created_at'     => \Carbon\Carbon::now(),
+          'updated_at'     => \Carbon\Carbon::now(),
       ]);
 
       DB::commit();
