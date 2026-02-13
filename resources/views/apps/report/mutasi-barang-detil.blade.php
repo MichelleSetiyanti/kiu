@@ -303,7 +303,7 @@ use Illuminate\Support\Facades\DB;
                       @endforeach
                       <tr>
                         <td colspan="4" style="text-align:right;padding-right:10px;font-size:16px;font-weight:bold;background-color:yellow;"> TOTAL </td>
-                        <td style="padding-left:10px;font-size:16px;font-weight:bold;background-color:yellow;">{{ number_format($sumsInvoices,0,',','.') }}</td>
+                        <td style="padding-left:10px;font-size:16px;font-weight:bold;background-color:yellow;">{{ number_format($sumsInvoices,2,',','.') }}</td>
                       </tr>
                       </tbody>
                     </table>

@@ -152,8 +152,8 @@ class SuratJalanController extends Controller
                   return 'product_not_found';
               }
 
-              $stoklama = (int) $barang->stok;
-              $qty      = (int) $penjualandetail->total_jual;
+              $stoklama =  $barang->stok;
+              $qty      =  $penjualandetail->total_jual;
               $stokbaru = $stoklama - $qty;
 
               if ($stokbaru < 0) {
