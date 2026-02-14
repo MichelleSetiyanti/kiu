@@ -122,9 +122,9 @@ class GudangTokoController extends Controller
           return 'product_not_found';
       }
 
-      $stokGudangLama = (int) $barang->gudang;
-      $stokTokoLama   = (int) $barang->stok;
-      $qty            = (int) $request->qty;
+      $stokGudangLama =  $barang->gudang;
+      $stokTokoLama   =  $barang->stok;
+      $qty            =  $request->qty;
 
       $stokGudangBaru = $stokGudangLama - $qty;
       $stokTokoBaru   = $stokTokoLama + $qty;
