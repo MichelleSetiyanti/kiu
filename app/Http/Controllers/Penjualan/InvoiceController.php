@@ -25,14 +25,50 @@ class InvoiceController extends Controller
       ->where('aktif', '=', 'Active')
       ->get();
 
-    $penjualan = DB::table('penjualans')
-      ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
-      ->select('penjualans.*', 'konsumens.nama as namakonsumen')
-      ->where('penjualans.kode_inv', '!=', '')
-      ->orderBy('created_at', 'desc')
-      ->get();
+    return view('apps.penjualan.invoice.index', ['konsumens' => $konsumens]);
+  }
 
-    return view('apps.penjualan.invoice.index', ['konsumens' => $konsumens, 'penjualans' => $penjualan]);
+  public function searchKodeInvoice(Request $request)
+  {
+    $perPage = 20;
+    $page = (int) $request->get('page', 1);
+    $search = trim((string) $request->get('search', ''));
+
+    $query = DB::table('penjualans')
+      ->join('konsumens', 'penjualans.id_konsumens', '=', 'konsumens.id')
+      ->select('penjualans.kode_inv', 'penjualans.kode', 'konsumens.nama as namakonsumen')
+      ->where('penjualans.kode_inv', '!=', '')
+      ->orderBy('penjualans.created_at', 'desc');
+
+    if ($search !== '') {
+      $query->where(function ($q) use ($search) {
+        $q->where('penjualans.kode_inv', 'like', "%{$search}%")
+          ->orWhere('konsumens.nama', 'like', "%{$search}%")
+          ->orWhere('penjualans.kode', 'like', "%{$search}%");
+      });
+    }
+
+    $total = (clone $query)->count();
+    $rows = $query->forPage($page, $perPage)->get();
+
+    $results = $rows->map(function ($row) {
+      return [
+        'id'   => $row->kode_inv,
+        'text' => $row->kode_inv,
+        'foo'  => $row->namakonsumen . ' (' . $row->kode . ')',
+      ];
+    })->values()->all();
+
+    if ($page === 1) {
+      array_unshift($results, ['id' => 'Baru', 'text' => 'Kode Invoice Baru', 'foo' => '']);
+    }
+
+    return response()->json([
+      'results'    => $results,
+      'pagination' => [
+        'more' => ($page * $perPage) < $total,
+      ],
+    ]);
   }
 
   public function list(Request $request)

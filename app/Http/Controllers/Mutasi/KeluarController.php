@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Services\StockService;
 use File;
-use Matrix\Exception;
 
 class KeluarController extends Controller
 {
@@ -99,10 +100,16 @@ class KeluarController extends Controller
 
     parse_str($request->data, $data); // ubah data serialized Jquery jadi Array
 
+    $lockKey = 'keluar-store:' . Auth::id() . ':' . $data['produks'] . ':' . $request->qty;
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('KeluarController::store: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
+
     DB::beginTransaction();
 
     try{
-      DB::table('mutasi_keluar_barangs')->insert([
+      $idMutasi = DB::table('mutasi_keluar_barangs')->insertGetId([
         'id_users' => Auth::User()->id,
         'id_barangs' => $data['produks'],
         'kode' => $kode,
@@ -112,23 +119,30 @@ class KeluarController extends Controller
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
-      // update stok barang
-      $barang = DB::table('barangs')->where('id',$data['produks'])->first();
-
-      $stoklama = $barang->gudang;
-
-      $stokbaru = $stoklama - $request->qty;
-
-      DB::table('barangs')->where('id',$data['produks'])->update([
-        'gudang' => $stokbaru,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
+      try {
+          StockService::adjust(
+              $data['produks'],
+              StockService::COLUMN_WAREHOUSE,
+              -$request->qty,
+              true,
+              [
+                  'type'           => 'out',
+                  'reference_type' => 'mutasi_keluar_barang',
+                  'reference_id'   => $idMutasi,
+                  'note'           => 'Mutasi Keluar Barang (' . $kode . ')',
+              ]
+          );
+      } catch (\RuntimeException $e) {
+          DB::rollBack();
+          return $e->getMessage();
+      }
 
       DB::commit();
 
       return 'berhasil';
-    }catch (Exception $e){
+    }catch (\Throwable $e){
       DB::rollBack();
+      Log::error('KeluarController::store gagal', ['exception' => $e]);
 
       return 'gagal';
     }
@@ -137,6 +151,12 @@ class KeluarController extends Controller
   public function update(Request $request){
 
     parse_str($request->data, $data); // ubah data serialized Jquery jadi Array
+
+    $lockKey = 'keluar-update:' . $data['id'];
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('KeluarController::update: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
 
     DB::beginTransaction();
     try{
@@ -154,23 +174,30 @@ class KeluarController extends Controller
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
-      // update stok barang
-      $barang = DB::table('barangs')->where('id',$datalama->id_barangs)->first();
-
-      $stoklama = $barang->gudang;
-
-      $stokbaru = $stoklama - $penambahanstok;
-
-      DB::table('barangs')->where('id',$datalama->id_barangs)->update([
-        'gudang' => $stokbaru,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
+      try {
+          StockService::adjust(
+              $datalama->id_barangs,
+              StockService::COLUMN_WAREHOUSE,
+              -$penambahanstok,
+              true,
+              [
+                  'type'           => $penambahanstok >= 0 ? 'out' : 'in',
+                  'reference_type' => 'mutasi_keluar_barang',
+                  'reference_id'   => $datalama->id,
+                  'note'           => 'Edit Mutasi Keluar Barang (' . $datalama->kode . ')',
+              ]
+          );
+      } catch (\RuntimeException $e) {
+          DB::rollBack();
+          return $e->getMessage();
+      }
 
       DB::commit();
 
       return 'berhasil';
-    }catch (Exception $e){
+    }catch (\Throwable $e){
       DB::rollBack();
+      Log::error('KeluarController::update gagal', ['exception' => $e]);
 
       return 'gagal';
     }
@@ -187,6 +214,12 @@ class KeluarController extends Controller
   }
 
   public function drop(Request $request){
+    $lockKey = 'keluar-drop:' . $request->id;
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('KeluarController::drop: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
+
     DB::beginTransaction();
 
     try{
@@ -194,25 +227,32 @@ class KeluarController extends Controller
       // baca data pembelian sebelumnya
       $datalama = DB::table('mutasi_keluar_barangs')->where('id',$request->id)->first();
 
-      // update stok barang
-      $barang = DB::table('barangs')->where('id',$datalama->id_barangs)->first();
-
-      $stoklama = $barang->gudang;
-
-      $stokbaru = $stoklama + $datalama->qty;
-
-      DB::table('barangs')->where('id',$datalama->id_barangs)->update([
-        'gudang' => $stokbaru,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
+      try {
+          StockService::adjust(
+              $datalama->id_barangs,
+              StockService::COLUMN_WAREHOUSE,
+              $datalama->qty,
+              true,
+              [
+                  'type'           => 'in',
+                  'reference_type' => 'mutasi_keluar_barang',
+                  'reference_id'   => $datalama->id,
+                  'note'           => 'Hapus Mutasi Keluar Barang (' . $datalama->kode . ')',
+              ]
+          );
+      } catch (\RuntimeException $e) {
+          DB::rollBack();
+          return $e->getMessage();
+      }
 
       DB::table('mutasi_keluar_barangs')->where('id',$request->id)->delete();
 
       DB::commit();
 
       return 'berhasil';
-    }catch (Exception $e){
+    }catch (\Throwable $e){
       DB::rollBack();
+      Log::error('KeluarController::drop gagal', ['exception' => $e]);
 
       return 'gagal';
     }

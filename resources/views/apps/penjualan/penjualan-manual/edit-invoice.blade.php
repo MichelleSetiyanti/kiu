@@ -704,6 +704,9 @@
                         f_addtemp()
                     },
                     className: "btn bg-gradient-success waves-effect waves-light",
+                    attr: {
+                        id: 'btnsimpandetil'
+                    },
                 }],
                 initComplete: function(settings, json) {
                     $(".dt-buttons .btn").removeClass("btn-secondary")
@@ -845,6 +848,8 @@
                 let diskonextra = accounting.unformat($("#diskonextra").val(), ',');
 
                 if (action == "Simpan") {
+                    $("#btnsimpandetil").prop("disabled", true);
+
                     $.post('/penjualan/penjualan-manual/store-detil-invoice', {
                             idpenjualan: idpenjualan,
                             produk: produks,
@@ -857,6 +862,8 @@
                             _token: '{{ csrf_token() }}'
                         })
                         .done(function(data) {
+                            $("#btnsimpandetil").prop("disabled", false);
+
                             if (data != "gagal" && data != 'stockhabis') {
                                 f_clear();
                                 toastr.success('Data ini berhasil disimpan.', 'Berhasil', {
@@ -878,6 +885,14 @@
                             } else {
                                 Swal.fire('Peringatan', 'Data gagal tersimpan!', 'error');
                             }
+                        })
+                        .fail(function() {
+                            $("#btnsimpandetil").prop("disabled", false);
+                            toastr.error('Terjadi kesalahan jaringan, silakan coba lagi.', 'Warning', {
+                                positionClass: 'toast-top-right',
+                                containerId: 'toast-top-right',
+                                "closeButton": true
+                            });
                         });
                 } else if (action == "Edit") {
                     catatan = $("#catatandetil").val();

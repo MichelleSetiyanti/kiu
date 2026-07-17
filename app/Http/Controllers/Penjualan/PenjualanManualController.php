@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Services\StockService;
 use File;
-use Matrix\Exception;
 
 class PenjualanManualController extends Controller
 {
@@ -58,7 +59,7 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -189,7 +190,7 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -211,7 +212,7 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -259,6 +260,11 @@ class PenjualanManualController extends Controller
 
   public function store_detil_invoice(Request $request)
   {
+    $lockKey = 'penjualan-manual-store-detil-invoice:' . $request->idpenjualan . ':' . $request->produk . ':' . $request->totaljual;
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('PenjualanManualController::store_detil_invoice: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
 
     DB::beginTransaction();
 
@@ -286,15 +292,18 @@ class PenjualanManualController extends Controller
           "updated_at" => \Carbon\Carbon::now()
         ]);
 
-        $barang = DB::table('barangs')->where('id', $produk)->first();
-        $stoklama = $barang->stok;
-        $stokbaru = $stoklama - $request->totaljual;
-
-
-        DB::table('barangs')->where('id', $produk)->update([
-          'stok' => $stokbaru,
-          "updated_at" => \Carbon\Carbon::now()
-        ]);
+        StockService::adjust(
+            $produk,
+            StockService::COLUMN_STORE,
+            -$request->totaljual,
+            false,
+            [
+                'type'           => 'out',
+                'reference_type' => 'penjualan_manual',
+                'reference_id'   => $request->idpenjualan,
+                'note'           => 'Tambah Item Invoice #' . $request->idpenjualan,
+            ]
+        );
 
         DB::commit();
 
@@ -319,8 +328,9 @@ class PenjualanManualController extends Controller
         DB::commit();
         return 'stockhabis';
       }
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
+      Log::error('PenjualanManualController::store_detil_invoice gagal', ['exception' => $e]);
 
       return 'gagal';
     }
@@ -367,7 +377,7 @@ class PenjualanManualController extends Controller
         DB::rollBack();
         return 'stockhabis';
       }
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -376,6 +386,11 @@ class PenjualanManualController extends Controller
 
   public function update_detil_invoice(Request $request)
   {
+    $lockKey = 'penjualan-manual-update-detil-invoice:' . $request->id_temp . ':' . $request->totaljual;
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('PenjualanManualController::update_detil_invoice: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
 
     DB::beginTransaction();
     try {
@@ -386,32 +401,24 @@ class PenjualanManualController extends Controller
       $totaljuallama = $penjualan_detil->total_jual;
       $idbarang = $penjualan_detil->id_barangs;
 
-      $barang = DB::table('barangs')->where('id', $idbarang)->first();
-      $stoklama = $barang->stok;
-      $stokbaru = $stoklama + $totaljuallama - $request->totaljual;
+      $delta = $totaljuallama - $request->totaljual;
 
-      if ($stokbaru < 0) {
-        DB::table('penjualan_details')->where('id', $request->id_temp)->update([
-          'catatan' => $request->catatan,
-          'harga' => $request->harga,
-          'total_jual' => $request->totaljual,
-          'diskon' => $request->diskon,
-          'diskon_paket' => $request->diskonpaket,
-          'diskon_extra' => $request->diskonextra,
-          'subtotal' => $subtotal,
-          "updated_at" => \Carbon\Carbon::now()
-        ]);
-
-        DB::table('barangs')->where('id', $idbarang)->update([
-          'stok' => $stokbaru,
-          "updated_at" => \Carbon\Carbon::now()
-        ]);
-
-
-        DB::commit();
-
-        return "stockhabis";
-      }
+      // Historical quirk: this method never blocked a negative resulting stock,
+      // it only returned 'stockhabis' as a warning while still committing.
+      // Preserved as-is (allowNegative=true) rather than fixed as a side effect
+      // of this stock-tracking refactor.
+      $result = StockService::adjust(
+          $idbarang,
+          StockService::COLUMN_STORE,
+          $delta,
+          true,
+          [
+              'type'           => $delta >= 0 ? 'in' : 'out',
+              'reference_type' => 'penjualan_manual',
+              'reference_id'   => $penjualan_detil->id_penjualans,
+              'note'           => 'Edit Item Invoice #' . $penjualan_detil->id_penjualans,
+          ]
+      );
 
       DB::table('penjualan_details')->where('id', $request->id_temp)->update([
         'catatan' => $request->catatan,
@@ -424,17 +431,16 @@ class PenjualanManualController extends Controller
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
-      DB::table('barangs')->where('id', $idbarang)->update([
-        'stok' => $stokbaru,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
-
-
       DB::commit();
 
+      if ($result['after'] < 0) {
+        return "stockhabis";
+      }
+
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
+      Log::error('PenjualanManualController::update_detil_invoice gagal', ['exception' => $e]);
 
       return 'gagal';
     }
@@ -447,7 +453,13 @@ class PenjualanManualController extends Controller
 
       $subtotal = $request->totaljual * ($request->harga - $request->diskon - $request->diskonpaket - $request->diskonextra);
 
-      $stock = DB::table('barangs')->where("id", "=", $request->product)->value('stok');
+      // NB: the edit form never submits a product field (the product isn't
+      // editable here, only qty/harga/diskon) — the stock lookup must use
+      // the product already tied to this line item, not $request->product
+      // (which is always null and previously made this check always fail).
+      $penjualan_detil = DB::table('penjualan_details')->where('id', $request->id_temp)->first();
+
+      $stock = DB::table('barangs')->where('id', $penjualan_detil->id_barangs)->value('stok');
 
       if ($stock >= $request->totaljual) {
         DB::table('penjualan_details')->where('id', $request->id_temp)->update([
@@ -468,7 +480,7 @@ class PenjualanManualController extends Controller
         DB::rollback();
         return 'stockhabis';
       }
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -502,6 +514,12 @@ class PenjualanManualController extends Controller
 
   public function drop_detil_invoice(Request $request)
   {
+    $lockKey = 'penjualan-manual-drop-detil-invoice:' . $request->id;
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('PenjualanManualController::drop_detil_invoice: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
+
     DB::beginTransaction();
 
     try {
@@ -510,22 +528,27 @@ class PenjualanManualController extends Controller
       $totaljual = $penjualan_detil->total_jual;
       $idbarang = $penjualan_detil->id_barangs;
 
-      $barang = DB::table('barangs')->where('id', $idbarang)->first();
-      $stoklama = $barang->stok;
-      $stokbaru = $stoklama + $totaljual;
-
-      DB::table('barangs')->where('id', $idbarang)->update([
-        'stok' => $stokbaru,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
+      StockService::adjust(
+          $idbarang,
+          StockService::COLUMN_STORE,
+          $totaljual,
+          true,
+          [
+              'type'           => 'in',
+              'reference_type' => 'penjualan_manual',
+              'reference_id'   => $penjualan_detil->id_penjualans,
+              'note'           => 'Hapus Item Invoice #' . $penjualan_detil->id_penjualans,
+          ]
+      );
 
       DB::table('penjualan_details')->where('id', $request->id)->delete();
 
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
+      Log::error('PenjualanManualController::drop_detil_invoice gagal', ['exception' => $e]);
 
       return 'gagal';
     }
@@ -541,7 +564,7 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -576,7 +599,7 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -662,6 +685,12 @@ class PenjualanManualController extends Controller
 
   public function drop_penjualan(Request $request)
   {
+    $lockKey = 'penjualan-manual-drop-penjualan:' . $request->id;
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('PenjualanManualController::drop_penjualan: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
+
     DB::beginTransaction();
 
     try {
@@ -703,16 +732,18 @@ class PenjualanManualController extends Controller
 
         if ($penjualanlama->kode_sj != "") {
 
-          $barang = DB::table('barangs')->where('id', $penjualandetil->id_barangs)->first();
-
-          $stoklama = $barang->stok;
-
-          $stokbaru = $stoklama + $totaljual;
-
-          DB::table('barangs')->where('id', $penjualandetil->id_barangs)->update([
-            'stok' => $stokbaru,
-            "updated_at" => \Carbon\Carbon::now()
-          ]);
+          StockService::adjust(
+              $penjualandetil->id_barangs,
+              StockService::COLUMN_STORE,
+              $totaljual,
+              true,
+              [
+                  'type'           => 'in',
+                  'reference_type' => 'penjualan_manual',
+                  'reference_id'   => $request->id,
+                  'note'           => 'Void/Trash Penjualan #' . $request->id,
+              ]
+          );
         }
 
         // insert trash detil penjualan
@@ -740,8 +771,9 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
+      Log::error('PenjualanManualController::drop_penjualan gagal', ['exception' => $e]);
 
       return 'gagal';
     }
@@ -806,7 +838,7 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -886,7 +918,7 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -992,7 +1024,7 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';
@@ -1010,7 +1042,7 @@ class PenjualanManualController extends Controller
       DB::commit();
 
       return 'berhasil';
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       DB::rollBack();
 
       return 'gagal';

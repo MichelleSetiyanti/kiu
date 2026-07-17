@@ -183,13 +183,8 @@
                         <div class="row">
                             <div class="col-sm-12 mb-1 data-field-col">
                                 <label for="kodeinvoice">Kode Invoice</label>
-                                <select class="form-control select" name="kodeinvoice" id="kodeinvoice">
-                                    <option value="Baru" data-foo=""> Kode Invoice Baru </option>
-                                    @foreach ($penjualans as $penjualan)
-                                        <option value="{{ $penjualan->kode_inv }}"
-                                            data-foo="{{ $penjualan->namakonsumen }} ({{ $penjualan->kode }})">
-                                            {{ $penjualan->kode_inv }}</option>
-                                    @endforeach
+                                <select class="form-control" name="kodeinvoice" id="kodeinvoice">
+                                    <option value="Baru"> Kode Invoice Baru </option>
                                 </select>
                             </div>
                         </div>
@@ -213,8 +208,7 @@
                         <div class="row">
                             <div class="col-sm-12 mb-1 data-field-col">
                                 <label for="alamat">Keterangan</label>
-                                <textarea class="form-control" name="keterangan" id="keterangan" rows="3" placeholder="keterangan">{{ $penjualan->keterangan }}
-                                </textarea>
+                                <textarea class="form-control" name="keterangan" id="keterangan" rows="3" placeholder="keterangan"></textarea>
                             </div>
                         </div>
 
@@ -305,12 +299,48 @@
                 templateResult: formatCustom
             });
 
+            $("#kodeinvoice").select2({
+                dropdownAutoWidth: true,
+                width: '100%',
+                minimumInputLength: 0,
+                ajax: {
+                    url: '/penjualan/invoice/search-kode-invoice',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            search: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination.more
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                templateResult: formatAjaxResult
+            });
+
             f_loadtable();
 
         });
 
         function stringMatch(term, candidate) {
             return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+        }
+
+        function formatAjaxResult(state) {
+            if (!state.id) {
+                return state.text;
+            }
+            let foo = state.foo ? state.foo : '';
+            return $('<div><div>' + state.text + '</div><div class="foo">' + foo + '</div></div>');
         }
 
         function matchCustom(params, data) {

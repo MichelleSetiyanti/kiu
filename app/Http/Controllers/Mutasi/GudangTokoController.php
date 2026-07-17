@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Services\StockService;
 use File;
-use Matrix\Exception;
 
 class GudangTokoController extends Controller
 {
@@ -99,10 +100,16 @@ class GudangTokoController extends Controller
 
     parse_str($request->data, $data); // ubah data serialized Jquery jadi Array
 
+    $lockKey = 'gudang-toko-store:' . Auth::id() . ':' . $data['produks'] . ':' . $request->qty;
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('GudangTokoController::store: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
+
     DB::beginTransaction();
 
     try{
-      DB::table('mutasi_gudang_tokos')->insert([
+      $idMutasi = DB::table('mutasi_gudang_tokos')->insertGetId([
         'id_users' => Auth::User()->id,
         'id_barangs' => $data['produks'],
         'kode' => $kode,
@@ -112,55 +119,47 @@ class GudangTokoController extends Controller
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
-      $barang = DB::table('barangs')
-          ->where('id', $data['produks'])
-          ->lockForUpdate()
-          ->first();
+      $qty = $request->qty;
 
-      if (! $barang) {
+      try {
+          StockService::adjust(
+              $data['produks'],
+              StockService::COLUMN_WAREHOUSE,
+              -$qty,
+              false,
+              [
+                  'type'           => 'out',
+                  'reference_type' => 'mutasi_gudang_toko_gudang',
+                  'reference_id'   => $idMutasi,
+                  'note'           => 'Mutasi Gudang ke Toko (' . $kode . ') - kurang gudang',
+                  'store_id'       => $request->store_id ?? null,
+              ]
+          );
+
+          StockService::adjust(
+              $data['produks'],
+              StockService::COLUMN_STORE,
+              $qty,
+              false,
+              [
+                  'type'           => 'in',
+                  'reference_type' => 'mutasi_gudang_toko',
+                  'reference_id'   => $idMutasi,
+                  'note'           => 'Mutasi Gudang ke Toko (' . $kode . ')',
+                  'store_id'       => $request->store_id ?? null,
+              ]
+          );
+      } catch (\RuntimeException $e) {
           DB::rollBack();
-          return 'product_not_found';
+          return $e->getMessage(); // 'product_not_found' | 'insufficient_stock'
       }
-
-      $stokGudangLama =  $barang->gudang;
-      $stokTokoLama   =  $barang->stok;
-      $qty            =  $request->qty;
-
-      $stokGudangBaru = $stokGudangLama - $qty;
-      $stokTokoBaru   = $stokTokoLama + $qty;
-
-      if ($stokGudangBaru < 0) {
-          DB::rollBack();
-          return 'insufficient_stock';
-      }
-
-      DB::table('barangs')->where('id', $data['produks'])->update([
-          'stok'       => $stokTokoBaru,
-          'gudang'     => $stokGudangBaru,
-          'updated_at' => \Carbon\Carbon::now()
-      ]);
-
-      DB::table('stock_movements')->insert([
-          'product_id'     => $data['produks'],
-          'store_id'       => $request->store_id ?? null,
-          'movement_date'  => \Carbon\Carbon::now(),
-          'type'           => 'in',
-          'quantity'       => $qty,
-          'before_stock'   => $stokTokoLama,
-          'after_stock'    => $stokTokoBaru,
-          'reference_type' => 'mutasi_gudang_toko',
-          'reference_id'   => $kode,
-          'note'           => 'Mutasi Gudang ke Toko (' . $kode . ')',
-          'created_by'     => Auth::id(),
-          'created_at'     => \Carbon\Carbon::now(),
-          'updated_at'     => \Carbon\Carbon::now(),
-      ]);
 
       DB::commit();
 
       return 'berhasil';
-    }catch (Exception $e){
+    }catch (\Throwable $e){
       DB::rollBack();
+      Log::error('GudangTokoController::store gagal', ['exception' => $e]);
 
       return 'gagal';
     }
@@ -169,6 +168,12 @@ class GudangTokoController extends Controller
   public function update(Request $request){
 
     parse_str($request->data, $data); // ubah data serialized Jquery jadi Array
+
+    $lockKey = 'gudang-toko-update:' . $data['id'];
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('GudangTokoController::update: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
 
     DB::beginTransaction();
     try{
@@ -186,26 +191,43 @@ class GudangTokoController extends Controller
         "updated_at" => \Carbon\Carbon::now()
       ]);
 
-      // update stok barang
-      $barang = DB::table('barangs')->where('id',$datalama->id_barangs)->first();
+      try {
+          StockService::adjust(
+              $datalama->id_barangs,
+              StockService::COLUMN_WAREHOUSE,
+              -$penambahanstok,
+              true,
+              [
+                  'type'           => $penambahanstok >= 0 ? 'out' : 'in',
+                  'reference_type' => 'mutasi_gudang_toko_gudang',
+                  'reference_id'   => $datalama->id,
+                  'note'           => 'Edit Mutasi Gudang ke Toko (' . $datalama->kode . ') - kurang gudang',
+              ]
+          );
 
-      $stockgudang = $barang->gudang;
-      $stocktoko = $barang->stok;
-
-      $stokgudangbaru = $stockgudang - $penambahanstok;
-      $stoktokobaru = $stocktoko + $penambahanstok;
-
-      DB::table('barangs')->where('id',$datalama->id_barangs)->update([
-        'stok' => $stoktokobaru,
-        'gudang' => $stokgudangbaru,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
+          StockService::adjust(
+              $datalama->id_barangs,
+              StockService::COLUMN_STORE,
+              $penambahanstok,
+              true,
+              [
+                  'type'           => $penambahanstok >= 0 ? 'in' : 'out',
+                  'reference_type' => 'mutasi_gudang_toko',
+                  'reference_id'   => $datalama->id,
+                  'note'           => 'Edit Mutasi Gudang ke Toko (' . $datalama->kode . ')',
+              ]
+          );
+      } catch (\RuntimeException $e) {
+          DB::rollBack();
+          return $e->getMessage();
+      }
 
       DB::commit();
 
       return 'berhasil';
-    }catch (Exception $e){
+    }catch (\Throwable $e){
       DB::rollBack();
+      Log::error('GudangTokoController::update gagal', ['exception' => $e]);
 
       return 'gagal';
     }
@@ -222,6 +244,12 @@ class GudangTokoController extends Controller
   }
 
   public function drop(Request $request){
+    $lockKey = 'gudang-toko-drop:' . $request->id;
+    if (!StockService::acquireRequestLock($lockKey)) {
+        Log::warning('GudangTokoController::drop: duplicate submission ditolak', ['lockKey' => $lockKey]);
+        return 'gagal';
+    }
+
     DB::beginTransaction();
 
     try{
@@ -229,28 +257,45 @@ class GudangTokoController extends Controller
       // baca data pembelian sebelumnya
       $datalama = DB::table('mutasi_gudang_tokos')->where('id',$request->id)->first();
 
-      // update stok barang
-      $barang = DB::table('barangs')->where('id',$datalama->id_barangs)->first();
+      try {
+          StockService::adjust(
+              $datalama->id_barangs,
+              StockService::COLUMN_WAREHOUSE,
+              $datalama->qty,
+              true,
+              [
+                  'type'           => 'in',
+                  'reference_type' => 'mutasi_gudang_toko_gudang',
+                  'reference_id'   => $datalama->id,
+                  'note'           => 'Hapus Mutasi Gudang ke Toko (' . $datalama->kode . ') - kembali gudang',
+              ]
+          );
 
-      $stockgudang = $barang->gudang;
-      $stocktoko = $barang->stok;
-
-      $stokgudangbaru = $stockgudang + $datalama->qty;
-      $stoktokobaru = $stocktoko - $datalama->qty;
-
-      DB::table('barangs')->where('id',$datalama->id_barangs)->update([
-        'stok' => $stoktokobaru,
-        'gudang' => $stokgudangbaru,
-        "updated_at" => \Carbon\Carbon::now()
-      ]);
+          StockService::adjust(
+              $datalama->id_barangs,
+              StockService::COLUMN_STORE,
+              -$datalama->qty,
+              true,
+              [
+                  'type'           => 'out',
+                  'reference_type' => 'mutasi_gudang_toko',
+                  'reference_id'   => $datalama->id,
+                  'note'           => 'Hapus Mutasi Gudang ke Toko (' . $datalama->kode . ')',
+              ]
+          );
+      } catch (\RuntimeException $e) {
+          DB::rollBack();
+          return $e->getMessage();
+      }
 
       DB::table('mutasi_gudang_tokos')->where('id',$request->id)->delete();
 
       DB::commit();
 
       return 'berhasil';
-    }catch (Exception $e){
+    }catch (\Throwable $e){
       DB::rollBack();
+      Log::error('GudangTokoController::drop gagal', ['exception' => $e]);
 
       return 'gagal';
     }

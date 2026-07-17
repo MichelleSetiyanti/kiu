@@ -394,6 +394,7 @@ Route::group(['prefix' => 'penjualan'], function () {
   Route::group(['prefix' => 'invoice'], function () {
     Route::get('/', 'Penjualan\InvoiceController@index');
     Route::get('/list', 'Penjualan\InvoiceController@list');
+    Route::get('/search-kode-invoice', 'Penjualan\InvoiceController@searchKodeInvoice');
 
     Route::post('/store', 'Penjualan\InvoiceController@store');
     Route::post('/store-kas', 'Penjualan\InvoiceController@store_kas');
