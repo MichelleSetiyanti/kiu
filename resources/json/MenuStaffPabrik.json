@@ -114,6 +114,11 @@
       "url": "/report/mutasi-barang",
       "name": "Lap. Mutasi Barang",
       "icon": "feather icon-list"
+    },
+    {
+      "url": "/report/kartu-stok",
+      "name": "Kartu Stok",
+      "icon": "feather icon-list"
     }
   ]
 }

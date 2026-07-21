@@ -1098,6 +1098,11 @@ Route::group(['prefix' => 'report'], function () {
     Route::get('/list-detil', 'Report\MutasiBarangController@list_detil');
   });
 
+  Route::group(['prefix' => 'kartu-stok'], function () {
+    Route::get('/', 'Report\KartuStokController@index');
+    Route::get('/list-detil', 'Report\KartuStokController@list_detil');
+  });
+
   Route::group(['prefix' => 'pelunasan-hutang'], function () {
     Route::get('/', 'Report\HutangController@index');
     Route::get('/list', 'Report\HutangController@list');

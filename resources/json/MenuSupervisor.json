@@ -170,6 +170,11 @@
       "icon": "feather icon-list"
     },
     {
+      "url": "/report/kartu-stok",
+      "name": "Kartu Stok",
+      "icon": "feather icon-list"
+    },
+    {
       "url": "/report/rekap-pinjaman-konsumen",
       "name": "Limit Piu. Konsumen",
       "icon": "feather icon-list"
